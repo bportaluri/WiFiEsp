@@ -13,10 +13,11 @@ class WiFiEspServer : public Server
 private:
 	WiFiEsp *_esp;
 	uint16_t _port;
-	void*     pcb;
+	bool _started;
+	
 
 public:
-  WiFiEspServer(uint16_t);
+  WiFiEspServer(WiFiEsp *esp, uint16_t port);
 
 
   /*
@@ -26,9 +27,14 @@ public:
   */
   WiFiEspClient available(uint8_t* status = NULL);
   
+  /*
+  * Start the TCP server
+  */
   void begin();
+  
   virtual size_t write(uint8_t);
   virtual size_t write(const uint8_t *buf, size_t size);
+  
   uint8_t status();
 
   using Print::write;

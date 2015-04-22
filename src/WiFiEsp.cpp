@@ -14,24 +14,12 @@ void WiFiEsp::init()
     espDrv->wifiDriverInit();
 }
 
-uint8_t WiFiEsp::getSocket()
-{
-    for (uint8_t i = 0; i < MAX_SOCK_NUM; ++i)
-    {
-        if (_server_port[i] == 0)
-        {
-             return i;
-        }
-    }
-    return NO_SOCKET_AVAIL;
-}
 
 
 char* WiFiEsp::firmwareVersion()
 {
 	return espDrv->getFwVersion();
 }
-
 
 
 

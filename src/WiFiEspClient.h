@@ -16,7 +16,7 @@ private:
   WiFiEsp *_esp;
 
   uint16_t _srcport = 1024;
-  uint8_t _sock;   //not used
+  uint8_t _sock;     // connection id
   uint16_t  _socket;
 
   uint8_t getFirstSocket();

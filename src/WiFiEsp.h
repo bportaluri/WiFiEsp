@@ -19,7 +19,7 @@ private:
 	EspDrv *espDrv;
 
     int16_t _state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
-    uint16_t _server_port[MAX_SOCK_NUM] = { 0, 0, 0, 0 };
+
 
 public:
 
@@ -27,11 +27,7 @@ public:
 
 	
 	void init();
-	
-    /*
-     * Get the first socket available
-     */
-    uint8_t getSocket();
+
 
     /*
      * Get firmware version

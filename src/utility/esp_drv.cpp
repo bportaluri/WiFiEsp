@@ -50,16 +50,15 @@ EspDrv::EspDrv(Stream *espSerial, Stream *debugSerial, int resetPin)
 
 
 // Start server TCP on port specified
-void EspDrv::startServer(uint16_t port, uint8_t sock, uint8_t protMode)
+void EspDrv::startServer(uint16_t port)
 {
-/*
-	bool ret;
+	INFO ("Entering startServer (%d)", port);
+
 	char cmd[100];
-	sprintf(cmd, "AT+CIPSERVER=1,%d", _port);
+	sprintf(cmd, "AT+CIPSERVER=1,%d", port);
 	
-	_wifi->espSendCmd("AT+CIPMUX=1", "OK", 5000);
-	_wifi->espSendCmd(cmd, "OK", 5000);
-*/
+	INFO1(cmd);
+	sendCmd(cmd, 2000);
 }
 
 // Start server TCP on port specified
@@ -121,33 +120,46 @@ uint8_t EspDrv::getClientState(uint8_t sock)
     return WL_DISCONNECTED;
 }
 
-uint16_t EspDrv::availData(uint8_t sock)
+
+uint16_t EspDrv::availData(uint8_t connId)
 {
     //INFO1(bufPos);
-	if (bufPos>0)
-		return bufPos;
 	
-	INFO1("2");
+	// if there is data in the buffer just returns the bytes left
+	if (_connId==connId && _bufPos>0)
+		return _bufPos;
+	
+	if (connId==0 && _bufPos>0)
+		return _bufPos;
+	
     
-    int bytes=_espSerial->available();
+    int bytes = _espSerial->available();
+
 	if (bytes)
 	{
 		INFO("There are %d bytes in the serial buffer", bytes);
 		if (_espSerial->find("+IPD,"))
 		{
-			int i = _espSerial->parseInt();
-			INFO("ConnID: %d", i);
+			int _connId = _espSerial->parseInt();
+			INFO("ConnID: %d", _connId);
+			
 			_espSerial->read();
-			bufPos = _espSerial->parseInt();
-			INFO("Bytes: %d", bufPos);
-			return bufPos;
+			_bufPos = _espSerial->parseInt()+1;
+			INFO("Bytes: %d", _bufPos);
+			
+			if(_connId==connId)
+				return _bufPos;
 		}
 	}
 	return 0;
 }
 
-bool EspDrv::getData(uint8_t sock, uint8_t *data, uint8_t peek)
+
+bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 {
+	if (connId!=_connId)
+		return false;
+	
     //char c = (char)_espSerial->read();
 	
 	// see Serial.timedRead
@@ -155,28 +167,29 @@ bool EspDrv::getData(uint8_t sock, uint8_t *data, uint8_t peek)
 	long _startMillis = millis();
 	do
 	{
-		c = _espSerial->read();
-		if (c >= 0)
+		if (_espSerial->available())
 		{
-			*data = (char)c;
-			bufPos--;
-			Serial.print((char)c);
+			 *data = (char)_espSerial->read();
+			_bufPos--;
+			//Serial.print((char)c);
 			return true;
 		}
-	} while(millis() - _startMillis < 500);
+	} while(millis() - _startMillis < 1000);
 	
     // timed out, reset the buffer
-	INFO1("TIMEOUT");
-    bufPos==0;
+	INFO("TIMEOUT (%d)", _bufPos);
+    _bufPos = 0;
 	*data = 0;
 	return false;
 }
+
 
 bool EspDrv::getDataBuf(uint8_t sock, uint8_t *_data, uint16_t *_dataLen)
 {
     return false;
 }
 
+/*
 bool EspDrv::insertDataBuf(uint8_t sock, const uint8_t *data, uint16_t _len)
 {
     return false;
@@ -186,11 +199,11 @@ bool EspDrv::sendUdpData(uint8_t sock)
 {
     return false;
 }
-
+*/
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
-	//INFO("Entering sendData (%d): %s", len, data);
+	INFO("Entering sendData (%d): %s", len, data);
 	
 	bool ret;
 	char cmd[100];
@@ -213,12 +226,12 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
     return true;
 }
 
-
+/*
 uint8_t EspDrv::checkDataSent(uint8_t sock)
 {
     return 0;
 }
-
+*/
 
 void EspDrv::wifiDriverInit()
 {
@@ -227,10 +240,12 @@ void EspDrv::wifiDriverInit()
 	sendCmd("AT+RST", 1000);
 	delay(3000);
 	
-	espEmptyBuf();
+	// empty dirty characters from the buffer
+	while(_espSerial->available() > 0) _espSerial->read();
 
 	// set AP mode
-	sendCmd("AT+CWMODE=1", 2000);
+	//sendCmd("AT+CWMODE=1", 2000);
+	sendCmd("AT+CWMODE=3", 2000);
 
 	// set multiple connections mode
 	sendCmd("AT+CIPMUX=1", 2000);
@@ -287,9 +302,6 @@ int8_t EspDrv::disconnect()
 uint8_t EspDrv::getConnectionStatus()
 {
 	INFO1("Entering getConnectionStatus");
-	
-	//if(!sendCmd("AT", 1000))
-	//	return WL_NO_SHIELD;
 	
 	char buf[10];
 	int bufLen;
@@ -667,7 +679,6 @@ void EspDrv::espEmptyBuf()
 		i++;
 	}
 	if (i>0)
-		INFO("xxxxxx %d", i);
+		INFO("Dirty characters in the serial buffer!!!! > %d", i);
 }
-
 

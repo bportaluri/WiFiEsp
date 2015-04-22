@@ -32,20 +32,8 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
     {
     	if (!_esp->espDrv->startClient(host, port, _sock))
 			return 0;
-		
+
     	_esp->_state[_sock] = _sock;
-/*
-    	unsigned long start = millis();
-
-    	// wait 4 second for the connection
-    	while (!connected() && millis() - start < 4000)
-    		delay(10);
-
-    	if (!connected())
-       	{
-    		return 0;
-    	}
-*/
     }
 	else
 	{
@@ -125,12 +113,16 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 
 int WiFiEspClient::available()
 {
-  if (_sock != 255)
-  {
-      return _esp->espDrv->availData(_sock);
-  }
+	if (_sock != 255)
+	{
+		int bytes = _esp->espDrv->availData(_sock);
+		if (bytes>0)
+		{
+			return bytes;
+		}
+	}
 
-  return 0;
+	return 0;
 }
 
 int WiFiEspClient::read()
@@ -179,12 +171,7 @@ void WiFiEspClient::stop()
 
 	_esp->espDrv->stopClient(_sock);
 	_esp->_state[_sock] = NA_STATE;
-/*
-	int count = 0;
-	// wait maximum 5 secs for the connection to close
-	while (status() != CLOSED && ++count < 50)
-		delay(100);
-*/
+
 	_sock = 255;
 }
 
@@ -195,7 +182,8 @@ uint8_t WiFiEspClient::connected()
 		return 0;
 	}
 	
-	uint8_t s = status();
+	//uint8_t s = status();
+	uint16_t s = _esp->espDrv->availData(_sock);
 
     return !(s == 0);
 }
