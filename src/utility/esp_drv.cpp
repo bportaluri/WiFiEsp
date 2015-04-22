@@ -4,7 +4,6 @@
 
 #include "esp_drv.h"                   
 
-
 #include "utility/debug.h"
 
 
@@ -36,8 +35,6 @@ uint8_t _gatewayIp[] = {0};
 char    fwVersion[] = {0};
 
 
-
-
 // Public Methods
 
 
@@ -57,7 +54,6 @@ void EspDrv::startServer(uint16_t port)
 	char cmd[100];
 	sprintf(cmd, "AT+CIPSERVER=1,%d", port);
 	
-	INFO1(cmd);
 	sendCmd(cmd, 2000);
 }
 
@@ -75,7 +71,7 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	bool ret;
 	char cmd[200];
 
-	sprintf(cmd, "AT+CIPSTART=1,\"TCP\",\"%s\",%d", host, port);  // TODO must handle connection ID
+	sprintf(cmd, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
 	
 	int r = sendCmd(cmd, 5000);
 	if (r==TAG_OK)
@@ -90,11 +86,11 @@ void EspDrv::stopClient(uint8_t sock)
 	INFO1("Entering stopClient");
 
 	bool ret;
-	char cmd[100];
+	char cmd[20];
 	
-	sprintf(cmd, "AT+CIPCLOSE=%d", 1);    
+	sprintf(cmd, "AT+CIPCLOSE=%d", sock);    
 	
-	int r = sendCmd(cmd, 2000);
+	int r = sendCmd(cmd, 4000);
 }
 
 
@@ -107,7 +103,7 @@ uint8_t EspDrv::getClientState(uint8_t sock)
 {
 	INFO1("getClientState");
 
-	char buf[500];
+	char buf[200];
 	int bufLen;
 	if(!sendCmd("AT+CIPSTATUS", "STATUS:", "\r\n", buf))
 		return WL_NO_SHIELD;
@@ -125,12 +121,14 @@ uint16_t EspDrv::availData(uint8_t connId)
 {
     //INFO1(bufPos);
 	
-	// if there is data in the buffer just returns the bytes left
-	if (_connId==connId && _bufPos>0)
-		return _bufPos;
-	
-	if (connId==0 && _bufPos>0)
-		return _bufPos;
+	// if there is data in the buffer
+	if (_bufPos>0)
+	{
+		if (_connId==connId)
+			return _bufPos;
+		else if (_connId==0)
+			return _bufPos;
+	}
 	
     
     int bytes = _espSerial->available();
@@ -140,14 +138,16 @@ uint16_t EspDrv::availData(uint8_t connId)
 		INFO("There are %d bytes in the serial buffer", bytes);
 		if (_espSerial->find("+IPD,"))
 		{
-			int _connId = _espSerial->parseInt();
+			_connId = _espSerial->parseInt();
+			//_connId = _espSerial->read() - 48;
 			INFO("ConnID: %d", _connId);
 			
 			_espSerial->read();
+			
 			_bufPos = _espSerial->parseInt()+1;
 			INFO("Bytes: %d", _bufPos);
 			
-			if(_connId==connId)
+			if(_connId==connId || connId==0)
 				return _bufPos;
 		}
 	}
@@ -179,6 +179,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
     // timed out, reset the buffer
 	INFO("TIMEOUT (%d)", _bufPos);
     _bufPos = 0;
+	_connId = 0;
 	*data = 0;
 	return false;
 }
@@ -207,31 +208,29 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	
 	bool ret;
 	char cmd[100];
-	sprintf(cmd, "AT+CIPSEND=1,%d", len);  // TODO must handle connection ID
+	sprintf(cmd, "AT+CIPSEND=%d,%d", sock, len);
 
 	_espSerial->println(cmd);
 	
-	char c = (char)_espSerial->read();
-	//INFO1(c);
+	delay(100);
+
+	//readUntil(500);
+	_espSerial->find(">");
 
 	_espSerial->write(data, len);
-	
-	_espSerial->find("SEND OK");
+
+
+	delay(100);
+	ret = _espSerial->find("SEND OK\r\n");
 
 	//readUntil(2000);
 	
 	//espGetOutput("SEND OK", 5000);
 	//espGetOutput("\r\nOK", 8000);
 	
-    return true;
+    return ret;
 }
 
-/*
-uint8_t EspDrv::checkDataSent(uint8_t sock)
-{
-    return 0;
-}
-*/
 
 void EspDrv::wifiDriverInit()
 {
@@ -245,7 +244,7 @@ void EspDrv::wifiDriverInit()
 
 	// set AP mode
 	//sendCmd("AT+CWMODE=1", 2000);
-	sendCmd("AT+CWMODE=3", 2000);
+	sendCmd("AT+CWMODE=2", 2000);
 
 	// set multiple connections mode
 	sendCmd("AT+CIPMUX=1", 2000);
@@ -276,14 +275,6 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 int8_t EspDrv::wifiSetKey(char* ssid, uint8_t key_idx, const void *key)
 {
 	return 0;
-}
-
-void EspDrv::config(uint8_t validParams, uint32_t local_ip, uint32_t gateway, uint32_t subnet)
-{
-}
-
-void EspDrv::setDNS(uint8_t validParams, uint32_t dns_server1, uint32_t dns_server2)
-{
 }
 
 
@@ -368,17 +359,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	}
 }
 
- void EspDrv::getSubnetMask(IPAddress& mask)
- {
-	//getNetworkData(_localIp, _subnetMask, _gatewayIp);
-	//mask = _subnetMask;
- }
 
- void EspDrv::getGatewayIP(IPAddress& ip)
- {
-	//getNetworkData(_localIp, _subnetMask, _gatewayIp);
-	//ip = _gatewayIp;
- }
 
 char* EspDrv::getCurrentSSID()
 {
@@ -390,72 +371,6 @@ char* EspDrv::getCurrentSSID()
 	return _ssid;
 }
 
-uint8_t* EspDrv::getCurrentBSSID()
-{
-
-}
-
-int32_t EspDrv::getCurrentRSSI()
-{
-
-}
-
-uint8_t EspDrv::getCurrentEncryptionType()
-{
-
-}
-
-int8_t EspDrv::startScanNetworks()
-{
-	return 0;
-}
-
-
-uint8_t EspDrv::getScanNetworks()
-{
-	return 0;
-}
-
-char* EspDrv::getSSIDNetoworks(uint8_t networkItem)
-{
-	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
-		return NULL;
-
-	return _networkSsid[networkItem];
-}
-
-uint8_t EspDrv::getEncTypeNetowrks(uint8_t networkItem)
-{
-}
-
-int32_t EspDrv::getRSSINetoworks(uint8_t networkItem)
-{
-}
-
-uint8_t EspDrv::reqHostByName(const char* aHostname)
-{
-}
-
-int EspDrv::getHostByName(IPAddress& aResult)
-{
-}
-
-int EspDrv::getHostByName(const char* aHostname, IPAddress& aResult)
-{
-/*
-	uint8_t retry = 10;
-	if (reqHostByName(aHostname))
-	{
-		while(!getHostByName(aResult) && --retry > 0)
-		{
-			delay(1000);
-		}
-	}else{
-		return 0;
-	}
-	return (retry>0);
-*/
-}
 
 char*EspDrv:: EspDrv::getFwVersion()
 {
