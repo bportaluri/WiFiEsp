@@ -79,6 +79,36 @@ int WiFiEsp::begin(char* ssid, const char *passphrase)
     return WL_CONNECT_FAILED;
 }
 
+
+
+/*
+
+void ESP8266::hardReset(void)
+{
+connected = false;
+strcpy(ip, "");
+digitalWrite(ESP8266_RST, LOW);
+delay(ESP8266_HARD_RESET_DURACTION);
+digitalWrite(ESP8266_RST, HIGH);
+delay(ESP8266_HARD_RESET_DURACTION);
+}
+void ESP8266::softReset(void)
+{
+connected = false;
+strcpy(ip, "");
+state = STATE_RESETING;
+_wifiSerial.println(F("AT+RST"));
+setResponseTrueKeywords(KEYWORD_READY);
+setResponseFalseKeywords();
+readResponse(15000, PostSoftReset);
+}
+
+*/
+
+
+
+
+
 void WiFiEsp::config(IPAddress local_ip)
 {
 	//espDrv->config(1, (uint32_t)local_ip, 0, 0);

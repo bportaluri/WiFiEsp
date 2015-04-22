@@ -81,8 +81,8 @@ size_t WiFiEspClient::write(uint8_t b)
 
 size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 {
-    INFO1("Entering WiFiEspClient::write");
-	//INFO("Entering WiFiEspClient::write (%d): %s", size, buf);
+    //INFO1("Entering WiFiEspClient::write");
+	INFO("Entering WiFiEspClient::write (%d, %d)", _sock, size);
 
 	if (_sock >= MAX_SOCK_NUM)
 	{
@@ -170,8 +170,8 @@ void WiFiEspClient::stop()
 		return;
 
 	_esp->espDrv->stopClient(_sock);
+	
 	_esp->_state[_sock] = NA_STATE;
-
 	_sock = 255;
 }
 

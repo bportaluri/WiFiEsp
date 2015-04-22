@@ -28,6 +28,8 @@ WiFiEspClient WiFiEspServer::available(byte* status)
 	int bytes = _esp->espDrv->availData(0);
 	if (bytes>0)
 	{
+		INFO("returning client %d", _esp->espDrv->_connId);
+		
 		WiFiEspClient client(_esp, _esp->espDrv->_connId);
 		return client;
 	}
