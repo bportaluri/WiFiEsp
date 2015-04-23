@@ -9,16 +9,6 @@
 
 
 
-
-typedef enum {
-	TAG_OK = 0,
-	TAG_SENDOK = 1,
-	TAG_CONNECT = 2,
-	TAG_ERROR = 3,
-	TAG_FAIL = 4
-} TAGSSEn;
-
-
 // Maximum size of a SSID
 #define WL_SSID_MAX_LENGTH 32
 // Length of passphrase. Valid lengths are 8-63.

@@ -24,7 +24,7 @@ WiFiEspClient::WiFiEspClient(WiFiEsp *esp, uint8_t sock) : _sock(sock)
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
 {
-    INFO1("WiFiEspClient::connect");
+    //INFO1("WiFiEspClient::connect");
 	
 	_sock = getFirstSocket();
 
@@ -45,7 +45,7 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
 
 int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 {
-    INFO1("WiFiEspClient::connect");
+    //INFO1("WiFiEspClient::connect");
 
     _sock = getFirstSocket();
     if (_sock != NO_SOCKET_AVAIL)
@@ -81,8 +81,7 @@ size_t WiFiEspClient::write(uint8_t b)
 
 size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 {
-    //INFO1("Entering WiFiEspClient::write");
-	INFO("Entering WiFiEspClient::write (%d, %d)", _sock, size);
+    //INFO("Entering WiFiEspClient::write (%d, %d)", _sock, size);
 
 	if (_sock >= MAX_SOCK_NUM)
 	{
@@ -137,8 +136,6 @@ int WiFiEspClient::read()
 
 int WiFiEspClient::read(uint8_t* buf, size_t size)
 {
-  // sizeof(size_t) is architecture dependent
-  // but we need a 16 bit data type here
   uint16_t _size = size;
   if (!_esp->espDrv->getDataBuf(_sock, buf, &_size))
       return -1;
@@ -155,7 +152,8 @@ int WiFiEspClient::peek()
 	  return b;
 }
 
-void WiFiEspClient::flush() {
+void WiFiEspClient::flush()
+{
   while (available())
     read();
 }
@@ -164,7 +162,7 @@ void WiFiEspClient::flush() {
 
 void WiFiEspClient::stop()
 {
-	INFO1("Entering WiFiEspClient::stop");
+	//INFO1("Entering WiFiEspClient::stop");
 	
 	if (_sock == 255)
 		return;

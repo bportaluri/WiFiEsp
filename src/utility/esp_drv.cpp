@@ -7,16 +7,27 @@
 #include "utility/debug.h"
 
 
-#define NUMTAGSS 5
+#define NUMTAGSS 6
 
 char* TAGSS[] =
 {
     "\r\nOK\r\n",
+    "\r\nno change\r\n",
     "\r\nSEND OK\r\n",
     " CONNECT\r\n",
 	"\r\nERROR\r\n",
 	"\r\nFAIL\r\n"
 };
+
+typedef enum
+{
+	TAG_OK = 0,
+	TAG_NOCHANGE = 1,
+	TAG_SENDOK = 2,
+	TAG_CONNECT = 3,
+	TAG_ERROR = 4,
+	TAG_FAIL = 5
+} TagsEnum;
 
 
 // Array of data to cache the information related to the networks discovered
@@ -139,7 +150,6 @@ uint16_t EspDrv::availData(uint8_t connId)
 		if (_espSerial->find("+IPD,"))
 		{
 			_connId = _espSerial->parseInt();
-			//_connId = _espSerial->read() - 48;
 			INFO("ConnID: %d", _connId);
 			
 			_espSerial->read();
@@ -204,30 +214,20 @@ bool EspDrv::sendUdpData(uint8_t sock)
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
-	INFO("Entering sendData (%d): %s", len, data);
+	INFO("Entering sendData (%d, %d): %s", sock, len, data);
 	
 	bool ret;
 	char cmd[100];
 	sprintf(cmd, "AT+CIPSEND=%d,%d", sock, len);
 
 	_espSerial->println(cmd);
-	
-	delay(100);
 
-	//readUntil(500);
 	_espSerial->find(">");
 
 	_espSerial->write(data, len);
 
-
-	delay(100);
 	ret = _espSerial->find("SEND OK\r\n");
 
-	//readUntil(2000);
-	
-	//espGetOutput("SEND OK", 5000);
-	//espGetOutput("\r\nOK", 8000);
-	
     return ret;
 }
 
@@ -243,8 +243,8 @@ void EspDrv::wifiDriverInit()
 	while(_espSerial->available() > 0) _espSerial->read();
 
 	// set AP mode
-	//sendCmd("AT+CWMODE=1", 2000);
-	sendCmd("AT+CWMODE=2", 2000);
+	sendCmd("AT+CWMODE=1", 2000);
+	//sendCmd("AT+CWMODE=2", 2000);
 
 	// set multiple connections mode
 	sendCmd("AT+CIPMUX=1", 2000);

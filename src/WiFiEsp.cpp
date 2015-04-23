@@ -189,7 +189,8 @@ uint8_t* WiFiEsp::BSSID(uint8_t* bssid)
 
 int32_t WiFiEsp::RSSI()
 {
-    return espDrv->getCurrentRSSI();
+    //return espDrv->getCurrentRSSI();
+	return 0;
 }
 
 uint8_t WiFiEsp::encryptionType()
