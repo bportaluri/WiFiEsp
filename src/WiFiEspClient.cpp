@@ -12,7 +12,7 @@
 
 
 
-WiFiEspClient::WiFiEspClient(WiFiEsp *esp) : _sock(MAX_SOCK_NUM)
+WiFiEspClient::WiFiEspClient(WiFiEsp *esp) : _sock(255)
 {
 	_esp = esp;
 }
@@ -24,7 +24,7 @@ WiFiEspClient::WiFiEspClient(WiFiEsp *esp, uint8_t sock) : _sock(sock)
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
 {
-    //INFO1("WiFiEspClient::connect");
+    INFO1("WiFiEspClient::connect");
 	
 	_sock = getFirstSocket();
 
@@ -45,31 +45,9 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
 
 int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 {
-    //INFO1("WiFiEspClient::connect");
-
-    _sock = getFirstSocket();
-    if (_sock != NO_SOCKET_AVAIL)
-    {
-    	_esp->espDrv->startClientIp(uint32_t(ip), port, _sock);
-    	_esp->_state[_sock] = _sock;
-
-    	unsigned long start = millis();
-
-    	// wait 4 second for the connection to close
-    	while (!connected() && millis() - start < 4000)
-    		delay(1);
-
-    	if (!connected())
-       	{
-    		return 0;
-    	}
-    }
-	else
-	{
-    	Serial.println("No Socket available");
-    	return 0;
-    }
-    return 1;
+	char s[20];  
+	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	return connect(s, port);
 }
 
 
@@ -97,6 +75,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 	if (!_esp->espDrv->sendData(_sock, buf, size))
 	{
 		setWriteError();
+		stop();
 		return 0;
 	}
 /*
@@ -131,6 +110,7 @@ int WiFiEspClient::read()
     return -1;
 
   _esp->espDrv->getData(_sock, &b);
+  
   return b;
 }
 
@@ -180,10 +160,9 @@ uint8_t WiFiEspClient::connected()
 		return 0;
 	}
 	
-	//uint8_t s = status();
-	uint16_t s = _esp->espDrv->availData(_sock);
-
-    return !(s == 0);
+	uint8_t s = status();
+	
+	return (s != CLOSED);
 }
 
 
@@ -191,12 +170,15 @@ uint8_t WiFiEspClient::status()
 {
 	if (_sock == 255)
 	{
-		return 0;
+		return CLOSED;
 	}
-	else
+	
+	if (_esp->espDrv->availData(_sock))
 	{
-		return _esp->espDrv->getClientState(_sock);
+		return ESTABLISHED;
 	}
+	
+	return LISTEN;
 }
 
 WiFiEspClient::operator bool()

@@ -338,6 +338,8 @@ private:
 
 	void espEmptyBuf();
 	
+	int timedRead();
+	
 
 	// settings of requested network
 	char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];

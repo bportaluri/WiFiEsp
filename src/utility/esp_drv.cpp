@@ -80,7 +80,7 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	INFO1("Entering startClient");
 	
 	bool ret;
-	char cmd[200];
+	char cmd[250];
 
 	sprintf(cmd, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
 	
@@ -110,22 +110,6 @@ uint8_t EspDrv::getServerState(uint8_t sock)
     return 0;
 }
 
-uint8_t EspDrv::getClientState(uint8_t sock)
-{
-	INFO1("getClientState");
-
-	char buf[200];
-	int bufLen;
-	if(!sendCmd("AT+CIPSTATUS", "STATUS:", "\r\n", buf))
-		return WL_NO_SHIELD;
-
-	// TODO: handle other statuses
-	int s = atoi(buf);
-	if(s==3)
-		return WL_CONNECTED;
-
-    return WL_DISCONNECTED;
-}
 
 
 uint16_t EspDrv::availData(uint8_t connId)
@@ -149,13 +133,25 @@ uint16_t EspDrv::availData(uint8_t connId)
 		INFO("There are %d bytes in the serial buffer", bytes);
 		if (_espSerial->find("+IPD,"))
 		{
+			// format is : +IPD,<id>,<len>:<data>
+			
 			_connId = _espSerial->parseInt();
 			INFO("ConnID: %d", _connId);
 			
-			_espSerial->read();
+			_espSerial->read();  // read the ',' character
 			
-			_bufPos = _espSerial->parseInt()+1;
+			// ESP sends 21 more characters to acknowledge send request: \r\nOK\r\n\r\nOK\r\nUnlink\r\n
+
+			//Serial.print((char)_espSerial->read());
+			//Serial.print((char)_espSerial->read());
+			//Serial.print((char)_espSerial->read());
+			//Serial.println((char)_espSerial->read());
+			//_bufPos = 10;
+			
+			_bufPos = _espSerial->parseInt();
 			INFO("Bytes: %d", _bufPos);
+			
+			_espSerial->read();  // read the ':' character
 			
 			if(_connId==connId || connId==0)
 				return _bufPos;
@@ -170,10 +166,9 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 	if (connId!=_connId)
 		return false;
 	
-    //char c = (char)_espSerial->read();
 	
 	// see Serial.timedRead
-	int c;
+	
 	long _startMillis = millis();
 	do
 	{
@@ -181,10 +176,22 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 		{
 			 *data = (char)_espSerial->read();
 			_bufPos--;
-			//Serial.print((char)c);
+			//Serial.print((char)*data);
+			
+			// empty buffer
+			// based on the request the ESP is returning "\r\nOK\r\n" or "\r\nOK\r\n\r\nOK\r\nUnlink\r\n"
+			if (_bufPos==0)
+			{
+				Serial.println();
+				Serial.println("--");
+				int c;
+				while( (c = timedRead()) > 0)
+					Serial.print((char)c);
+				Serial.println("--");
+			}
 			return true;
 		}
-	} while(millis() - _startMillis < 1000);
+	} while(millis() - _startMillis < 2000);
 	
     // timed out, reset the buffer
 	INFO("TIMEOUT (%d)", _bufPos);
@@ -222,11 +229,21 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 
 	_espSerial->println(cmd);
 
-	_espSerial->find(">");
+	if(!_espSerial->find(">"))
+	{
+		//INFO1("FAILED 1 !!!");
+		return false;
+	}
 
 	_espSerial->write(data, len);
 
 	ret = _espSerial->find("SEND OK\r\n");
+	
+	if(!ret)
+	{
+		//INFO1("FAILED 2 !!!");
+		return false;
+	}
 
     return ret;
 }
@@ -342,7 +359,8 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	
 	char ipStr[20];
 
-	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n\r\nOK", ipStr))
+	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n\r\nOK", ipStr))  // Old firmware
+	//if (sendCmd("AT+CIFSR", "+CIFSR:STAIP,\"", "\"\r\n", ipStr))  // New firmware
 	{
 		char* token;
 		
@@ -441,7 +459,7 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 	INFO(">> %s", cmd);
 
 	_espSerial->println(cmd);
-	delay(100);
+	//delay(100);
 
 	// get result
     String data;
@@ -492,7 +510,7 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 	INFO(">> %s", cmd);
 
 	_espSerial->println(cmd);
-	delay(100);
+	//delay(100);
 
 	// get result
     String data;
@@ -597,3 +615,16 @@ void EspDrv::espEmptyBuf()
 		INFO("Dirty characters in the serial buffer!!!! > %d", i);
 }
 
+
+// copied from Serial::timedRead
+int EspDrv::timedRead()
+{
+  int _timeout = 500;
+  int c;
+  long _startMillis = millis();
+  do {
+    c = _espSerial->read();
+    if (c >= 0) return c;
+  } while(millis() - _startMillis < _timeout);
+  return -1; // -1 indicates timeout
+}
