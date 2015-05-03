@@ -75,6 +75,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 	if (!_esp->espDrv->sendData(_sock, buf, size))
 	{
 		setWriteError();
+		delay(2000);
 		stop();
 		return 0;
 	}

@@ -1,18 +1,19 @@
 
-#include "Arduino.h"
-
+#include <Arduino.h>
+#include <avr/pgmspace.h>
 
 #include "esp_drv.h"                   
 
 #include "utility/debug.h"
 
 
-#define NUMTAGSS 6
+#define NUMESPTAGS 7
 
-char* TAGSS[] =
+const char* ESPTAGS[] =
 {
     "\r\nOK\r\n",
     "\r\nno change\r\n",
+    "\r\nready\r\n",
     "\r\nSEND OK\r\n",
     " CONNECT\r\n",
 	"\r\nERROR\r\n",
@@ -23,27 +24,31 @@ typedef enum
 {
 	TAG_OK = 0,
 	TAG_NOCHANGE = 1,
-	TAG_SENDOK = 2,
-	TAG_CONNECT = 3,
-	TAG_ERROR = 4,
-	TAG_FAIL = 5
+	TAG_READY = 2,
+	TAG_SENDOK = 3,
+	TAG_CONNECT = 4,
+	TAG_ERROR = 5,
+	TAG_FAIL = 6
 } TagsEnum;
 
 
 // Array of data to cache the information related to the networks discovered
-char 	_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
-int32_t _networkRssi[WL_NETWORKS_LIST_MAXNUM] = { 0 };
-uint8_t _networkEncr[WL_NETWORKS_LIST_MAXNUM] = { 0 };
+//char 	_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
+//int32_t _networkRssi[WL_NETWORKS_LIST_MAXNUM] = { 0 };
+//uint8_t _networkEncr[WL_NETWORKS_LIST_MAXNUM] = { 0 };
 
 // Cached values of retrieved data
-char 	_ssid[] = {0};
-uint8_t	_bssid[] = {0};
-uint8_t _mac[] = {0};
-uint8_t _localIp[] = {0};
-uint8_t _subnetMask[] = {0};
-uint8_t _gatewayIp[] = {0};
+//char 	_ssid[] = {0};
+//uint8_t	_bssid[] = {0};
+//uint8_t _mac[] = {0};
+//uint8_t _localIp[] = {0};
+//uint8_t _subnetMask[] = {0};
+//uint8_t _gatewayIp[] = {0};
 // Firmware version
-char    fwVersion[] = {0};
+//char    fwVersion[] = {0};
+
+
+
 
 
 // Public Methods
@@ -56,11 +61,28 @@ EspDrv::EspDrv(Stream *espSerial, Stream *debugSerial, int resetPin)
 	_resetPin = resetPin;
 }
 
+void EspDrv::wifiDriverInit()
+{
+	INFO1(F("> wifiDriverInit"));
+	
+	sendCmd("AT+RST", 1000);
+	delay(3000);
+	
+	// empty dirty characters from the buffer
+	while(_espSerial->available() > 0) _espSerial->read();
+
+	// set AP mode
+	sendCmd("AT+CWMODE=1", 2000);
+
+	// set multiple connections mode
+	sendCmd("AT+CIPMUX=1", 2000);
+}
+
 
 // Start server TCP on port specified
 void EspDrv::startServer(uint16_t port)
 {
-	INFO ("Entering startServer (%d)", port);
+	INFO1(F("> startServer"));
 
 	char cmd[100];
 	sprintf(cmd, "AT+CIPSERVER=1,%d", port);
@@ -77,7 +99,7 @@ void EspDrv::startClientIp(uint32_t ipAddress, uint16_t port, uint8_t sock, uint
 // Start server TCP on port specified
 bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode)
 {
-	INFO1("Entering startClient");
+	INFO1(F("> startClient"));
 	
 	bool ret;
 	char cmd[250];
@@ -94,7 +116,7 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 // Start server TCP on port specified
 void EspDrv::stopClient(uint8_t sock)
 {
-	INFO1("Entering stopClient");
+	INFO1(F("> stopClient"));
 
 	bool ret;
 	char cmd[20];
@@ -221,7 +243,7 @@ bool EspDrv::sendUdpData(uint8_t sock)
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
-	INFO("Entering sendData (%d, %d): %s", sock, len, data);
+	INFO("> sendData (%d, %d): %s", sock, len, data);
 	
 	bool ret;
 	char cmd[100];
@@ -249,23 +271,6 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 }
 
 
-void EspDrv::wifiDriverInit()
-{
-	INFO1("Entering wifiDriverInit");
-	
-	sendCmd("AT+RST", 1000);
-	delay(3000);
-	
-	// empty dirty characters from the buffer
-	while(_espSerial->available() > 0) _espSerial->read();
-
-	// set AP mode
-	sendCmd("AT+CWMODE=1", 2000);
-	//sendCmd("AT+CWMODE=2", 2000);
-
-	// set multiple connections mode
-	sendCmd("AT+CIPMUX=1", 2000);
-}
 
 int8_t EspDrv::wifiSetNetwork(char* ssid)
 {
@@ -274,7 +279,7 @@ int8_t EspDrv::wifiSetNetwork(char* ssid)
 
 bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 {
-	INFO1("Entering wifiConnect");
+	INFO1(F("> wifiConnect"));
 	
 	bool ret;
 
@@ -298,7 +303,7 @@ int8_t EspDrv::wifiSetKey(char* ssid, uint8_t key_idx, const void *key)
                         
 int8_t EspDrv::disconnect()
 {
-	INFO1("Entering disconnect");
+	INFO1(F("> disconnect"));
 
 	int ret = sendCmd("AT+CWQAP", 2000);
 	if(ret==TAG_OK)
@@ -309,7 +314,7 @@ int8_t EspDrv::disconnect()
 
 uint8_t EspDrv::getConnectionStatus()
 {
-	INFO1("Entering getConnectionStatus");
+	INFO1(F("> getConnectionStatus"));
 	
 	char buf[10];
 	int bufLen;
@@ -355,7 +360,7 @@ uint8_t* EspDrv::getMacAddress()
 
 void EspDrv::getIpAddress(IPAddress& ip)
 {
-	INFO1("Entering getIpAddress");
+	INFO1("> getIpAddress");
 	
 	char ipStr[20];
 
@@ -381,7 +386,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 
 char* EspDrv::getCurrentSSID()
 {
-	INFO1("Entering getCurrentSSID");
+	INFO1("> getCurrentSSID");
 
 	_ssid[0]=0;
 	sendCmd("AT+CWJAP?", "+CWJAP:\"", "\"\r\n", _ssid);
@@ -392,7 +397,7 @@ char* EspDrv::getCurrentSSID()
 
 char*EspDrv:: EspDrv::getFwVersion()
 {
-	INFO1("Entering getFwVersion");
+	INFO1(F("> getFwVersion"));
 	
 	int _dataLen = 0;
 	sendCmd("AT+GMR", "AT+GMR\r\r\n", "\r\n\r\nOK", fwVersion);
@@ -433,14 +438,14 @@ bool EspDrv::sendCmd(char* cmd, char* startTag, char* endTag, char* outStr)
 			ret.toCharArray(outStr, 50);
 
 			INFO("Return: %s", outStr);
-			INFO1("----------------------------------------------");
+			INFO1(F("----------------------------------------------"));
 			INFO1();
 			return true;
 		}
 	}	
 
-	WARN("Error: TAGSS not found");
-	INFO1("----------------------------------------------");
+	WARN(F("Error: TAG not found"));
+	INFO1(F("----------------------------------------------"));
 	INFO1();
 	
 	return false;
@@ -455,7 +460,7 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 {
     espEmptyBuf();
 
-	INFO1("----------------------------------------------");
+	INFO1(F("----------------------------------------------"));
 	INFO(">> %s", cmd);
 
 	_espSerial->println(cmd);
@@ -463,6 +468,7 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 
 	// get result
     String data;
+	data.reserve(80);
 	char c;
     unsigned long start = millis();
 	int ret = -1;
@@ -477,11 +483,11 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 			#endif
 			data += c;
         }
-		for(int i=0; i<NUMTAGSS; i++)
+		for(int i=0; i<NUMESPTAGS; i++)
 		{
 			if (data==NULL)
 				break;
-			if (data.indexOf(TAGSS[i]) != -1)
+			if (data.indexOf(ESPTAGS[i]) != -1)
 			{
 				ret = i;
 				break;
@@ -489,13 +495,15 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 		}
     }
 	
-	INFO1();
+	INFO1(".");
+	//INFO1(data);
 
-	if (millis() - start > timeout)
+	if (millis() - start >= timeout)
 		INFO1("TIMEOUT");
 	
 	INFO("Return: %d", ret);
-	INFO1("----------------------------------------------");
+
+	INFO1(F("----------------------------------------------"));
 	INFO1();
 
     return ret;
@@ -506,7 +514,7 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 {
     espEmptyBuf();
 
-	INFO1("----------------------------------------------");
+	INFO1(F("----------------------------------------------"));
 	INFO(">> %s", cmd);
 
 	_espSerial->println(cmd);
@@ -514,6 +522,7 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 
 	// get result
     String data;
+	data.reserve(50);
 	char c;
     unsigned long start = millis();
 	int ret = -1;
@@ -528,11 +537,11 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 			#endif
 			data += c;
         }
-		for(int i=0; i<NUMTAGSS; i++)
+		for(int i=0; i<NUMESPTAGS; i++)
 		{
 			if (data==NULL)
 				break;
-			if (data.indexOf(TAGSS[i]) != -1)
+			if (data.indexOf(ESPTAGS[i]) != -1)
 			{
 				ret = i;
 				break;
@@ -542,13 +551,13 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 
 	INFO1();
 	
-	if (millis() - start > timeout)
+	if (millis() - start >= timeout)
 	{
 		INFO1("TIMEOUT");
 		return "";
 	}
 	
-	INFO1("----------------------------------------------");
+	INFO1(F("----------------------------------------------"));
 	INFO1();
 
     return data;
@@ -562,6 +571,7 @@ String EspDrv::sendCmdRet(char* cmd, int timeout)
 int EspDrv::readUntil(int timeout)
 {
     String data;
+	data.reserve(50);
 	char c;
     unsigned long start = millis();
 	int ret = -1;
@@ -576,11 +586,11 @@ int EspDrv::readUntil(int timeout)
 			#endif
 			data += c;
         }
-		for(int i=0; i<NUMTAGSS; i++)
+		for(int i=0; i<NUMESPTAGS; i++)
 		{
 			if (data==NULL)
 				break;
-			if (data.indexOf(TAGSS[i]) != -1)
+			if (data.indexOf(ESPTAGS[i]) != -1)
 			{
 				ret = i;
 				break;
@@ -590,16 +600,15 @@ int EspDrv::readUntil(int timeout)
 	
 	INFO1();
 
-	if (millis() - start > timeout)
+	if (millis() - start >= timeout)
 		INFO1("TIMEOUT");
 	
 	INFO("Return: %d", ret);
-	INFO1("----------------------------------------------");
+	INFO1(F("----------------------------------------------"));
 	INFO1();
 
     return ret;
 }
-
 
 
 
@@ -622,7 +631,8 @@ int EspDrv::timedRead()
   int _timeout = 500;
   int c;
   long _startMillis = millis();
-  do {
+  do
+  {
     c = _espSerial->read();
     if (c >= 0) return c;
   } while(millis() - _startMillis < _timeout);
