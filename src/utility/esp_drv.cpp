@@ -203,7 +203,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 		{
 			 *data = (char)_espSerial->read();
 			_bufPos--;
-			//Serial.print((char)*data);
+			Serial.print((char)*data);
 			
 			// empty buffer
 			// based on the request the ESP is returning "\r\nOK\r\n" or "\r\nOK\r\n\r\nOK\r\nUnlink\r\n"
@@ -248,7 +248,8 @@ bool EspDrv::sendUdpData(uint8_t sock)
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
-	INFO("> sendData (%d, %d): %s", sock, len, data);
+	//INFO("> sendData (%d, %d): %s", sock, len, data);
+	INFO("> sendData (%d, %d)", sock, len);
 	
 	bool ret;
 	char cmd[100];
@@ -341,7 +342,7 @@ uint8_t* EspDrv::getMacAddress()
 	
 	memset(_mac, 0, WL_MAC_ADDR_LENGTH);
 	
-	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n\r\nOK", buf, sizeof(buf)))
+	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n", buf, sizeof(buf)))
 	{
 		char* token;
 
@@ -368,7 +369,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	
 	char buf[20];
 
-	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n\r\nOK", buf, sizeof(buf)))  // Old firmware
+	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n", buf, sizeof(buf)))  // Old firmware
 	//if (sendCmd("AT+CIFSR", "+CIFSR:STAIP,\"", "\"\r\n", buf))  // New firmware
 	{
 		char* token;

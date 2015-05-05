@@ -7,9 +7,7 @@
 #include "WiFiEspClient.h"
 #include "WiFiEspServer.h"
 
-
 #include "utility/esp_drv.h"
-
 
 
 WiFiEspClient::WiFiEspClient(WiFiEsp *esp) : _sock(255)
@@ -23,9 +21,7 @@ WiFiEspClient::WiFiEspClient(WiFiEsp *esp, uint8_t sock) : _sock(sock)
 }
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
-{
-    INFO1("WiFiEspClient::connect");
-	
+{	
 	_sock = getFirstSocket();
 
     if (_sock != NO_SOCKET_AVAIL)
@@ -37,7 +33,7 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
     }
 	else
 	{
-    	Serial.println("No Socket available");
+    	Serial.println(F("No socket available"));
     	return 0;
     }
     return 1;
@@ -45,7 +41,7 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
 
 int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 {
-	char s[20];  
+	char s[18];  
 	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 	return connect(s, port);
 }
@@ -75,6 +71,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 	if (!_esp->espDrv->sendData(_sock, buf, size))
 	{
 		setWriteError();
+		INFO1(F("Failed to write, disconnecting"));
 		delay(2000);
 		stop();
 		return 0;
@@ -111,6 +108,8 @@ int WiFiEspClient::read()
     return -1;
 
   _esp->espDrv->getData(_sock, &b);
+  
+  //Serial.print((char)b);
   
   return b;
 }

@@ -12,11 +12,15 @@
 #include <WiFiEspClient.h>
 #include <WiFiEspServer.h>
 
+#if not (defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
+#include "SoftwareSerial.h"
+SoftwareSerial Serial1(6, 7);
+#endif
+
 char ssid[] = "Twim";    // network SSID (name)
 char pass[] = "12345678";  // network password
 
 int status = WL_IDLE_STATUS;
-
 
 WiFiEsp WiFi(&Serial1, &Serial);
 
@@ -48,8 +52,8 @@ void setup()
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
 
-    // wait 10 seconds for connection:
-    delay(10000);
+    // wait 5 seconds for connection:
+    delay(5000);
   }
   server.begin();
   // you're connected now, so print out the status:
