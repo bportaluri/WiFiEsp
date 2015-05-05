@@ -35,6 +35,9 @@
 #define NO_SOCKET_AVAIL     255
 
 
+#define RINGBUFLEN 30
+
+
 typedef enum eProtMode {TCP_MODE, UDP_MODE}tProtMode;
 
 
@@ -90,6 +93,7 @@ enum wl_tcp_state {
   LAST_ACK    = 9,
   TIME_WAIT   = 10
 };
+
 
 
 class EspDrv
@@ -314,7 +318,6 @@ public:
 
     /*
      * Get the firmware version
-     * result: version as string with this format a.b.c
      */
     char* getFwVersion();
 
@@ -331,32 +334,38 @@ private:
 	uint8_t _connId = 0;
 
 
-	int sendCmd(char* cmd, int timeout);
-	bool sendCmd(char* cmd, char* startTag, char* endTag, char* outStr);
-	String sendCmdRet(char* cmd, int timeout);
-	int readUntil(int timeout);
+	int sendCmd(const char* cmd, int timeout);
+	bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
+	int readUntil(int timeout, const char* findStr=NULL);
 
 	void espEmptyBuf();
 	
 	int timedRead();
 	
+	
+	void ringBufInit();
+	void ringBufPutChar(char c);
+	bool ringBufFind(const char* findStr);
+	
 
 	// settings of requested network
-	char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
-	int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
-	uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
+	//char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
+	//int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
+	//uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
 
-	// firmware version string in the format a.b.c
+	// firmware version string
 	char 	fwVersion[WL_FW_VER_LENGTH];
 
 	// settings of current selected network
 	char 	_ssid[WL_SSID_MAX_LENGTH];
-	uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
+	//uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
 	uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
 	uint8_t  _localIp[WL_IPV4_LENGTH];
-	uint8_t  _subnetMask[WL_IPV4_LENGTH];
-	uint8_t  _gatewayIp[WL_IPV4_LENGTH];
+	//uint8_t  _subnetMask[WL_IPV4_LENGTH];
+	//uint8_t  _gatewayIp[WL_IPV4_LENGTH];
 
+	char ringBuf[RINGBUFLEN];
+	unsigned int ringBufPos;
 
     uint8_t reqHostByName(const char* aHostname);
 

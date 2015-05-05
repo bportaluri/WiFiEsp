@@ -4,6 +4,7 @@
 
 #include "esp_drv.h"                   
 
+
 #include "utility/debug.h"
 
 
@@ -32,6 +33,10 @@ typedef enum
 } TagsEnum;
 
 
+
+
+
+
 // Array of data to cache the information related to the networks discovered
 //char 	_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
 //int32_t _networkRssi[WL_NETWORKS_LIST_MAXNUM] = { 0 };
@@ -45,7 +50,7 @@ typedef enum
 //uint8_t _subnetMask[] = {0};
 //uint8_t _gatewayIp[] = {0};
 // Firmware version
-//char    fwVersion[] = {0};
+char    fwVersion[] = {0};
 
 
 
@@ -317,8 +322,7 @@ uint8_t EspDrv::getConnectionStatus()
 	INFO1(F("> getConnectionStatus"));
 	
 	char buf[10];
-	int bufLen;
-	if(!sendCmd("AT+CIPSTATUS", "STATUS:", "\r\n", buf))
+	if(!sendCmd("AT+CIPSTATUS", "STATUS:", "\r\n", buf, sizeof(buf)))
 		return WL_NO_SHIELD;
 
 	// TODO: other statuses?
@@ -333,15 +337,15 @@ uint8_t EspDrv::getConnectionStatus()
 
 uint8_t* EspDrv::getMacAddress()
 {
-	char macStr[20];
+	char buf[20];
 	
-	//sendCmd("AT+CIPSTAMAC?",5000);
+	memset(_mac, 0, WL_MAC_ADDR_LENGTH);
 	
-	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n\r\nOK", macStr))
+	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n\r\nOK", buf, sizeof(buf)))
 	{
 		char* token;
 
-		token = strtok(macStr, ":");
+		token = strtok(buf, ":");
 		_mac[0] = atoi(token);
 		token = strtok(NULL, ":");
 		_mac[1] = atoi(token);
@@ -362,14 +366,14 @@ void EspDrv::getIpAddress(IPAddress& ip)
 {
 	INFO1("> getIpAddress");
 	
-	char ipStr[20];
+	char buf[20];
 
-	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n\r\nOK", ipStr))  // Old firmware
-	//if (sendCmd("AT+CIFSR", "+CIFSR:STAIP,\"", "\"\r\n", ipStr))  // New firmware
+	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n\r\nOK", buf, sizeof(buf)))  // Old firmware
+	//if (sendCmd("AT+CIFSR", "+CIFSR:STAIP,\"", "\"\r\n", buf))  // New firmware
 	{
 		char* token;
 		
-		token = strtok(ipStr, ".");
+		token = strtok(buf, ".");
 		_localIp[0] = atoi(token);
 		token = strtok(NULL, ".");
 		_localIp[1] = atoi(token);
@@ -389,18 +393,19 @@ char* EspDrv::getCurrentSSID()
 	INFO1("> getCurrentSSID");
 
 	_ssid[0]=0;
-	sendCmd("AT+CWJAP?", "+CWJAP:\"", "\"\r\n", _ssid);
+	sendCmd("AT+CWJAP?", "+CWJAP:\"", "\"\r\n", _ssid, sizeof(_ssid));
 	
 	return _ssid;
 }
 
 
-char*EspDrv:: EspDrv::getFwVersion()
+char* EspDrv::getFwVersion()
 {
 	INFO1(F("> getFwVersion"));
+
+	fwVersion[0]=0;
 	
-	int _dataLen = 0;
-	sendCmd("AT+GMR", "AT+GMR\r\r\n", "\r\n\r\nOK", fwVersion);
+	sendCmd("AT+GMR", "AT+GMR\r\r\n", "\r\n", fwVersion, sizeof(fwVersion));
 	
     return fwVersion;
 }
@@ -417,38 +422,63 @@ char*EspDrv:: EspDrv::getFwVersion()
 * Extract the string enclosed in the passed tags and returns it in the outStr buffer.
 * Returns true if the string is extracted, false if tags are not found of timed out.
 */
-bool EspDrv::sendCmd(char* cmd, char* startTag, char* endTag, char* outStr)
+bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen)
 {
-	String data_tmp;
-	data_tmp = sendCmdRet(cmd, 6000);
+    int idx;
+	bool ret = false;
+	
+	outStr[0] = 0;
+	
+	espEmptyBuf();
 
-	//INFO("len=%d", data_tmp.length());
+	INFO1(F("----------------------------------------------"));
+	INFO(">> %s", cmd);
 
-    if (data_tmp.length() == 0)
-		return false;
-
-	int32_t index1 = data_tmp.indexOf(startTag);
-	if (index1 != -1)
+	_espSerial->println(cmd);
+	
+	idx = readUntil(1000, startTag);
+	//INFO("---------- 1: %d", idx);
+	
+	if(idx==NUMESPTAGS)
 	{
-		int32_t index2 = data_tmp.indexOf(endTag, index1+1);
-		if (index2 != -1)
+		// start tag found
+		idx = readUntil(1000, endTag);
+		if(idx==NUMESPTAGS)
 		{
-			index1 += strlen(startTag);
-			String ret = data_tmp.substring(index1, index2);
-			ret.toCharArray(outStr, 50);
+			// end tag found
+			//INFO("---------- 2: %d", idx);
+			//INFO("ringBuf: (%d) '%s'", ringBufPos, ringBuf);
+			
+			ringBuf[ringBufPos-strlen(endTag)] = 0;
+			strncpy(outStr, ringBuf, outStrLen);
 
-			INFO("Return: %s", outStr);
-			INFO1(F("----------------------------------------------"));
-			INFO1();
-			return true;
+			//INFO("outStr: '%s'", outStr);
+			readUntil(1000, NULL);
+			//INFO("outStr: '%s'", outStr);
+			ret = true;
 		}
-	}	
+		else
+		{
+			WARN(F("Error: TAG not found"));
+		}
+	}
+	else if(idx>=0 and idx<NUMESPTAGS)
+	{
+		// the command has returned but no start tag is found
+		WARN(F("Error: TAG not found"));
+	}
+	else
+	{
+		// the command has returned but no tag is found
+		WARN(F("Error"));
+	}
 
-	WARN(F("Error: TAG not found"));
 	INFO1(F("----------------------------------------------"));
 	INFO1();
 	
-	return false;
+	//INFO("outStr: '%s'", outStr);
+	
+	return ret;
 }
 
 
@@ -456,7 +486,7 @@ bool EspDrv::sendCmd(char* cmd, char* startTag, char* endTag, char* outStr)
 * Sends the AT command and returns the id of the TAG.
 * Return -1 if no tag is found.
 */
-int EspDrv::sendCmd(char* cmd, int timeout)
+int EspDrv::sendCmd(const char* cmd, int timeout)
 {
     espEmptyBuf();
 
@@ -464,149 +494,65 @@ int EspDrv::sendCmd(char* cmd, int timeout)
 	INFO(">> %s", cmd);
 
 	_espSerial->println(cmd);
-	//delay(100);
+	
+	int i = readUntil(timeout);
+	
+	INFO1(F("----------------------------------------------"));
+	INFO1();
+	
+    return i;
+}
 
-	// get result
-    String data;
-	data.reserve(80);
+
+// Read from serial until one of the tags is found
+int EspDrv::readUntil(int timeout, const char* findStr)
+{
+	ringBufInit();
+	
 	char c;
     unsigned long start = millis();
 	int ret = -1;
     	
 	while ((millis() - start < timeout) and ret<0)
 	{
-        while(_espSerial->available())
+        if(_espSerial->available())
 		{
             c = (char)_espSerial->read();
 			#ifdef _DEBUG_
 			Serial.print(c);
 			#endif
-			data += c;
-        }
-		for(int i=0; i<NUMESPTAGS; i++)
-		{
-			if (data==NULL)
-				break;
-			if (data.indexOf(ESPTAGS[i]) != -1)
+			ringBufPutChar(c);
+        
+			if (findStr!=NULL)
 			{
-				ret = i;
-				break;
+				if (ringBufFind(findStr))
+				{
+					ret = NUMESPTAGS;
+					//INFO1("xxx");
+				}
 			}
-		}
-    }
-	
-	INFO1(".");
-	//INFO1(data);
-
-	if (millis() - start >= timeout)
-		INFO1("TIMEOUT");
-	
-	INFO("Return: %d", ret);
-
-	INFO1(F("----------------------------------------------"));
-	INFO1();
-
-    return ret;
-}
-
-
-String EspDrv::sendCmdRet(char* cmd, int timeout)
-{
-    espEmptyBuf();
-
-	INFO1(F("----------------------------------------------"));
-	INFO(">> %s", cmd);
-
-	_espSerial->println(cmd);
-	//delay(100);
-
-	// get result
-    String data;
-	data.reserve(50);
-	char c;
-    unsigned long start = millis();
-	int ret = -1;
-	
-	while (millis() - start < timeout and ret<0)
-	{
-		while(_espSerial->available())
-		{
-            c = (char)_espSerial->read();
-			#ifdef _DEBUG_
-			Serial.print(c);
-			#endif
-			data += c;
-        }
-		for(int i=0; i<NUMESPTAGS; i++)
-		{
-			if (data==NULL)
-				break;
-			if (data.indexOf(ESPTAGS[i]) != -1)
+			for(int i=0; i<NUMESPTAGS; i++)
 			{
-				ret = i;
-				break;
+				if (ringBufFind(ESPTAGS[i]))
+				{
+					ret = i;
+					//INFO1("yyy");
+					break;
+				}
 			}
 		}
     }
 
-	INFO1();
-	
+
 	if (millis() - start >= timeout)
 	{
-		INFO1("TIMEOUT");
-		return "";
+		INFO1(F("TIMEOUT >>>"));
 	}
 	
-	INFO1(F("----------------------------------------------"));
-	INFO1();
-
-    return data;
-}
-
-
-
-/*
-* 
-*/
-int EspDrv::readUntil(int timeout)
-{
-    String data;
-	data.reserve(50);
-	char c;
-    unsigned long start = millis();
-	int ret = -1;
-    	
-	while ((millis() - start < timeout) and ret<0)
-	{
-        while(_espSerial->available())
-		{
-            c = (char)_espSerial->read();
-			#ifdef _DEBUG_
-			Serial.print(c);
-			#endif
-			data += c;
-        }
-		for(int i=0; i<NUMESPTAGS; i++)
-		{
-			if (data==NULL)
-				break;
-			if (data.indexOf(ESPTAGS[i]) != -1)
-			{
-				ret = i;
-				break;
-			}
-		}
-    }
+	ringBuf[ringBufPos] = 0;
+	//INFO("Return: %d > '%s'", ret, ringBuf);
 	
-	INFO1();
-
-	if (millis() - start >= timeout)
-		INFO1("TIMEOUT");
 	
-	INFO("Return: %d", ret);
-	INFO1(F("----------------------------------------------"));
-	INFO1();
-
     return ret;
 }
 
@@ -636,5 +582,40 @@ int EspDrv::timedRead()
     c = _espSerial->read();
     if (c >= 0) return c;
   } while(millis() - _startMillis < _timeout);
+  
   return -1; // -1 indicates timeout
+}
+
+
+//--------------------------------------------------------
+
+void EspDrv::ringBufInit()
+{
+  ringBufPos = 0;
+  memset(ringBuf, 0, RINGBUFLEN);
+}
+
+void EspDrv::ringBufPutChar(char c)
+{
+  ringBuf[ringBufPos%RINGBUFLEN] = c;
+  ringBufPos++;
+}
+
+
+bool EspDrv::ringBufFind(const char* findStr)
+{
+  int findStrLen = strlen(findStr);
+  
+  if(ringBufPos < findStrLen)
+	return false;
+
+  unsigned int j = ringBufPos-findStrLen;
+      
+  for(unsigned int i=0; i<findStrLen; i++)
+  {
+	if(findStr[i] != ringBuf[(j+i)%RINGBUFLEN])
+      return false;
+  }
+  
+  return true;
 }

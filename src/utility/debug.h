@@ -40,7 +40,7 @@
 #ifdef _DEBUG_
 
 #define INFO(format, args...) do { \
-	char buf[250];	\
+	char buf[200];	\
 	sprintf(buf, format, args); \
 	Serial.println(buf); \
 } while(0);
