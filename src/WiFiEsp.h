@@ -8,31 +8,39 @@
 #include "IPAddress.h"
 
 
-#include "IPAddress.h"
-//#include "WiFiEspClient.h"
-//#include "WiFiEspServer.h"
-#include "utility/esp_drv.h"
 
-class WiFiEsp
+
+#include "IPAddress.h"
+#include "WiFiEspClient.h"
+#include "WiFiEspServer.h"
+#include "utility/EspDrv.h"
+
+
+
+
+
+
+class WiFiEspClass
 {
 private:
-	EspDrv *espDrv;
-
-    int16_t _state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
-
-
-public:
-
-    WiFiEsp(Stream *espSerial, Stream *debugSerial, int r = -1);
 
 	
-	void init();
+public:
 
+    static int16_t _state[MAX_SOCK_NUM];
+
+    WiFiEspClass();
+	
+
+    /*
+     * Initialize the ESP serial interface
+     */
+	static void init(unsigned long baud=9600);
 
     /*
      * Get firmware version
      */
-    char* firmwareVersion();
+    static char* firmwareVersion();
 
 
     /* Start Wifi connection for OPEN networks
@@ -226,6 +234,6 @@ public:
 
 };
 
-//extern WiFiEsp WiFi;
+extern WiFiEspClass WiFi;
 
 #endif

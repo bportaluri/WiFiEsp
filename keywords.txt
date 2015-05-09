@@ -13,8 +13,8 @@ WiFiEsp	KEYWORD3
 # Datatypes (KEYWORD1)
 #######################################
 
-WiFiClient	KEYWORD1
-WiFiServer	KEYWORD1
+WiFiEspClient	KEYWORD1
+WiFiEspServer	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

@@ -1,13 +1,17 @@
 
-
-#ifndef Esp_Drv_h
-#define Esp_Drv_h
+#ifndef ESP8266_h
+#define ESP8266_h
 
 #include "Stream.h"
 #include "IPAddress.h"
 
+#ifndef HAVE_HWSERIAL1
+#include "SoftwareSerial.h"
+#endif
 
 
+
+#define WL_SERIAL_SPEED 9600
 
 // Maximum size of a SSID
 #define WL_SSID_MAX_LENGTH 32
@@ -38,7 +42,7 @@
 #define RINGBUFLEN 30
 
 
-typedef enum eProtMode {TCP_MODE, UDP_MODE}tProtMode;
+typedef enum eProtMode {TCP_MODE, UDP_MODE} tProtMode;
 
 
 typedef enum {
@@ -101,37 +105,35 @@ class EspDrv
 
 public:
 
-	EspDrv(Stream *espSerial, Stream *debugSerial, int r = -1);
+	//EspDrv(Stream *espSerial, Stream *debugSerial, int r = -1);
 
 	// SERVER methods
 	
     /*
 	* Start a TCP server on the specified port
 	*/
-	void startServer(uint16_t port);
+	static void startServer(uint16_t port);
 	
 
-    void startClientIp(uint32_t ipAddress, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
+    static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
 
-    bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
+    static void stopClient(uint8_t sock);
 
-    void stopClient(uint8_t sock);
+    static uint8_t getServerState(uint8_t sock);
 
-    uint8_t getServerState(uint8_t sock);
+    static uint8_t getClientState(uint8_t sock);
 
-    uint8_t getClientState(uint8_t sock);
+    static bool getData(uint8_t connId, uint8_t *data, uint8_t peek = 0);
 
-    bool getData(uint8_t connId, uint8_t *data, uint8_t peek = 0);
-
-    bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
+    static bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
 
     //bool insertDataBuf(uint8_t sock, const uint8_t *_data, uint16_t _dataLen);
 
     //bool sendUdpData(uint8_t sock);
 
-    bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
+    static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
 
-    uint16_t availData(uint8_t connId);
+    static uint16_t availData(uint8_t connId);
 
     //uint8_t checkDataSent(uint8_t sock);
 
@@ -142,7 +144,7 @@ public:
     /*
      * Driver initialization
      */
-    void wifiDriverInit();
+    static void wifiDriverInit(unsigned long baud);
 
     /*
      * Set the desired network which the connection manager should try to
@@ -153,14 +155,14 @@ public:
      * param ssid: The ssid of the desired network.
      * return: WL_SUCCESS or WL_FAILURE
 	 */
-    int8_t wifiSetNetwork(char* ssid);
+    static int8_t wifiSetNetwork(char* ssid);
 
     /* Start Wifi connection with passphrase
      *
      * param ssid: Pointer to the SSID string.
      * param passphrase: Passphrase. Valid characters in a passphrase must be between ASCII 32-126 (decimal).
      */
-    bool wifiConnect(char* ssid, const char *passphrase);
+    static bool wifiConnect(char* ssid, const char *passphrase);
 
     /* Start Wifi connection with WEP encryption.
      * Configure a key into the device. The key type (WEP-40, WEP-104)
@@ -171,7 +173,7 @@ public:
      * param key: Key input buffer.
      * return: WL_SUCCESS or WL_FAILURE
      */
-    int8_t wifiSetKey(char* ssid, uint8_t key_idx, const void *key);
+    static int8_t wifiSetKey(char* ssid, uint8_t key_idx, const void *key);
 
     /* Set ip configuration disabling dhcp client
         *
@@ -182,7 +184,7 @@ public:
         * param gateway: 	gateway configuration
         * param subnet: 	subnet mask configuration
         */
-    void config(uint8_t validParams, uint32_t local_ip, uint32_t gateway, uint32_t subnet);
+    static void config(uint8_t validParams, uint32_t local_ip, uint32_t gateway, uint32_t subnet);
 
     /* Set DNS ip configuration
            *
@@ -192,56 +194,56 @@ public:
            * param dns_server1: DNS server1 configuration
            * param dns_server2: DNS server2 configuration
            */
-    void setDNS(uint8_t validParams, uint32_t dns_server1, uint32_t dns_server2);
+    static void setDNS(uint8_t validParams, uint32_t dns_server1, uint32_t dns_server2);
 
     /*
      * Disconnect from the network
      *
      * return: WL_SUCCESS or WL_FAILURE
      */
-    int8_t disconnect();
+    static int8_t disconnect();
 
     /*
      * Disconnect from the network
      *
      * return: one value of wl_status_t enum
      */
-    uint8_t getConnectionStatus();
+    static uint8_t getConnectionStatus();
 
     /*
      * Get the interface MAC address.
      *
      * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
      */
-    uint8_t* getMacAddress();
+    static uint8_t* getMacAddress();
 
     /*
      * Get the interface IP address.
      *
      * return: copy the ip address value in IPAddress object
      */
-    void getIpAddress(IPAddress& ip);
+    static void getIpAddress(IPAddress& ip);
 
     /*
      * Get the interface subnet mask address.
      *
      * return: copy the subnet mask address value in IPAddress object
      */
-    void getSubnetMask(IPAddress& mask);
+    static void getSubnetMask(IPAddress& mask);
 
     /*
      * Get the gateway ip address.
      *
      * return: copy the gateway ip address value in IPAddress object
      */
-    void getGatewayIP(IPAddress& ip);
+    static void getGatewayIP(IPAddress& ip);
 
     /*
      * Return the current SSID associated with the network
      *
      * return: ssid string
      */
-    char* getCurrentSSID();
+    static char* getCurrentSSID();
 
     /*
      * Return the current BSSID associated with the network.
@@ -249,7 +251,7 @@ public:
      *
      * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
      */
-    uint8_t* getCurrentBSSID();
+    static uint8_t* getCurrentBSSID();
 
     /*
      * Return the current RSSI /Received Signal Strength in dBm)
@@ -257,28 +259,28 @@ public:
      *
      * return: signed value
      */
-    int32_t getCurrentRSSI();
+    static int32_t getCurrentRSSI();
 
     /*
      * Return the Encryption Type associated with the network
      *
      * return: one value of wl_enc_type enum
      */
-    uint8_t getCurrentEncryptionType();
+    static uint8_t getCurrentEncryptionType();
 
     /*
      * Start scan WiFi networks available
      *
      * return: Number of discovered networks
      */
-    int8_t startScanNetworks();
+    static int8_t startScanNetworks();
 
     /*
      * Get the networks available
      *
      * return: Number of discovered networks
      */
-    uint8_t getScanNetworks();
+    static uint8_t getScanNetworks();
 
     /*
      * Return the SSID discovered during the network scan.
@@ -287,7 +289,7 @@ public:
 	 *
      * return: ssid string of the specified item on the networks scanned list
      */
-    char* getSSIDNetoworks(uint8_t networkItem);
+    static char* getSSIDNetoworks(uint8_t networkItem);
 
     /*
      * Return the RSSI of the networks discovered during the scanNetworks
@@ -296,7 +298,7 @@ public:
 	 *
      * return: signed value of RSSI of the specified item on the networks scanned list
      */
-    int32_t getRSSINetoworks(uint8_t networkItem);
+    static int32_t getRSSINetoworks(uint8_t networkItem);
 
     /*
      * Return the encryption type of the networks discovered during the scanNetworks
@@ -305,7 +307,7 @@ public:
 	 *
      * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
      */
-    uint8_t getEncTypeNetowrks(uint8_t networkItem);
+    static uint8_t getEncTypeNetowrks(uint8_t networkItem);
 
     /*
      * Resolve the given hostname to an IP address.
@@ -314,65 +316,63 @@ public:
      * result: 1 if aIPAddrString was successfully converted to an IP address,
      *          else error code
      */
-    int getHostByName(const char* aHostname, IPAddress& aResult);
+    static int getHostByName(const char* aHostname, IPAddress& aResult);
 
     /*
      * Get the firmware version
      */
-    char* getFwVersion();
+    static char* getFwVersion();
 
 private:
 
-	Stream *_espSerial;
-	Stream *_debugSerial;
-	int _resetPin;
 
-	bool _isDebug;
+#ifndef HAVE_HWSERIAL1
+	static SoftwareSerial Serial1;
+#endif
+
+	//static Stream *_espSerial;
 
 	
-	long _bufPos = 0;
-	uint8_t _connId = 0;
-
-
-	int sendCmd(const char* cmd, int timeout);
-	bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
-	int readUntil(int timeout, const char* findStr=NULL);
-
-	void espEmptyBuf();
+	static long _bufPos;
+	static uint8_t _connId;
 	
-	int timedRead();
-	
-	
-	void ringBufInit();
-	void ringBufPutChar(char c);
-	bool ringBufFind(const char* findStr);
-	
-
 	// settings of requested network
 	//char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
 	//int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
 	//uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
 
 	// firmware version string
-	char 	fwVersion[WL_FW_VER_LENGTH];
+	static char 	fwVersion[WL_FW_VER_LENGTH];
 
 	// settings of current selected network
-	char 	_ssid[WL_SSID_MAX_LENGTH];
+	static char 	_ssid[WL_SSID_MAX_LENGTH];
 	//uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
-	uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
-	uint8_t  _localIp[WL_IPV4_LENGTH];
+	static uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
+	static uint8_t  _localIp[WL_IPV4_LENGTH];
 	//uint8_t  _subnetMask[WL_IPV4_LENGTH];
 	//uint8_t  _gatewayIp[WL_IPV4_LENGTH];
 
-	char ringBuf[RINGBUFLEN];
-	unsigned int ringBufPos;
+	static char ringBuf[RINGBUFLEN];
+	static unsigned int ringBufPos;
 
-    uint8_t reqHostByName(const char* aHostname);
 
-    int getHostByName(IPAddress& aResult);
+	static int sendCmd(const char* cmd, int timeout=1000);
+	static bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
+	static int readUntil(int timeout, const char* findStr=NULL);
+
+	static void espEmptyBuf(bool warn=true);
+	
+	static int timedRead();
+	
+	
+	static void ringBufInit();
+	static void ringBufPutChar(char c);
+	static bool ringBufFind(const char* findStr);
 
 	
-  friend class WiFiEspServer;
+	friend class WiFiEspServer;
 };
+
+extern EspDrv espDrv;
 
 #endif

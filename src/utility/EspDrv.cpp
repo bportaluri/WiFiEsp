@@ -2,10 +2,9 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#include "esp_drv.h"                   
-
-
+#include "utility/EspDrv.h"
 #include "utility/debug.h"
+
 
 
 #define NUMESPTAGS 7
@@ -35,52 +34,59 @@ typedef enum
 
 
 
-
-
 // Array of data to cache the information related to the networks discovered
+
 //char 	_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
 //int32_t _networkRssi[WL_NETWORKS_LIST_MAXNUM] = { 0 };
 //uint8_t _networkEncr[WL_NETWORKS_LIST_MAXNUM] = { 0 };
 
+
 // Cached values of retrieved data
-//char 	_ssid[] = {0};
+char 	EspDrv::_ssid[] = {0};
 //uint8_t	_bssid[] = {0};
-//uint8_t _mac[] = {0};
-//uint8_t _localIp[] = {0};
+uint8_t EspDrv::_mac[] = {0};
+uint8_t EspDrv::_localIp[] = {0};
 //uint8_t _subnetMask[] = {0};
 //uint8_t _gatewayIp[] = {0};
-// Firmware version
-char    fwVersion[] = {0};
+char EspDrv::fwVersion[] = {0};
+
+long EspDrv::_bufPos=0;
+uint8_t EspDrv::_connId=0;
+
+
+char EspDrv::ringBuf[] = {0};
+unsigned int EspDrv::ringBufPos = 0;
+
+
+#ifndef HAVE_HWSERIAL1
+#include "SoftwareSerial.h"
+SoftwareSerial EspDrv::Serial1(6, 7); // RX, TX
+#endif
 
 
 
-
-
-// Public Methods
-
-
-EspDrv::EspDrv(Stream *espSerial, Stream *debugSerial, int resetPin)
-{
-	_espSerial = espSerial;
-	_debugSerial = debugSerial;
-	_resetPin = resetPin;
-}
-
-void EspDrv::wifiDriverInit()
+void EspDrv::wifiDriverInit(unsigned long baud)
 {
 	INFO1(F("> wifiDriverInit"));
 	
+	Serial1.begin(baud);
+
 	sendCmd("AT+RST", 1000);
 	delay(3000);
+	espEmptyBuf(false);  // empty dirty characters from the buffer
 	
-	// empty dirty characters from the buffer
-	while(_espSerial->available() > 0) _espSerial->read();
+	getFwVersion();
+	if (strcmp(fwVersion, "0018000902")!=0);
+	{
+		Serial.println(F("Firmware version not supported"));
+		delay(5000);
+	}
 
 	// set AP mode
-	sendCmd("AT+CWMODE=1", 2000);
+	sendCmd("AT+CWMODE=1");
 
 	// set multiple connections mode
-	sendCmd("AT+CIPMUX=1", 2000);
+	sendCmd("AT+CIPMUX=1");
 }
 
 
@@ -92,16 +98,11 @@ void EspDrv::startServer(uint16_t port)
 	char cmd[100];
 	sprintf(cmd, "AT+CIPSERVER=1,%d", port);
 	
-	sendCmd(cmd, 2000);
+	sendCmd(cmd);
 }
 
-// Start server TCP on port specified
-void EspDrv::startClientIp(uint32_t ipAddress, uint16_t port, uint8_t sock, uint8_t protMode)
-{
 
-}
 
-// Start server TCP on port specified
 bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode)
 {
 	INFO1(F("> startClient"));
@@ -117,6 +118,8 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	
 	return false;
 }
+
+
 
 // Start server TCP on port specified
 void EspDrv::stopClient(uint8_t sock)
@@ -153,32 +156,32 @@ uint16_t EspDrv::availData(uint8_t connId)
 	}
 	
     
-    int bytes = _espSerial->available();
+    int bytes = Serial1.available();
 
 	if (bytes)
 	{
 		INFO("There are %d bytes in the serial buffer", bytes);
-		if (_espSerial->find("+IPD,"))
+		if (Serial1.find("+IPD,"))
 		{
 			// format is : +IPD,<id>,<len>:<data>
 			
-			_connId = _espSerial->parseInt();
+			_connId = Serial1.parseInt();
 			INFO("ConnID: %d", _connId);
 			
-			_espSerial->read();  // read the ',' character
+			Serial1.read();  // read the ',' character
 			
 			// ESP sends 21 more characters to acknowledge send request: \r\nOK\r\n\r\nOK\r\nUnlink\r\n
 
-			//Serial.print((char)_espSerial->read());
-			//Serial.print((char)_espSerial->read());
-			//Serial.print((char)_espSerial->read());
-			//Serial.println((char)_espSerial->read());
+			//Serial.print((char)Serial1.read());
+			//Serial.print((char)Serial1.read());
+			//Serial.print((char)Serial1.read());
+			//Serial.println((char)Serial1.read());
 			//_bufPos = 10;
 			
-			_bufPos = _espSerial->parseInt();
+			_bufPos = Serial1.parseInt();
 			INFO("Bytes: %d", _bufPos);
 			
-			_espSerial->read();  // read the ':' character
+			Serial1.read();  // read the ':' character
 			
 			if(_connId==connId || connId==0)
 				return _bufPos;
@@ -199,18 +202,18 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 	long _startMillis = millis();
 	do
 	{
-		if (_espSerial->available())
+		if (Serial1.available())
 		{
-			 *data = (char)_espSerial->read();
+			 *data = (char)Serial1.read();
 			_bufPos--;
-			Serial.print((char)*data);
+			//Serial.print((char)*data);
 			
-			// empty buffer
+			// empty buffer if finished receiving data
 			// based on the request the ESP is returning "\r\nOK\r\n" or "\r\nOK\r\n\r\nOK\r\nUnlink\r\n"
 			if (_bufPos==0)
 			{
 				Serial.println();
-				Serial.println("--");
+				Serial.println(">>> Trailing data >>>");
 				int c;
 				while( (c = timedRead()) > 0)
 					Serial.print((char)c);
@@ -255,17 +258,17 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	char cmd[100];
 	sprintf(cmd, "AT+CIPSEND=%d,%d", sock, len);
 
-	_espSerial->println(cmd);
+	Serial1.println(cmd);
 
-	if(!_espSerial->find(">"))
+	if(!Serial1.find(">"))
 	{
 		//INFO1("FAILED 1 !!!");
 		return false;
 	}
 
-	_espSerial->write(data, len);
+	Serial1.write(data, len);
 
-	ret = _espSerial->find("SEND OK\r\n");
+	ret = Serial1.find("SEND OK\r\n");
 	
 	if(!ret)
 	{
@@ -311,7 +314,7 @@ int8_t EspDrv::disconnect()
 {
 	INFO1(F("> disconnect"));
 
-	int ret = sendCmd("AT+CWQAP", 2000);
+	int ret = sendCmd("AT+CWQAP");
 	if(ret==TAG_OK)
 		return WL_DISCONNECTED;
 		
@@ -435,7 +438,7 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 	INFO1(F("----------------------------------------------"));
 	INFO(">> %s", cmd);
 
-	_espSerial->println(cmd);
+	Serial1.println(cmd);
 	
 	idx = readUntil(1000, startTag);
 	//INFO("---------- 1: %d", idx);
@@ -494,7 +497,7 @@ int EspDrv::sendCmd(const char* cmd, int timeout)
 	INFO1(F("----------------------------------------------"));
 	INFO(">> %s", cmd);
 
-	_espSerial->println(cmd);
+	Serial1.println(cmd);
 	
 	int i = readUntil(timeout);
 	
@@ -516,9 +519,9 @@ int EspDrv::readUntil(int timeout, const char* findStr)
     	
 	while ((millis() - start < timeout) and ret<0)
 	{
-        if(_espSerial->available())
+        if(Serial1.available())
 		{
-            c = (char)_espSerial->read();
+            c = (char)Serial1.read();
 			#ifdef _DEBUG_
 			Serial.print(c);
 			#endif
@@ -559,15 +562,15 @@ int EspDrv::readUntil(int timeout, const char* findStr)
 
 
 
-void EspDrv::espEmptyBuf() 
+void EspDrv::espEmptyBuf(bool warn) 
 {
     int i=0;
-	while(_espSerial->available() > 0)
+	while(Serial1.available() > 0)
     {
-		_espSerial->read();
+		Serial1.read();
 		i++;
 	}
-	if (i>0)
+	if (i>0 and warn==true)
 		INFO("Dirty characters in the serial buffer!!!! > %d", i);
 }
 
@@ -580,7 +583,7 @@ int EspDrv::timedRead()
   long _startMillis = millis();
   do
   {
-    c = _espSerial->read();
+    c = Serial1.read();
     if (c >= 0) return c;
   } while(millis() - _startMillis < _timeout);
   
@@ -620,3 +623,5 @@ bool EspDrv::ringBufFind(const char* findStr)
   
   return true;
 }
+
+EspDrv espDrv;

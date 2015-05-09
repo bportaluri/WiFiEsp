@@ -1,37 +1,40 @@
 /*
- WiFiEsp Web Server LED Blink
-
+ WiFiEsp example: WebServerLedBlink
+ 
  A simple web server that lets you blink an LED via the web.
- This sketch will print the IP address of your WiFi Shield (once connected)
+ This sketch will print the IP address of your ESP8266 module (once connected)
  to the Serial monitor. From there, you can open that address in a web browser
  to turn on and off the LED on pin 13.
 
  This example is written for a network using WPA encryption. For
  WEP or WPA, change the Wifi.begin() call accordingly.
- */
-#include <WiFiEsp.h>
-#include <WiFiEspClient.h>
-#include <WiFiEspServer.h>
 
-char ssid[] = "Twim";    // network SSID (name)
-char pass[] = "12345678";  // network password
+ Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+*/
 
+#include "WiFiEsp.h"
+
+// Emulate Serial1 on pins 7/6 if not present
+#ifndef HAVE_HWSERIAL1
+#include "SoftwareSerial.h"
+#endif
+
+
+char ssid[] = "Twim";            // your network SSID (name)
+char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;
 
-
-WiFiEsp WiFi(&Serial1, &Serial);
-
-WiFiEspServer server(&WiFi, 80);
+WiFiEspServer server(80);
 
 
 void setup()
 {
+  // initialize serial and wait for port to open:
   Serial.begin(115200);
-  while (!Serial);
-  Serial1.begin(9600);
+  while (!Serial); // wait for serial port to connect. Needed for Leonardo only
 
-  WiFi.init();
-  
+  WiFi.init();  // initialize ESP serial port with default baud rate 9600
+
   pinMode(13, OUTPUT);      // set the LED pin mode
 
   // check for the presence of the shield:
@@ -40,7 +43,6 @@ void setup()
     while (true);       // don't continue
   }
 
-
   // attempt to connect to Wifi network:
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to Network named: ");
@@ -48,8 +50,6 @@ void setup()
 
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
-    // wait 10 seconds for connection:
-    delay(10000);
   }
   server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status

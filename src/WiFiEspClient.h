@@ -7,23 +7,13 @@
 #include "Client.h"
 #include "IPAddress.h"
 
-#include "WiFiEsp.h"
 
 
 class WiFiEspClient : public Client
 {
-private:
-  WiFiEsp *_esp;
-
-  uint16_t _srcport = 1024;
-  uint8_t _sock;     // connection id
-  uint16_t  _socket;
-
-  uint8_t getFirstSocket();
-
 public:
-  WiFiEspClient(WiFiEsp *esp);
-  WiFiEspClient(WiFiEsp *esp, uint8_t sock);
+  WiFiEspClient();
+  WiFiEspClient(uint8_t sock);
 
   uint8_t status();
   
@@ -95,6 +85,14 @@ public:
 
   friend class WiFiEspServer;
   
+private:
+
+  static uint16_t _srcport;
+  uint8_t _sock;     // connection id
+  uint16_t  _socket;
+
+  uint8_t getFirstSocket();
+
 
 };
 

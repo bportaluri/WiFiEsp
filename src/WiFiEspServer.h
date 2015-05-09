@@ -2,22 +2,21 @@
 #define WiFiEspServer_h
 
 
-
 #include "Server.h"
 #include "WiFiEsp.h"
+
 
 class WiFiEspClient;
 
 class WiFiEspServer : public Server
 {
 private:
-	WiFiEsp *_esp;
 	uint16_t _port;
 	bool _started;
 	
 
 public:
-  WiFiEspServer(WiFiEsp *esp, uint16_t port);
+  WiFiEspServer(uint16_t port);
 
 
   /*

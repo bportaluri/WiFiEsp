@@ -7,17 +7,17 @@
 #include "WiFiEspClient.h"
 #include "WiFiEspServer.h"
 
-#include "utility/esp_drv.h"
+#include "utility/EspDrv.h"
 
 
-WiFiEspClient::WiFiEspClient(WiFiEsp *esp) : _sock(255)
+WiFiEspClient::WiFiEspClient() : _sock(255)
 {
-	_esp = esp;
+
 }
 
-WiFiEspClient::WiFiEspClient(WiFiEsp *esp, uint8_t sock) : _sock(sock)
+WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
 {
-	_esp = esp;
+
 }
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
@@ -26,10 +26,10 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
 
     if (_sock != NO_SOCKET_AVAIL)
     {
-    	if (!_esp->espDrv->startClient(host, port, _sock))
+    	if (!EspDrv::startClient(host, port, _sock))
 			return 0;
 
-    	_esp->_state[_sock] = _sock;
+    	WiFiEspClass::_state[_sock] = _sock;
     }
 	else
 	{
@@ -68,7 +68,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 		return 0;
 	}
 	
-	if (!_esp->espDrv->sendData(_sock, buf, size))
+	if (!EspDrv::sendData(_sock, buf, size))
 	{
 		setWriteError();
 		INFO1(F("Failed to write, disconnecting"));
@@ -77,7 +77,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 		return 0;
 	}
 /*
-	if (!_esp->espDrv->checkDataSent(_sock))
+	if (!EspDrv::checkDataSent(_sock))
 	{
 		setWriteError();
 		return 0;
@@ -91,7 +91,7 @@ int WiFiEspClient::available()
 {
 	if (_sock != 255)
 	{
-		int bytes = _esp->espDrv->availData(_sock);
+		int bytes = EspDrv::availData(_sock);
 		if (bytes>0)
 		{
 			return bytes;
@@ -107,7 +107,7 @@ int WiFiEspClient::read()
   if (!available())
     return -1;
 
-  _esp->espDrv->getData(_sock, &b);
+  EspDrv::getData(_sock, &b);
   
   //Serial.print((char)b);
   
@@ -117,7 +117,7 @@ int WiFiEspClient::read()
 int WiFiEspClient::read(uint8_t* buf, size_t size)
 {
   uint16_t _size = size;
-  if (!_esp->espDrv->getDataBuf(_sock, buf, &_size))
+  if (!EspDrv::getDataBuf(_sock, buf, &_size))
       return -1;
   return 0;
 }
@@ -128,7 +128,7 @@ int WiFiEspClient::peek()
 	  if (!available())
 	    return -1;
 
-	  _esp->espDrv->getData(_sock, &b, 1);
+	  EspDrv::getData(_sock, &b, 1);
 	  return b;
 }
 
@@ -147,9 +147,9 @@ void WiFiEspClient::stop()
 	if (_sock == 255)
 		return;
 
-	_esp->espDrv->stopClient(_sock);
+	EspDrv::stopClient(_sock);
 	
-	_esp->_state[_sock] = NA_STATE;
+	WiFiEspClass::_state[_sock] = NA_STATE;
 	_sock = 255;
 }
 
@@ -173,7 +173,7 @@ uint8_t WiFiEspClient::status()
 		return CLOSED;
 	}
 	
-	if (_esp->espDrv->availData(_sock))
+	if (EspDrv::availData(_sock))
 	{
 		return ESTABLISHED;
 	}
@@ -196,7 +196,7 @@ uint8_t WiFiEspClient::getFirstSocket()
 {
     for (int i = 0; i < MAX_SOCK_NUM; i++)
 	{
-      if (_esp->_state[i] == NA_STATE)
+      if (WiFiEspClass::_state[i] == NA_STATE)
       {
           return i;
       }
