@@ -10,9 +10,9 @@ It is still an alpha version but works fine already.
 ##Features
 
 - APIs compatible with standard Arduino WiFi library.
-- Use the standard ESP firmware.
-- Support hardware and software serial ports
-- Debugging features
+- Use AT commands of standard ESP firmware.
+- Support hardware and software serial ports.
+- Debugging features.
 
 
 ##ToDo
@@ -24,7 +24,6 @@ It is still an alpha version but works fine already.
 - Implement UDP
 - Test all public methods
 - Publish documentation and samples
-- Avoid use of constructor?
 
 
 ##Supported APIs

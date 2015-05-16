@@ -139,7 +139,6 @@ void WiFiEspClient::flush()
 }
 
 
-
 void WiFiEspClient::stop()
 {
 	//INFO1("Entering WiFiEspClient::stop");

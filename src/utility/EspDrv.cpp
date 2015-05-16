@@ -54,6 +54,8 @@ long EspDrv::_bufPos=0;
 uint8_t EspDrv::_connId=0;
 
 
+char EspDrv::cmdBuf[] = {0};
+
 char EspDrv::ringBuf[] = {0};
 unsigned int EspDrv::ringBufPos = 0;
 
@@ -71,22 +73,25 @@ void EspDrv::wifiDriverInit(unsigned long baud)
 	
 	Serial1.begin(baud);
 
-	sendCmd("AT+RST", 1000);
+	sendCmd(F("AT+RST"), 1000);
 	delay(3000);
 	espEmptyBuf(false);  // empty dirty characters from the buffer
 	
 	getFwVersion();
-	if (strcmp(fwVersion, "0018000902")!=0);
+		
+	if (strcmp(fwVersion, "0018000902-AI03")!=0)
 	{
-		Serial.println(F("Firmware version not supported"));
-		delay(5000);
+		Serial.print(F("Firmware version "));
+		Serial.print(fwVersion);
+		Serial.println(F(" is not tested"));
+		delay(2000);
 	}
 
 	// set AP mode
-	sendCmd("AT+CWMODE=1");
+	sendCmd(F("AT+CWMODE=1"));
 
 	// set multiple connections mode
-	sendCmd("AT+CIPMUX=1");
+	sendCmd(F("AT+CIPMUX=1"));
 }
 
 
@@ -95,10 +100,9 @@ void EspDrv::startServer(uint16_t port)
 {
 	INFO1(F("> startServer"));
 
-	char cmd[100];
-	sprintf(cmd, "AT+CIPSERVER=1,%d", port);
+	sprintf(cmdBuf, "AT+CIPSERVER=1,%d", port);
 	
-	sendCmd(cmd);
+	sendCmd(cmdBuf);
 }
 
 
@@ -108,11 +112,10 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	INFO1(F("> startClient"));
 	
 	bool ret;
-	char cmd[250];
 
-	sprintf(cmd, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
+	sprintf(cmdBuf, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
 	
-	int r = sendCmd(cmd, 5000);
+	int r = sendCmd(cmdBuf, 5000);
 	if (r==TAG_OK)
 		return true;
 	
@@ -127,11 +130,10 @@ void EspDrv::stopClient(uint8_t sock)
 	INFO1(F("> stopClient"));
 
 	bool ret;
-	char cmd[20];
 	
-	sprintf(cmd, "AT+CIPCLOSE=%d", sock);    
+	sprintf(cmdBuf, "AT+CIPCLOSE=%d", sock);    
 	
-	int r = sendCmd(cmd, 4000);
+	int r = sendCmd(cmdBuf, 4000);
 }
 
 
@@ -160,13 +162,13 @@ uint16_t EspDrv::availData(uint8_t connId)
 
 	if (bytes)
 	{
-		INFO("There are %d bytes in the serial buffer", bytes);
+		//INFO2(F("Bytes in the serial buffer: "), bytes);
 		if (Serial1.find("+IPD,"))
 		{
 			// format is : +IPD,<id>,<len>:<data>
 			
 			_connId = Serial1.parseInt();
-			INFO("ConnID: %d", _connId);
+			INFO2(F("New incoming connection - connId:"), _connId);
 			
 			Serial1.read();  // read the ',' character
 			
@@ -179,7 +181,7 @@ uint16_t EspDrv::availData(uint8_t connId)
 			//_bufPos = 10;
 			
 			_bufPos = Serial1.parseInt();
-			INFO("Bytes: %d", _bufPos);
+			INFO2(F("Bytes:"), _bufPos);
 			
 			Serial1.read();  // read the ':' character
 			
@@ -213,7 +215,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 			if (_bufPos==0)
 			{
 				Serial.println();
-				Serial.println(">>> Trailing data >>>");
+				Serial.println(F(">>> Trailing data >>>"));
 				int c;
 				while( (c = timedRead()) > 0)
 					Serial.print((char)c);
@@ -224,7 +226,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 	} while(millis() - _startMillis < 2000);
 	
     // timed out, reset the buffer
-	INFO("TIMEOUT (%d)", _bufPos);
+	INFO2(F("TIMEOUT:"), _bufPos);
     _bufPos = 0;
 	_connId = 0;
 	*data = 0;
@@ -252,17 +254,16 @@ bool EspDrv::sendUdpData(uint8_t sock)
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
 	//INFO("> sendData (%d, %d): %s", sock, len, data);
-	INFO("> sendData (%d, %d)", sock, len);
+	INFO3(F("> sendData:"), sock, len);
 	
 	bool ret;
-	char cmd[100];
-	sprintf(cmd, "AT+CIPSEND=%d,%d", sock, len);
+	sprintf(cmdBuf, "AT+CIPSEND=%d,%d", sock, len);
 
-	Serial1.println(cmd);
+	Serial1.println(cmdBuf);
 
 	if(!Serial1.find(">"))
 	{
-		//INFO1("FAILED 1 !!!");
+		INFO1("FAILED 1 !!!");
 		return false;
 	}
 
@@ -272,7 +273,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	
 	if(!ret)
 	{
-		//INFO1("FAILED 2 !!!");
+		INFO1("FAILED 2 !!!");
 		return false;
 	}
 
@@ -293,10 +294,9 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	bool ret;
 
 	// connect to access point
-	char cmd[100];
-	sprintf(cmd, "AT+CWJAP=\"%s\",\"%s\"", ssid, passphrase);
+	sprintf(cmdBuf, "AT+CWJAP=\"%s\",\"%s\"", ssid, passphrase);
 
-	if (sendCmd(cmd, 20000)==TAG_OK);
+	if (sendCmd(cmdBuf, 20000)==TAG_OK);
 		return true;
 	
     return false;
@@ -314,7 +314,7 @@ int8_t EspDrv::disconnect()
 {
 	INFO1(F("> disconnect"));
 
-	int ret = sendCmd("AT+CWQAP");
+	int ret = sendCmd(F("AT+CWQAP"));
 	if(ret==TAG_OK)
 		return WL_DISCONNECTED;
 		
@@ -341,15 +341,13 @@ uint8_t EspDrv::getConnectionStatus()
 
 uint8_t* EspDrv::getMacAddress()
 {
-	char buf[20];
-	
 	memset(_mac, 0, WL_MAC_ADDR_LENGTH);
 	
-	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n", buf, sizeof(buf)))
+	if (sendCmd("AT+CIPAPMAC?", "AT+CIPAPMAC\r\r\n", "\r\n", cmdBuf, sizeof(cmdBuf)))
 	{
 		char* token;
 
-		token = strtok(buf, ":");
+		token = strtok(cmdBuf, ":");
 		_mac[0] = atoi(token);
 		token = strtok(NULL, ":");
 		_mac[1] = atoi(token);
@@ -368,16 +366,13 @@ uint8_t* EspDrv::getMacAddress()
 
 void EspDrv::getIpAddress(IPAddress& ip)
 {
-	INFO1("> getIpAddress");
+	INFO1(F("> getIpAddress"));
 	
-	char buf[20];
-
-	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n", buf, sizeof(buf)))  // Old firmware
-	//if (sendCmd("AT+CIFSR", "+CIFSR:STAIP,\"", "\"\r\n", buf))  // New firmware
+	if (sendCmd("AT+CIFSR", "AT+CIFSR\r\r\n", "\r\n", cmdBuf, sizeof(cmdBuf)))
 	{
 		char* token;
 		
-		token = strtok(buf, ".");
+		token = strtok(cmdBuf, ".");
 		_localIp[0] = atoi(token);
 		token = strtok(NULL, ".");
 		_localIp[1] = atoi(token);
@@ -394,7 +389,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 
 char* EspDrv::getCurrentSSID()
 {
-	INFO1("> getCurrentSSID");
+	INFO1(F("> getCurrentSSID"));
 
 	_ssid[0]=0;
 	sendCmd("AT+CWJAP?", "+CWJAP:\"", "\"\r\n", _ssid, sizeof(_ssid));
@@ -436,7 +431,7 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 	espEmptyBuf();
 
 	INFO1(F("----------------------------------------------"));
-	INFO(">> %s", cmd);
+	INFO2(F(">>"), cmd);
 
 	Serial1.println(cmd);
 	
@@ -490,12 +485,34 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 * Sends the AT command and returns the id of the TAG.
 * Return -1 if no tag is found.
 */
+int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout)
+{
+    espEmptyBuf();
+
+	INFO1(F("----------------------------------------------"));
+	INFO2(F(">>"), cmd);
+
+	Serial1.println(cmd);
+	
+	int i = readUntil(timeout);
+	
+	INFO1(F("----------------------------------------------"));
+	INFO1();
+	
+    return i;
+}
+
+
+/*
+* Sends the AT command and returns the id of the TAG.
+* Return -1 if no tag is found.
+*/
 int EspDrv::sendCmd(const char* cmd, int timeout)
 {
     espEmptyBuf();
 
 	INFO1(F("----------------------------------------------"));
-	INFO(">> %s", cmd);
+	INFO2(F(">>"), cmd);
 
 	Serial1.println(cmd);
 	
@@ -556,7 +573,6 @@ int EspDrv::readUntil(int timeout, const char* findStr)
 	ringBuf[ringBufPos] = 0;
 	//INFO("Return: %d > '%s'", ret, ringBuf);
 	
-	
     return ret;
 }
 
@@ -571,7 +587,7 @@ void EspDrv::espEmptyBuf(bool warn)
 		i++;
 	}
 	if (i>0 and warn==true)
-		INFO("Dirty characters in the serial buffer!!!! > %d", i);
+		INFO2(F("Dirty characters in the serial buffer!!!! >"), i);
 }
 
 

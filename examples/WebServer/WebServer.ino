@@ -73,15 +73,14 @@ void loop() {
           client.println();
           client.println("<!DOCTYPE HTML>");
           client.println("<html>");
-          // output the value of each analog input pin
-          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
-            int sensorReading = analogRead(analogChannel);
-            client.print("analog input ");
-            client.print(analogChannel);
-            client.print(" is ");
-            client.print(sensorReading);
-            client.println("<br />");
-          }
+          client.println("<h1>Hello World!</h1>");
+          client.print("Current time is ");
+          client.print(analogRead(millis()));
+          client.println("<br>");
+          client.print("Analog input A0 is ");
+          client.print(analogRead(0));
+          client.println("<br>");
+
           client.println("</html>");
           break;
         }

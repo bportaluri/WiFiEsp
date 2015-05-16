@@ -15,28 +15,37 @@
 
 // Maximum size of a SSID
 #define WL_SSID_MAX_LENGTH 32
+
 // Length of passphrase. Valid lengths are 8-63.
 #define WL_WPA_KEY_MAX_LENGTH 63
+
 // Length of key in bytes. Valid values are 5 and 13.
 #define WL_WEP_KEY_MAX_LENGTH 13
+
 // Size of a MAC-address or BSSID
 #define WL_MAC_ADDR_LENGTH 6
+
 // Size of a MAC-address or BSSID
 #define WL_IPV4_LENGTH 4
+
 // Maximum size of a SSID list
 #define WL_NETWORKS_LIST_MAXNUM	10
+
 // Maxmium number of socket
 #define	MAX_SOCK_NUM		4
+
 // Socket not available constant
 #define SOCK_NOT_AVAIL  255
+
 // Default state value for Wifi state field
 #define NA_STATE -1
+
 //Maximum number of attempts to establish wifi connection
-#define WL_MAX_ATTEMPT_CONNECTION	10
+#define WL_MAX_ATTEMPT_CONNECTION 10
 
-#define WL_FW_VER_LENGTH	20
+#define WL_FW_VER_LENGTH 20
 
-#define NO_SOCKET_AVAIL     255
+#define NO_SOCKET_AVAIL 255
 
 
 #define RINGBUFLEN 30
@@ -65,37 +74,37 @@ enum wl_auth_mode {
 
 typedef enum {
 	WL_NO_SHIELD = 255,
-        WL_IDLE_STATUS = 0,
-        WL_NO_SSID_AVAIL,
-        WL_SCAN_COMPLETED,
-        WL_CONNECTED,
-        WL_CONNECT_FAILED,
-        WL_CONNECTION_LOST,
-        WL_DISCONNECTED
+	WL_IDLE_STATUS = 0,
+	WL_NO_SSID_AVAIL,
+	WL_SCAN_COMPLETED,
+	WL_CONNECTED,
+	WL_CONNECT_FAILED,
+	WL_CONNECTION_LOST,
+	WL_DISCONNECTED
 } wl_status_t;
 
 /* Encryption modes */
 enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
-        ENC_TYPE_WEP  = 5,
-        ENC_TYPE_TKIP = 2,
-        ENC_TYPE_CCMP = 4,
-        /* ... except these two, 7 and 8 are reserved in 802.11-2007 */
-        ENC_TYPE_NONE = 7,
-        ENC_TYPE_AUTO = 8
+	ENC_TYPE_WEP  = 5,
+	ENC_TYPE_TKIP = 2,
+	ENC_TYPE_CCMP = 4,
+	/* ... except these two, 7 and 8 are reserved in 802.11-2007 */
+	ENC_TYPE_NONE = 7,
+	ENC_TYPE_AUTO = 8
 };
 
 enum wl_tcp_state {
-  CLOSED      = 0,
-  LISTEN      = 1,
-  SYN_SENT    = 2,
-  SYN_RCVD    = 3,
-  ESTABLISHED = 4,
-  FIN_WAIT_1  = 5,
-  FIN_WAIT_2  = 6,
-  CLOSE_WAIT  = 7,
-  CLOSING     = 8,
-  LAST_ACK    = 9,
-  TIME_WAIT   = 10
+	CLOSED      = 0,
+	LISTEN      = 1,
+	SYN_SENT    = 2,
+	SYN_RCVD    = 3,
+	ESTABLISHED = 4,
+	FIN_WAIT_1  = 5,
+	FIN_WAIT_2  = 6,
+	CLOSE_WAIT  = 7,
+	CLOSING     = 8,
+	LAST_ACK    = 9,
+	TIME_WAIT   = 10
 };
 
 
@@ -104,8 +113,6 @@ class EspDrv
 {
 
 public:
-
-	//EspDrv(Stream *espSerial, Stream *debugSerial, int r = -1);
 
 	// SERVER methods
 	
@@ -141,16 +148,12 @@ public:
 	// WIFI methods
 
 
-    /*
-     * Driver initialization
-     */
+
     static void wifiDriverInit(unsigned long baud);
 
     /*
      * Set the desired network which the connection manager should try to
      * connect to.
-     *
-     * The ssid of the desired network should be specified.
      *
      * param ssid: The ssid of the desired network.
      * return: WL_SUCCESS or WL_FAILURE
@@ -176,24 +179,24 @@ public:
     static int8_t wifiSetKey(char* ssid, uint8_t key_idx, const void *key);
 
     /* Set ip configuration disabling dhcp client
-        *
-        * param validParams: set the number of parameters that we want to change
-        * 					 i.e. validParams = 1 means that we'll change only ip address
-        * 					 	  validParams = 3 means that we'll change ip address, gateway and netmask
-        * param local_ip: 	ip configuration
-        * param gateway: 	gateway configuration
-        * param subnet: 	subnet mask configuration
-        */
+	*
+	* param validParams: set the number of parameters that we want to change
+	* 					 i.e. validParams = 1 means that we'll change only ip address
+	* 					 	  validParams = 3 means that we'll change ip address, gateway and netmask
+	* param local_ip: 	ip configuration
+	* param gateway: 	gateway configuration
+	* param subnet: 	subnet mask configuration
+	*/
     static void config(uint8_t validParams, uint32_t local_ip, uint32_t gateway, uint32_t subnet);
 
     /* Set DNS ip configuration
-           *
-           * param validParams: set the number of parameters that we want to change
-           * 					 i.e. validParams = 1 means that we'll change only dns_server1
-           * 					 	  validParams = 2 means that we'll change dns_server1 and dns_server2
-           * param dns_server1: DNS server1 configuration
-           * param dns_server2: DNS server2 configuration
-           */
+	*
+	* param validParams: set the number of parameters that we want to change
+	* 					 i.e. validParams = 1 means that we'll change only dns_server1
+	* 					 	  validParams = 2 means that we'll change dns_server1 and dns_server2
+	* param dns_server1: DNS server1 configuration
+	* param dns_server2: DNS server2 configuration
+	*/
     static void setDNS(uint8_t validParams, uint32_t dns_server1, uint32_t dns_server2);
 
     /*
@@ -204,7 +207,7 @@ public:
     static int8_t disconnect();
 
     /*
-     * Disconnect from the network
+     * 
      *
      * return: one value of wl_status_t enum
      */
@@ -330,9 +333,6 @@ private:
 	static SoftwareSerial Serial1;
 #endif
 
-	//static Stream *_espSerial;
-
-	
 	static long _bufPos;
 	static uint8_t _connId;
 	
@@ -352,10 +352,13 @@ private:
 	//uint8_t  _subnetMask[WL_IPV4_LENGTH];
 	//uint8_t  _gatewayIp[WL_IPV4_LENGTH];
 
+	static char cmdBuf[200];
+
 	static char ringBuf[RINGBUFLEN];
 	static unsigned int ringBufPos;
 
 
+	static int sendCmd(const __FlashStringHelper* cmd, int timeout=1000);
 	static int sendCmd(const char* cmd, int timeout=1000);
 	static bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
 	static int readUntil(int timeout, const char* findStr=NULL);

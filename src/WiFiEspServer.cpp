@@ -1,12 +1,8 @@
 
-#include <string.h>
-
 #include "utility/EspDrv.h"
-//#include "utility/debug.h"
 
-#include "WiFiEsp.h"
-#include "WiFiEspClient.h"
 #include "WiFiEspServer.h"
+
 
 
 WiFiEspServer::WiFiEspServer(uint16_t port)
@@ -16,21 +12,17 @@ WiFiEspServer::WiFiEspServer(uint16_t port)
 
 void WiFiEspServer::begin()
 {
-    //INFO1(F("WiFiEspServer::begin"));
-
 	EspDrv::startServer(_port);
 	_started = true;
 }
 
 WiFiEspClient WiFiEspServer::available(byte* status)
 {
-	// the original method seems to handle automatic server restart
+	// TODO the original method seems to handle automatic server restart
 	
 	int bytes = EspDrv::availData(0);
 	if (bytes>0)
 	{
-		//INFO("returning client %d", EspDrv::_connId);
-		
 		WiFiEspClient client(EspDrv::_connId);
 		return client;
 	}

@@ -1,4 +1,3 @@
-
 /*
  WiFiEsp example: WebClient
 
