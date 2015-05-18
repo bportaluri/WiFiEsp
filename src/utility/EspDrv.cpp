@@ -297,10 +297,7 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	sprintf(cmdBuf, "AT+CWJAP=\"%s\",\"%s\"", ssid, passphrase);
 
 	if (sendCmd(cmdBuf, 20000)==TAG_OK);
-	{
-		delay(1000);
 		return true;
-	}
 	
     return false;
 }
@@ -336,7 +333,7 @@ uint8_t EspDrv::getConnectionStatus()
 	int s = atoi(buf);
 	if(s==4)
 		return WL_DISCONNECTED;
-	else if(s==2 or s==3 or s==5)  // TODO why CIPSTATUS returns 5 if connected ?
+	else if(s==3 or s==5)         // TODO why CIPSTATUS returns 5 if connected ?
 		return WL_CONNECTED;
 	
 	return WL_IDLE_STATUS;
