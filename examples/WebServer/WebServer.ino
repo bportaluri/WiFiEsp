@@ -19,6 +19,7 @@
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
+int reqCount = 0;                // number of requests received
 
 WiFiEspServer server(80);
 
@@ -54,7 +55,7 @@ void loop() {
   // listen for incoming clients
   WiFiEspClient client = server.available();
   if (client) {
-    Serial.println("new client");
+    Serial.println("New client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (client.connected()) {
@@ -65,23 +66,25 @@ void loop() {
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
+          Serial.println("Sending response");
+          
           // send a standard http response header
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: text/html");
-          client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 20");  // refresh the page automatically every 20 sec
-          client.println();
-          client.println("<!DOCTYPE HTML>");
-          client.println("<html>");
-          client.println("<h1>Hello World!</h1>");
-          client.print("Current time is ");
-          client.print(analogRead(millis()));
-          client.println("<br>");
-          client.print("Analog input A0 is ");
+          client.print(
+            "HTTP/1.1 200 OK\r\n"          // use \r\n instead of println to speedup data send
+            "Content-Type: text/html\r\n"
+            "Connection: close\r\n"  // the connection will be closed after completion of the response
+            "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
+            "\r\n");
+          client.print("<!DOCTYPE HTML>\r\n");
+          client.print("<html>\r\n");
+          client.print("<h1>Hello World!</h1>\r\n");
+          client.print("Requests received: ");
+          client.print(++reqCount);
+          client.print("<br>\r\n");
+          client.print("Analog input A0: ");
           client.print(analogRead(0));
-          client.println("<br>");
-
-          client.println("</html>");
+          client.print("<br>\r\n");
+          client.print("</html>\r\n");
           break;
         }
         if (c == '\n') {
@@ -99,7 +102,7 @@ void loop() {
 
     // close the connection:
     client.stop();
-    Serial.println("client disonnected");
+    Serial.println("Client disconnected");
   }
 }
 

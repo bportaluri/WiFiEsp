@@ -69,7 +69,7 @@ SoftwareSerial EspDrv::Serial1(6, 7); // RX, TX
 
 void EspDrv::wifiDriverInit(unsigned long baud)
 {
-	INFO1(F("> wifiDriverInit"));
+	INFO2(F("> wifiDriverInit"), baud);
 	
 	Serial1.begin(baud);
 
@@ -219,7 +219,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 				int c;
 				while( (c = timedRead()) > 0)
 					Serial.print((char)c);
-				Serial.println("--");
+				Serial.println("<<<<<<<<<<<<<<<<<<<<<");
 			}
 			return true;
 		}

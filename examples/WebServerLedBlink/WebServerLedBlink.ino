@@ -60,7 +60,7 @@ void loop() {
   WiFiEspClient client = server.available();   // listen for incoming clients
 
   if (client) {                             // if you get a client,
-    Serial.println("new client");           // print a message out the serial port
+    Serial.println("New client");           // print a message out the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if there's bytes to read from the client,
@@ -78,8 +78,8 @@ void loop() {
             client.println();
 
             // the content of the HTTP response follows the header:
-            client.print("Click <a href=\"/H\">here</a> turn the LED on pin 13 on<br>");
-            client.print("Click <a href=\"/L\">here</a> turn the LED on pin 13 off<br>");
+            client.println("Click <a href=\"/H\">here</a> turn the LED on pin 13 on<br>");
+            client.println("Click <a href=\"/L\">here</a> turn the LED on pin 13 off<br>");
 
             // The HTTP response ends with another blank line:
             client.println();
