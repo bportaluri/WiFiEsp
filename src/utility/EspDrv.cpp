@@ -297,7 +297,9 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	sprintf(cmdBuf, "AT+CWJAP=\"%s\",\"%s\"", ssid, passphrase);
 
 	if (sendCmd(cmdBuf, 20000)==TAG_OK);
+	{
 		return true;
+	}
 	
     return false;
 }
@@ -309,7 +311,6 @@ int8_t EspDrv::wifiSetKey(char* ssid, uint8_t key_idx, const void *key)
 }
 
 
-                        
 int8_t EspDrv::disconnect()
 {
 	INFO1(F("> disconnect"));
@@ -321,6 +322,7 @@ int8_t EspDrv::disconnect()
 	return WL_IDLE_STATUS;
 }
 
+
 uint8_t EspDrv::getConnectionStatus()
 {
 	INFO1(F("> getConnectionStatus"));
@@ -329,15 +331,15 @@ uint8_t EspDrv::getConnectionStatus()
 	if(!sendCmd("AT+CIPSTATUS", "STATUS:", "\r\n", buf, sizeof(buf)))
 		return WL_NO_SHIELD;
 
-	// TODO: other statuses?
 	int s = atoi(buf);
 	if(s==4)
 		return WL_DISCONNECTED;
-	else if(s==3 or s==5)         // TODO why CIPSTATUS returns 5 if connected ?
+	else if(s==2 or s==3 or s==5)   // TODO why CIPSTATUS returns 5 if connected ?
 		return WL_CONNECTED;
 	
 	return WL_IDLE_STATUS;
 }
+
 
 uint8_t* EspDrv::getMacAddress()
 {
