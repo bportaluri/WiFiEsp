@@ -1,7 +1,8 @@
 
-#include "utility/EspDrv.h"
-
 #include "WiFiEspServer.h"
+
+#include "utility/EspDrv.h"
+#include "utility/debug.h"
 
 
 
@@ -12,6 +13,8 @@ WiFiEspServer::WiFiEspServer(uint16_t port)
 
 void WiFiEspServer::begin()
 {
+	LOGINFO(F("Starting server"));
+	
 	EspDrv::startServer(_port);
 	_started = true;
 }

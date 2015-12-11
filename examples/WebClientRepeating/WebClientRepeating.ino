@@ -1,10 +1,9 @@
 /*
- WiFiEsp example: WebClient
+ WiFiEsp example: WebClientRepeating
 
- This sketch connects to a website (http://www.google.com) using an ESP8266 module.
-
- This example is written for a network using WPA encryption.
- For WEP or WPA, change the Wifi.begin() call accordingly.
+ This sketch connects to a web server and makes an HTTP request
+ using an Arduino ESP8266 module.
+ It repeats the HTTP call each 10 seconds.
  
  Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
 */
@@ -21,7 +20,10 @@ char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
-char server[] = "www.google.com";
+char server[] = "arduino.cc";
+
+unsigned long lastConnectionTime = 0;         // last time you connected to the server, in milliseconds
+const unsigned long postingInterval = 10000L; // delay between updates, in milliseconds
 
 // Initialize the Ethernet client object
 WiFiEspClient client;
@@ -52,36 +54,49 @@ void setup() {
   Serial.println("You're connected to the network");
   
   printWifiStatus();
-
-  Serial.println();
-  Serial.println("Starting connection to server...");
-  // if you get a connection, report back via serial
-  if (client.connect(server, 80)) {
-    Serial.println("Connected to server");
-    // Make a HTTP request
-    client.println("GET /search?q=arduino HTTP/1.1");
-    client.println("Host: www.google.com");
-    client.println("Connection: close");
-    client.println();
-  }
 }
 
 void loop() {
-  // if there are incoming bytes available
-  // from the server, read them and print them
+  // if there's incoming data from the net connection send it out the serial port.
+  // this is for debugging purposes only
   while (client.available()) {
     char c = client.read();
     Serial.write(c);
   }
 
-  // if the server's disconnected, stop the client
-  if (!client.connected()) {
-    Serial.println();
-    Serial.println("Disconnecting from server...");
-    client.stop();
+  // if 10 seconds have passed since your last connection,
+  // then connect again and send data
+  if (millis() - lastConnectionTime > postingInterval) {
+    httpRequest();
+  }
+}
 
-    // do nothing forevermore
-    while (true);
+// this method makes a HTTP connection to the server
+void httpRequest() {
+  Serial.println();
+    
+   // close any connection before send a new request
+  // this will free the socket on the WiFi shield
+  client.stop();
+
+  // if there's a successful connection
+  if (client.connect(server, 80)) {
+    Serial.println("Connecting...");
+    
+    // send the HTTP PUT request
+    //client.println("GET /latest.txt HTTP/1.1");
+    client.println("GET /asciilogo.txt HTTP/1.1");
+    client.println("Host: arduino.cc");
+    client.println("User-Agent: ArduinoWiFiEsp/1.1");
+    client.println("Connection: close");
+    client.println();
+
+    // note the time that the connection was made
+    lastConnectionTime = millis();
+  }
+  else {
+    // if you couldn't make a connection
+    Serial.println("Connection failed");
   }
 }
 
@@ -102,6 +117,7 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
+
 
 
 

@@ -1,45 +1,29 @@
-
-#define _DEBUG_ 1
-
 #ifndef Debug_H
 #define Debug_H
 
 #include <stdio.h>
-#include <string.h>
 
-#define PRINT_FILE_LINE() do { 						\
-		Serial.print("[");Serial.print(__FILE__);		\
-		Serial.print("::");Serial.print(__LINE__);Serial.print("]");\
-}while (0);
+// Change _ESPLOGLEVEL_ to set tracing and logging verbosity
+// 0: DISABLED: no logging
+// 1: ERROR: errors
+// 2: WARN: errors and warnings 
+// 3: INFO: errors, warnings and informational (default)
+// 4: DEBUG: errors, warnings, informational and debug
 
-#ifdef _DEBUG_
-
-
-
-#define INFO1(x) do { Serial.println(x);    			\
-}while (0);
-
-#define INFO2(x,y) do { Serial.print(x); Serial.print(" "); Serial.println(y);    			\
-}while (0);
-
-#define INFO3(x,y,z) do { Serial.print(x); Serial.print(" "); Serial.print(y); Serial.print(" "); Serial.println(z);    			\
-}while (0);
+#define _ESPLOGLEVEL_ 3
 
 
-#else
-#define INFO1(x) do {} while(0);
-#define INFO2(x,y) do {} while(0);
-#define INFO3(x,y,z) do {} while(0);
-#define INFO(format, args...) do {} while(0);
-#endif
+#define LOGERROR(x)    if(_ESPLOGLEVEL_>0) { Serial.print("ERROR - "); Serial.println(x); }
+#define LOGERROR1(x,y) if(_ESPLOGLEVEL_>2) { Serial.print("ERROR - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGWARN(x)     if(_ESPLOGLEVEL_>1) { Serial.print("WARN  - "); Serial.println(x); }
+#define LOGWARN1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("WARN  - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGINFO(x)     if(_ESPLOGLEVEL_>2) { Serial.print("INFO  - "); Serial.println(x); }
+#define LOGINFO1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("INFO  - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
 
-#if 0
-#define WARN(args) do { PRINT_FILE_LINE()			\
-		Serial.print("-W-"); Serial.println(args);	\
-}while (0);
-#else
-#define WARN(args) do {} while (0);
-#endif
+#define LOGDEBUG(x)      if(_ESPLOGLEVEL_>3) { Serial.println(x); }
+#define LOGDEBUG0(x)     if(_ESPLOGLEVEL_>3) { Serial.print(x); }
+#define LOGDEBUG1(x,y)   if(_ESPLOGLEVEL_>3) { Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGDEBUG2(x,y,z) if(_ESPLOGLEVEL_>3) { Serial.print(x); Serial.print(" "); Serial.print(y); Serial.print(" "); Serial.println(z); }
 
 
 #endif

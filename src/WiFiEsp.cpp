@@ -1,7 +1,25 @@
+/*--------------------------------------------------------------------
+This file is part of the Arduino WiFiEsp library.
+
+The Arduino WiFiEsp library is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+The Arduino WiFiEsp library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The Arduino WiFiEsp library.  If not, see
+<http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------*/
 
 #include "WiFiEsp.h"
 
 #include "utility/EspDrv.h"
+#include "utility/debug.h"
 
 
 int16_t 	WiFiEspClass::_state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
@@ -16,7 +34,8 @@ WiFiEspClass::WiFiEspClass()
 
 void WiFiEspClass::init(unsigned long baud)
 {
-    EspDrv::wifiDriverInit(baud);
+    LOGINFO(F("Initializing ESP module"));
+	EspDrv::wifiDriverInit(baud);
 }
 
 
@@ -42,12 +61,8 @@ int WiFiEspClass::begin(char* ssid, const char *passphrase)
 {
     if (EspDrv::wifiConnect(ssid, passphrase))
 		return WL_CONNECTED;
-	//{
-	//	uint8_t status = EspDrv::getConnectionStatus();
-	//	return status;
-    //}
-	
-    return WL_CONNECT_FAILED;
+
+	return WL_CONNECT_FAILED;
 }
 
 
@@ -82,34 +97,40 @@ readResponse(15000, PostSoftReset);
 
 void WiFiEspClass::config(IPAddress local_ip)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::config(1, (uint32_t)local_ip, 0, 0);
 }
 
 void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::config(1, (uint32_t)local_ip, 0, 0);
 	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
 }
 
 void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::config(2, (uint32_t)local_ip, (uint32_t)gateway, 0);
 	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
 }
 
 void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::config(3, (uint32_t)local_ip, (uint32_t)gateway, (uint32_t)subnet);
 	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
 }
 
 void WiFiEspClass::setDNS(IPAddress dns_server1)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::setDNS(1, (uint32_t)dns_server1, 0);
 }
 
 void WiFiEspClass::setDNS(IPAddress dns_server1, IPAddress dns_server2)
 {
+	LOGERROR(F("Not implemented"));
 	//EspDrv::setDNS(2, (uint32_t)dns_server1, (uint32_t)dns_server2);
 }
 
@@ -120,6 +141,7 @@ int WiFiEspClass::disconnect()
 
 uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
 {
+	// TODO we don't need _mac
 	uint8_t* _mac = EspDrv::getMacAddress();
 	memcpy(mac, _mac, WL_MAC_ADDR_LENGTH);
     return mac;
@@ -154,39 +176,29 @@ char* WiFiEspClass::SSID()
 
 uint8_t* WiFiEspClass::BSSID(uint8_t* bssid)
 {
-	//uint8_t* _bssid = EspDrv::getCurrentBSSID();
-	//memcpy(bssid, _bssid, WL_MAC_ADDR_LENGTH);
+	// TODO we don't need _bssid
+	uint8_t* _bssid = EspDrv::getCurrentBSSID();
+	memcpy(bssid, _bssid, WL_MAC_ADDR_LENGTH);
     return bssid;
 }
 
 int32_t WiFiEspClass::RSSI()
 {
-    return 0;
-    //return EspDrv::getCurrentRSSI();
+    return EspDrv::getCurrentRSSI();
 }
 
 
 uint8_t WiFiEspClass::encryptionType()
 {
-    //return EspDrv::getCurrentEncryptionType();
+    LOGERROR(F("Not implemented"));
 	return 0;
 }
 
 
 int8_t WiFiEspClass::scanNetworks()
 {
-	uint8_t attempts = 10;
-	uint8_t numOfNetworks = 0;
-
-	if (EspDrv::startScanNetworks() == WL_FAILURE)
-		return WL_FAILURE;
- 	do
- 	{
- 		delay(2000);
- 		numOfNetworks = EspDrv::getScanNetworks();
- 	}
-	while (( numOfNetworks == 0)&&(--attempts>0));
-	return numOfNetworks;
+	LOGERROR(F("Not implemented"));
+	return 0;
 }
 
 char* WiFiEspClass::SSID(uint8_t networkItem)
@@ -214,6 +226,15 @@ int WiFiEspClass::hostByName(const char* aHostname, IPAddress& aResult)
 	return EspDrv::getHostByName(aHostname, aResult);
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+// Non standard methods
+////////////////////////////////////////////////////////////////////////////
+
+bool WiFiEspClass::ping(const char *host)
+{
+	return EspDrv::ping(host);
+}
 
 
 WiFiEspClass WiFi;

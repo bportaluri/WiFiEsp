@@ -15,6 +15,7 @@ WiFiEsp	KEYWORD3
 
 WiFiEspClient	KEYWORD1
 WiFiEspServer	KEYWORD1
+RingBuffer	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -43,9 +44,6 @@ RSSI	KEYWORD2
 encryptionType	KEYWORD2
 getResult	KEYWORD2
 getSocket	KEYWORD2
-WiFiClient	KEYWORD2
-WiFiServer	KEYWORD2
-WiFiUDP		KEYWORD2
 beginPacket	KEYWORD2
 endPacket	KEYWORD2
 parsePacket	KEYWORD2

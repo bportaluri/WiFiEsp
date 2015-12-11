@@ -1,13 +1,12 @@
 
-#include "utility/debug.h"
 #include <inttypes.h>
-
 
 #include "WiFiEsp.h"
 #include "WiFiEspClient.h"
 #include "WiFiEspServer.h"
 
 #include "utility/EspDrv.h"
+#include "utility/debug.h"
 
 
 WiFiEspClient::WiFiEspClient() : _sock(255)
@@ -21,7 +20,9 @@ WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
 }
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
-{	
+{
+	LOGINFO1(F("Connecting to"), host);
+	
 	_sock = getFirstSocket();
 
     if (_sock != NO_SOCKET_AVAIL)
@@ -55,8 +56,6 @@ size_t WiFiEspClient::write(uint8_t b)
 
 size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 {
-    //INFO("Entering WiFiEspClient::write (%d, %d)", _sock, size);
-
 	if (_sock >= MAX_SOCK_NUM)
 	{
 		setWriteError();
@@ -68,11 +67,12 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 		return 0;
 	}
 	
-	if (!EspDrv::sendData(_sock, buf, size))
+	bool r = EspDrv::sendData(_sock, buf, size);
+	if (!r)
 	{
 		setWriteError();
-		INFO1(F("Failed to write, disconnecting"));
-		delay(2000);
+		LOGDEBUG(F("Failed to write, disconnecting"));
+		delay(4000);
 		stop();
 		return 0;
 	}
@@ -141,10 +141,10 @@ void WiFiEspClient::flush()
 
 void WiFiEspClient::stop()
 {
-	//INFO1("Entering WiFiEspClient::stop");
-	
 	if (_sock == 255)
 		return;
+
+	LOGINFO1(F("Disconnecting "), _sock);
 
 	EspDrv::stopClient(_sock);
 	
@@ -159,9 +159,15 @@ uint8_t WiFiEspClient::connected()
 		return 0;
 	}
 	
+	return 1;
+/*
 	uint8_t s = status();
 	
-	return (s != CLOSED);
+    return !(s == LISTEN || s == CLOSED || s == FIN_WAIT_1 ||
+    		s == FIN_WAIT_2 || s == TIME_WAIT ||
+    		s == SYN_SENT || s== SYN_RCVD ||
+    		(s == CLOSE_WAIT));
+*/
 }
 
 
@@ -177,7 +183,14 @@ uint8_t WiFiEspClient::status()
 		return ESTABLISHED;
 	}
 	
-	return LISTEN;
+	if (EspDrv::getClientState(_sock))
+	{
+		return ESTABLISHED;
+	}
+	
+	_sock = 255;
+	
+	return CLOSED;
 }
 
 WiFiEspClient::operator bool()

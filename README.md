@@ -4,15 +4,15 @@ With an ESP8266 board, WiFiEsp library allows an Arduino board to connect to the
 It can serve as either a server accepting incoming connections or a client making outgoing ones.
 The WiFiEsp library is very similar to the Arduino [WiFi](http://www.arduino.cc/en/Reference/WiFi) and [Ethernet](http://www.arduino.cc/en/Reference/Ethernet) libraries, and many of the function calls are the same. 
 
-It is still an alpha version but works fine already.
+Supports ESP SDK version 1.1.1 and above (AT version 0.25 and above).
 
 
 ##Features
 
 - APIs compatible with standard Arduino WiFi library.
-- Use AT commands of standard ESP firmware.
+- Use AT commands of standard ESP firmware (no need to flash a custom firmware).
 - Support hardware and software serial ports.
-- Debugging features.
+- Configurable tracing level.
 
 
 ##ToDo
@@ -20,7 +20,6 @@ It is still an alpha version but works fine already.
 - Clean the source code
 - Add specific methods for ESP
 - Add support for AP mode
-- Align to the new ESP firmware
 - Implement UDP
 - Test all public methods
 - Publish documentation and samples
@@ -31,16 +30,16 @@ It is still an alpha version but works fine already.
 ###WiFiEsp class
 
 - begin() - Not all authentication types
-- disconnect() - Yes
+- disconnect() - YES
 - config()
-- setDNS() - Not supported by AT commands
-- SSID() - NO
-- BSSID()
-- RSSI()
-- encryptionType()
-- scanNetworks()
+- setDNS() - NO (no AT command available)
+- SSID() - YES
+- BSSID() - YES
+- RSSI() - YES
+- encryptionType() - NO (no AT command available)
+- scanNetworks() - NO
 - getSocket()
-- macAddress() - TODO
+- macAddress() - YES
 
 ###WiFiEspServer class
 
@@ -59,14 +58,14 @@ The Server class creates servers which can send data to and receive data from co
 The client class creates clients that can connect to servers and send and receive data.
 
 - WiFiClient() - YES
-- connected()
+- connected() - YES
 - connect() - YES
 - write() - YES
 - print() - YES
-- println()
+- println() - YES
 - available() - YES
 - read() - YES
-- flush()
+- flush() - YES
 - stop() - YES
 
 

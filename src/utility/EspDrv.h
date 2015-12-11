@@ -43,7 +43,7 @@
 //Maximum number of attempts to establish wifi connection
 #define WL_MAX_ATTEMPT_CONNECTION 10
 
-#define WL_FW_VER_LENGTH 20
+#define WL_FW_VER_LENGTH 10
 
 #define NO_SOCKET_AVAIL 255
 
@@ -325,6 +325,17 @@ public:
      * Get the firmware version
      */
     static char* getFwVersion();
+	
+	
+	////////////////////////////////////////////////////////////////////////////
+	// Non standard methods
+	////////////////////////////////////////////////////////////////////////////
+
+	/*
+	* Ping a host.
+	*/
+	static bool ping(const char *host);
+	
 
 private:
 
@@ -346,7 +357,7 @@ private:
 
 	// settings of current selected network
 	static char 	_ssid[WL_SSID_MAX_LENGTH];
-	//uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
+	static uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
 	static uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
 	static uint8_t  _localIp[WL_IPV4_LENGTH];
 	//uint8_t  _subnetMask[WL_IPV4_LENGTH];
@@ -360,8 +371,10 @@ private:
 
 	static int sendCmd(const __FlashStringHelper* cmd, int timeout=1000);
 	static int sendCmd(const char* cmd, int timeout=1000);
+	static bool sendCmd(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
 	static bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
-	static int readUntil(int timeout, const char* findStr=NULL);
+	static int readUntil(int timeout, const char* tag=NULL, bool findTags=true);
+	
 
 	static void espEmptyBuf(bool warn=true);
 	
