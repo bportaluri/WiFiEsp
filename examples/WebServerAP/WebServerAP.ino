@@ -1,11 +1,11 @@
 /*
- WiFiEsp example: WebServer
+ WiFiEsp example: WebServerAP
 
  A simple web server that shows the value of the analog input 
  pins via a web page using an ESP8266 module.
- This sketch will print the IP address of your ESP8266 module (once connected)
- to the Serial monitor. From there, you can open that address in a web browser
- to display the web page.
+ This sketch will start an access point and print the IP address of your
+ ESP8266 module to the Serial monitor. From there, you can open
+ that address in a web browser to display the web page.
  The web page will be automatically refreshed each 20 seconds.
 
  Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
@@ -19,8 +19,7 @@
 #endif
 
 
-
-char ssid[] = "Twim";            // your network SSID (name)
+char ssid[] = "TwimEsp";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 int reqCount = 0;                // number of requests received
@@ -42,19 +41,20 @@ void setup() {
     while (true);
   }
 
-  // attempt to connect to WiFi network
-  while ( status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to WPA SSID: ");
+  // start access point
+  //while ( status != WL_CONNECTED) {
+    Serial.print("Attempting to start AP ");
     Serial.println(ssid);
     // Connect to WPA/WPA2 network
-    status = WiFi.begin(ssid, pass);
-  }
+    status = WiFi.beginAP(ssid, pass, 10, 3);
+  //}
 
-  Serial.println("You're connected to the network");
+  Serial.println("Access point started");
   printWifiStatus();
   
   // start the web server on port 80
   server.begin();
+  Serial.println("Server started");
 }
 
 
@@ -116,24 +116,16 @@ void loop() {
 
 
 void printWifiStatus() {
-  // print the SSID of the network you're attached to
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
   // print your WiFi shield's IP address
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
 
-  // print the received signal strength
-  long rssi = WiFi.RSSI();
-  Serial.print("Signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
-  
   // print where to go in the browser
   Serial.println();
-  Serial.print("To see this page in action, open a browser to http://");
+  Serial.print("To see this page in action, connect to ");
+  Serial.print(ssid);
+  Serial.print(" and open a browser to http://");
   Serial.println(ip);
   Serial.println();
 }

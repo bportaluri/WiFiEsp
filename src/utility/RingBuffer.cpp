@@ -21,6 +21,11 @@ void RingBuffer::push(char c)
   ringBufPos++;
 }
 
+int RingBuffer::getPos()
+{
+  return ringBufPos;
+}
+
 
 bool RingBuffer::endsWith(const char* str)
 {
@@ -38,4 +43,16 @@ bool RingBuffer::endsWith(const char* str)
   }
   
   return true;
+}
+
+
+char * RingBuffer::getStr(char * destination, unsigned int num)
+{
+  // copy buffer to destination string
+  char * ret = strncpy(destination, ringBuf, num);
+  
+  // terminate output string
+  destination[num]=0;
+  
+  return ret;
 }

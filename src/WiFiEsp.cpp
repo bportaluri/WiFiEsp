@@ -25,6 +25,7 @@ along with The Arduino WiFiEsp library.  If not, see
 int16_t 	WiFiEspClass::_state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
 //uint16_t 	WiFiEspClass::_server_port[MAX_SOCK_NUM] = { 0, 0, 0, 0 };
 
+uint8_t WiFiEspClass::espMode=0;
 
 
 WiFiEspClass::WiFiEspClass()
@@ -46,52 +47,24 @@ char* WiFiEspClass::firmwareVersion()
 }
 
 
-
-int WiFiEspClass::begin(char* ssid)
-{
-	return WL_CONNECT_FAILED;
-}
-
-int WiFiEspClass::begin(char* ssid, uint8_t key_idx, const char *key)
-{
-	return WL_CONNECT_FAILED;
-}
-
 int WiFiEspClass::begin(char* ssid, const char *passphrase)
 {
-    if (EspDrv::wifiConnect(ssid, passphrase))
+    espMode = 1;
+	if (EspDrv::wifiConnect(ssid, passphrase))
 		return WL_CONNECTED;
 
 	return WL_CONNECT_FAILED;
 }
 
 
-
-/*
-
-void ESP8266::hardReset(void)
+int WiFiEspClass::beginAP(char* ssid, const char* pwd, char channel, uint8_t enc)
 {
-connected = false;
-strcpy(ip, "");
-digitalWrite(ESP8266_RST, LOW);
-delay(ESP8266_HARD_RESET_DURACTION);
-digitalWrite(ESP8266_RST, HIGH);
-delay(ESP8266_HARD_RESET_DURACTION);
+	espMode = 2;
+    if (EspDrv::wifiStartAP(ssid, pwd, channel, enc))
+		return WL_CONNECTED;
+
+	return WL_CONNECT_FAILED;
 }
-void ESP8266::softReset(void)
-{
-connected = false;
-strcpy(ip, "");
-state = STATE_RESETING;
-_wifiSerial.println(F("AT+RST"));
-setResponseTrueKeywords(KEYWORD_READY);
-setResponseFalseKeywords();
-readResponse(15000, PostSoftReset);
-}
-
-*/
-
-
 
 
 
@@ -101,38 +74,6 @@ void WiFiEspClass::config(IPAddress local_ip)
 	//EspDrv::config(1, (uint32_t)local_ip, 0, 0);
 }
 
-void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server)
-{
-	LOGERROR(F("Not implemented"));
-	//EspDrv::config(1, (uint32_t)local_ip, 0, 0);
-	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
-}
-
-void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway)
-{
-	LOGERROR(F("Not implemented"));
-	//EspDrv::config(2, (uint32_t)local_ip, (uint32_t)gateway, 0);
-	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
-}
-
-void WiFiEspClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet)
-{
-	LOGERROR(F("Not implemented"));
-	//EspDrv::config(3, (uint32_t)local_ip, (uint32_t)gateway, (uint32_t)subnet);
-	//EspDrv::setDNS(1, (uint32_t)dns_server, 0);
-}
-
-void WiFiEspClass::setDNS(IPAddress dns_server1)
-{
-	LOGERROR(F("Not implemented"));
-	//EspDrv::setDNS(1, (uint32_t)dns_server1, 0);
-}
-
-void WiFiEspClass::setDNS(IPAddress dns_server1, IPAddress dns_server2)
-{
-	LOGERROR(F("Not implemented"));
-	//EspDrv::setDNS(2, (uint32_t)dns_server1, (uint32_t)dns_server2);
-}
 
 int WiFiEspClass::disconnect()
 {
@@ -141,7 +82,7 @@ int WiFiEspClass::disconnect()
 
 uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
 {
-	// TODO we don't need _mac
+	// TODO we don't need _mac variable
 	uint8_t* _mac = EspDrv::getMacAddress();
 	memcpy(mac, _mac, WL_MAC_ADDR_LENGTH);
     return mac;
@@ -150,23 +91,14 @@ uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
 IPAddress WiFiEspClass::localIP()
 {
 	IPAddress ret;
-	EspDrv::getIpAddress(ret);
+	if(espMode==1)
+		EspDrv::getIpAddress(ret);
+	else
+		EspDrv::getIpAddressAP(ret);
 	return ret;
 }
 
-IPAddress WiFiEspClass::subnetMask()
-{
-	IPAddress ret;
-	EspDrv::getSubnetMask(ret);
-	return ret;
-}
 
-IPAddress WiFiEspClass::gatewayIP()
-{
-	IPAddress ret;
-	EspDrv::getGatewayIP(ret);
-	return ret;
-}
 
 char* WiFiEspClass::SSID()
 {
@@ -188,48 +120,36 @@ int32_t WiFiEspClass::RSSI()
 }
 
 
-uint8_t WiFiEspClass::encryptionType()
-{
-    LOGERROR(F("Not implemented"));
-	return 0;
-}
-
-
-int8_t WiFiEspClass::scanNetworks()
-{
-	LOGERROR(F("Not implemented"));
-	return 0;
-}
-
-char* WiFiEspClass::SSID(uint8_t networkItem)
-{
-	return EspDrv::getSSIDNetoworks(networkItem);
-}
-
-int32_t WiFiEspClass::RSSI(uint8_t networkItem)
-{
-	return EspDrv::getRSSINetoworks(networkItem);
-}
-
-uint8_t WiFiEspClass::encryptionType(uint8_t networkItem)
-{
-    return EspDrv::getEncTypeNetowrks(networkItem);
-}
 
 uint8_t WiFiEspClass::status()
 {
 	return EspDrv::getConnectionStatus();
 }
 
-int WiFiEspClass::hostByName(const char* aHostname, IPAddress& aResult)
-{
-	return EspDrv::getHostByName(aHostname, aResult);
-}
 
 
 ////////////////////////////////////////////////////////////////////////////
 // Non standard methods
 ////////////////////////////////////////////////////////////////////////////
+
+void WiFiEspClass::reset(void)
+{
+	EspDrv::reset();
+}
+
+
+/*
+void ESP8266::hardReset(void)
+{
+connected = false;
+strcpy(ip, "");
+digitalWrite(ESP8266_RST, LOW);
+delay(ESP8266_HARD_RESET_DURACTION);
+digitalWrite(ESP8266_RST, HIGH);
+delay(ESP8266_HARD_RESET_DURACTION);
+}
+*/
+
 
 bool WiFiEspClass::ping(const char *host)
 {

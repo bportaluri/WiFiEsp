@@ -40,34 +40,23 @@ public:
 	
 
 	/**
-	* Initialize the ESP serial interface
+	* Initialize the ESP serial interface.
+	* The default baud rate is 115200.
 	*/
 	static void init(unsigned long baud=115200);
 
+	
 	/**
 	* Get firmware version
 	*/
 	static char* firmwareVersion();
 
 
-	/**
-	* Start Wifi connection for open networks
-	*
-	* param ssid: Pointer to the SSID string.
-	*/
-	int begin(char* ssid);
+	// NOT IMPLEMENTED
+	//int begin(char* ssid);
 
-
-	/**
-	* Start Wifi connection with WEP encryption.
-	* Configure a key into the device. The key type (WEP-40, WEP-104)
-	* is determined by the size of the key (5 bytes for WEP-40, 13 bytes for WEP-104).
-	*
-	* param ssid: Pointer to the SSID string.
-	* param key_idx: The key index to set. Valid values are 0-3.
-	* param key: Key input buffer.
-	*/
-	int begin(char* ssid, uint8_t key_idx, const char* key);
+	// NOT IMPLEMENTED
+	//int begin(char* ssid, uint8_t key_idx, const char* key);
 
 
 	/**
@@ -78,7 +67,7 @@ public:
 	* param passphrase: Passphrase. Valid characters in a passphrase
 	*		  must be between ASCII 32-126 (decimal).
 	*/
-	int begin(char* ssid, const char*passphrase);
+	int begin(char* ssid, const char* passphrase);
 
 
 	/**
@@ -89,47 +78,20 @@ public:
 	void config(IPAddress local_ip);
 
 
-	/**
-	* Change Ip configuration settings disabling the DHCP client
-	*
-	* param local_ip:	Static ip configuration
-	* param dns_server:		IP configuration for DNS server 1
-	*/
-	void config(IPAddress local_ip, IPAddress dns_server);
+	// NOT IMPLEMENTED
+	//void config(IPAddress local_ip, IPAddress dns_server);
 
+	// NOT IMPLEMENTED
+	//void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
 
-	/**
-	* Change Ip configuration settings disabling the DHCP client
-	*
-	* param local_ip:	Static ip configuration
-	* param dns_server:		IP configuration for DNS server 1
-	* param gateway :	Static gateway configuration
-	*/
-	void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
+	// NOT IMPLEMENTED
+	//void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
 
+	// NOT IMPLEMENTED
+	//void setDNS(IPAddress dns_server1);
 
-	/** Change Ip configuration settings disabling the DHCP client
-	*
-	* param local_ip:	Static ip configuration
-	* param dns_server:		IP configuration for DNS server 1
-	* param gateway:	Static gateway configuration
-	* param subnet:		Static Subnet mask
-	*/
-	void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
-
-	/** Change DNS Ip configuration
-	*
-	* param dns_server1: ip configuration for DNS server 1
-	*/
-	void setDNS(IPAddress dns_server1);
-
-	/** Change DNS Ip configuration
-	*
-	* param dns_server1: ip configuration for DNS server 1
-	* param dns_server2: ip configuration for DNS server 2
-	*
-	*/
-	void setDNS(IPAddress dns_server1, IPAddress dns_server2);
+	// NOT IMPLEMENTED
+	//void setDNS(IPAddress dns_server1, IPAddress dns_server2);
 
 	/**
 	* Disconnect from the network
@@ -151,6 +113,7 @@ public:
 	* return: Ip address value
 	*/
 	IPAddress localIP();
+
 
 	/**
 	* Get the interface subnet mask address.
@@ -181,6 +144,7 @@ public:
 	*/
 	uint8_t* BSSID(uint8_t* bssid);
 
+
 	/**
 	* Return the current RSSI /Received Signal Strength in dBm)
 	* associated with the network
@@ -189,47 +153,7 @@ public:
 	*/
 	int32_t RSSI();
 
-	/**
-	* Return the Encryption Type associated with the network
-	*
-	* return: one value of wl_enc_type enum
-	*/
-	uint8_t	encryptionType();
-
-	/**
-	* Start scan WiFi networks available
-	*
-	* return: Number of discovered networks
-	*/
-	int8_t scanNetworks();
-
-	/**
-	* Return the SSID discovered during the network scan.
-	*
-	* param networkItem: specify from which network item want to get the information
-	*
-	* return: ssid string of the specified item on the networks scanned list
-	*/
-	char*	SSID(uint8_t networkItem);
-
-	/**
-	* Return the encryption type of the networks discovered during the scanNetworks
-	*
-	* param networkItem: specify from which network item want to get the information
-	*
-	* return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
-	*/
-	uint8_t	encryptionType(uint8_t networkItem);
-
-	/**
-	* Return the RSSI of the networks discovered during the scanNetworks
-	*
-	* param networkItem: specify from which network item want to get the information
-	*
-	* return: signed value of RSSI of the specified item on the networks scanned list
-	*/
-	int32_t RSSI(uint8_t networkItem);
-
+	
 	/**
 	* Return Connection status.
 	*
@@ -237,20 +161,50 @@ public:
 	*/
 	uint8_t status();
 
-	/**
-	* Resolve the given hostname to an IP address.
-	* param aHostname: Name to be resolved
-	* param aResult: IPAddress structure to store the returned IP address
-	* result: 1 if aIPAddrString was successfully converted to an IP address,
-	*         else error code
-	*/
-	int hostByName(const char* aHostname, IPAddress& aResult);
 	
+
+	// NOT IMPLEMENTED
+	//uint8_t encryptionType();
+
+	// NOT IMPLEMENTED
+	//int8_t scanNetworks();
+
+	// NOT IMPLEMENTED
+	//char*	SSID(uint8_t networkItem);
+
+	// NOT IMPLEMENTED
+	//uint8_t encryptionType(uint8_t networkItem);
+
+	// NOT IMPLEMENTED
+	//int32_t RSSI(uint8_t networkItem);
+
+
+	// NOT IMPLEMENTED
+	//int hostByName(const char* aHostname, IPAddress& aResult);
+
+
 	
 	////////////////////////////////////////////////////////////////////////////
 	// Non standard methods
 	////////////////////////////////////////////////////////////////////////////
 
+	/**
+	* Start the ESP access point.
+	*
+	* param ssid: Pointer to the SSID string.
+	* param pwd: Passphrase. Valid characters in a passphrase
+	*		  must be between ASCII 32-126 (decimal).
+	* param enc: encryption type (enum wl_enc_type)
+	*/
+	int beginAP(char* ssid, const char* pwd, char channel, uint8_t enc);
+
+	
+	
+	/**
+	* Restart the ESP module.
+	*/
+	void reset();
+	
 	/**
 	* Ping a host.
 	*/
@@ -261,7 +215,7 @@ public:
 	friend class WiFiEspServer;
 
 private:
-
+	static uint8_t espMode;
 };
 
 extern WiFiEspClass WiFi;
