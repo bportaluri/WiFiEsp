@@ -50,14 +50,13 @@ void setup() {
     status = WiFi.begin(ssid, pass);
   }
 
-  // you're connected now, so print out the data
   Serial.println("You're connected to the network");
   
   printWifiStatus();
 }
 
 void loop() {
-  // if there's incoming data from the net connection send it out the serial port.
+  // if there's incoming data from the net connection send it out the serial port
   // this is for debugging purposes only
   while (client.available()) {
     char c = client.read();
@@ -75,7 +74,7 @@ void loop() {
 void httpRequest() {
   Serial.println();
     
-   // close any connection before send a new request
+  // close any connection before send a new request
   // this will free the socket on the WiFi shield
   client.stop();
 
@@ -84,7 +83,6 @@ void httpRequest() {
     Serial.println("Connecting...");
     
     // send the HTTP PUT request
-    //client.println("GET /latest.txt HTTP/1.1");
     client.println("GET /asciilogo.txt HTTP/1.1");
     client.println("Host: arduino.cc");
     client.println("User-Agent: ArduinoWiFiEsp/1.1");
@@ -117,8 +115,4 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-
-
-
 

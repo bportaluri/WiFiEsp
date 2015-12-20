@@ -1,7 +1,10 @@
-1.1 (2015-xx-xx)
+1.1 (2015-12-20)
+   * Fix for receiving large data packets
    * Access point mode support
    * Ring buffer class is now used in EspDrv.cpp
    * Removed not implemented methods
+   * Prints firmware version if not recognized
+   * Multiple exclamation marks fixed for Arduino Mega
    * Cleaned up comments
 
 1.0 (2015-12-11)
