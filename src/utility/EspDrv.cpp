@@ -90,7 +90,7 @@ void EspDrv::reset()
 	if (fwVersion[0] != '1' or
 		fwVersion[1] != '.')
 	{
-		LOGWARN(F("Warning: This firmware has not been tested!!!!"));
+		LOGWARN(F("Warning: This firmware has not been tested!"));
 		delay(5000);
 	}
 
@@ -782,7 +782,7 @@ void EspDrv::espEmptyBuf(bool warn)
 	if (i>0 and warn==true)
     {
 		LOGDEBUG(F(""));
-		LOGDEBUG1(F("Dirty characters in the serial buffer!!!! >"), i);
+		LOGDEBUG1(F("Dirty characters in the serial buffer! >"), i);
 	}
 }
 
