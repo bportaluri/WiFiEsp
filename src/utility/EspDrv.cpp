@@ -484,22 +484,11 @@ uint16_t EspDrv::availData(uint8_t connId)
 			// format is : +IPD,<id>,<len>:<data>
 			
 			_connId = Serial1.parseInt();
-			LOGDEBUG1(F("New incoming connection - connId:"), _connId);
-			
 			Serial1.read();  // read the ',' character
-			
-			// ESP sends 21 more characters to acknowledge send request: \r\nOK\r\n\r\nOK\r\nUnlink\r\n
-
-			//Serial.print((char)Serial1.read());
-			//Serial.print((char)Serial1.read());
-			//Serial.print((char)Serial1.read());
-			//Serial.println((char)Serial1.read());
-			//_bufPos = 10;
-			
 			_bufPos = Serial1.parseInt();
-			LOGDEBUG1(F("Bytes:"), _bufPos);
-			
 			Serial1.read();  // read the ':' character
+			
+			LOGDEBUG2(F("Data packet"), _connId, _bufPos);
 			
 			if(_connId==connId || connId==0)
 				return _bufPos;
@@ -525,7 +514,8 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 			 *data = (char)Serial1.read();
 			_bufPos--;
 			//Serial.print((char)*data);
-			
+
+/*
 			// empty buffer if finished receiving data
 			// based on the request the ESP is returning "\r\nOK\r\n" or "\r\nOK\r\n\r\nOK\r\nUnlink\r\n"
 			if (_bufPos==0)
@@ -537,6 +527,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 					LOGDEBUG0((char)c);
 				LOGDEBUG("<<<<<<<<<<<<<<<<<<<<<");
 			}
+*/
 			return true;
 		}
 	} while(millis() - _startMillis < 2000);
