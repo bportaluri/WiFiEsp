@@ -90,7 +90,7 @@ void EspDrv::reset()
 	if (fwVersion[0] != '1' or
 		fwVersion[1] != '.')
 	{
-		LOGWARN(F("Warning: This firmware has not been tested!"));
+		LOGWARN1(F("Warning: This firmware has not been tested!"), fwVersion);
 		delay(5000);
 	}
 
