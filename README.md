@@ -14,18 +14,15 @@ Supports ESP SDK version 1.1.1 and above (AT version 0.25 and above).
 - Support hardware and software serial ports.
 - Configurable tracing level.
 
+##Wiring
 
-##ToDo
-
-- Clean the source code
-- Add specific methods for ESP
-- Add support for AP mode
-- Implement UDP
-- Test all public methods
-- Publish documentation and samples
+The WiFiEsp library has been designed to work with the [ESP WiFi shield] (http://www.instructables.com/id/Cheap-Arduino-WiFi-Shield-With-ESP8266/).
+It is a cheap version of the Arduino WiFi shield that uses an ESP-01 module to provide networking capabilities to Arduino boards.
 
 
 ##Supported APIs
+
+Most of the standard Arduino WiFi library methods are available. Refer to the [WiFi library page](http://www.arduino.cc/en/Reference/WiFi) for more details.
 
 ###WiFiEsp class
 
@@ -41,11 +38,12 @@ Supports ESP SDK version 1.1.1 and above (AT version 0.25 and above).
 - getSocket()
 - macAddress() - YES
 
+
 ###WiFiEspServer class
 
-The Server class creates servers which can send data to and receive data from connected clients (programs running on other computers or devices).
+The WiFiEspServer class creates servers which can send data to and receive data from connected clients (programs running on other computers or devices).
 
-- WiFiServer() - YES
+- WiFiEspServer() - YES
 - begin() - YES
 - available() - YES
 - write() - YES
@@ -55,9 +53,9 @@ The Server class creates servers which can send data to and receive data from co
 
 ###Client class
 
-The client class creates clients that can connect to servers and send and receive data.
+The WiFiEspClient class creates clients that can connect to servers and send and receive data.
 
-- WiFiClient() - YES
+- WiFiEspClient() - YES
 - connected() - YES
 - connect() - YES
 - write() - YES
