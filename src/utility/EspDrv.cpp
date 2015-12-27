@@ -136,17 +136,17 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 	// Escape character syntax is needed if "SSID" or "password" contains 
 	// any special characters (',', '"' and '/')
 
-	// set AP mode
-	if (sendCmd(F("AT+CWMODE=2"))!=TAG_OK)
+	// set AP mode, use CUR mode to avoid starting the AP at reboot
+	if (sendCmd(F("AT+CWMODE_CUR=2"))!=TAG_OK)
 	{
 		LOGWARN1(F("Failed to set AP mode"), ssid);
 		return false;
 	}
 	
-	// connect to access point
-	sprintf(cmdBuf, "AT+CWSAP=\"%s\",\"%s\",%d,%d", ssid, pwd, channel, enc);
+	// start access point
+	sprintf(cmdBuf, "AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d", ssid, pwd, channel, enc);
 
-	if (sendCmd(cmdBuf, 20000)==TAG_OK)
+	if (sendCmd(cmdBuf, 10000)==TAG_OK)
 	{
 		LOGINFO1(F("Access point started"), ssid);
 		return true;
