@@ -13,12 +13,12 @@
 #define _ESPLOGLEVEL_ 3
 
 
-#define LOGERROR(x)    if(_ESPLOGLEVEL_>0) { Serial.print("ERROR - "); Serial.println(x); }
-#define LOGERROR1(x,y) if(_ESPLOGLEVEL_>2) { Serial.print("ERROR - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
-#define LOGWARN(x)     if(_ESPLOGLEVEL_>1) { Serial.print("WARN  - "); Serial.println(x); }
-#define LOGWARN1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("WARN  - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
-#define LOGINFO(x)     if(_ESPLOGLEVEL_>2) { Serial.print("INFO  - "); Serial.println(x); }
-#define LOGINFO1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("INFO  - "); Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGERROR(x)    if(_ESPLOGLEVEL_>0) { Serial.print("[WiFiEsp] "); Serial.println(x); }
+#define LOGERROR1(x,y) if(_ESPLOGLEVEL_>2) { Serial.print("[WiFiEsp] "); Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGWARN(x)     if(_ESPLOGLEVEL_>1) { Serial.print("[WiFiEsp] "); Serial.println(x); }
+#define LOGWARN1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("[WiFiEsp] "); Serial.print(x); Serial.print(" "); Serial.println(y); }
+#define LOGINFO(x)     if(_ESPLOGLEVEL_>2) { Serial.print("[WiFiEsp] "); Serial.println(x); }
+#define LOGINFO1(x,y)  if(_ESPLOGLEVEL_>2) { Serial.print("[WiFiEsp] "); Serial.print(x); Serial.print(" "); Serial.println(y); }
 
 #define LOGDEBUG(x)      if(_ESPLOGLEVEL_>3) { Serial.println(x); }
 #define LOGDEBUG0(x)     if(_ESPLOGLEVEL_>3) { Serial.print(x); }
