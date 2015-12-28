@@ -8,7 +8,7 @@
  that address in a web browser to display the web page.
  The web page will be automatically refreshed each 20 seconds.
 
- Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+ For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
 */
 
 #include "WiFiEsp.h"
@@ -17,7 +17,6 @@
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
 #endif
-
 
 char ssid[] = "TwimEsp";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
@@ -30,9 +29,10 @@ WiFiEspServer server(80);
 void setup() {
   // initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial); // wait for serial port to connect. Needed for Leonardo only
+  while (!Serial);
 
-  WiFi.init();  // initialize ESP8266 module
+  // initialize ESP8266 module setting the baud rate to 9600
+  WiFi.init(9600);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -42,12 +42,10 @@ void setup() {
   }
 
   // start access point
-  //while ( status != WL_CONNECTED) {
-    Serial.print("Attempting to start AP ");
-    Serial.println(ssid);
-    // Connect to WPA/WPA2 network
-    status = WiFi.beginAP(ssid, pass, 10, 3);
-  //}
+  Serial.print("Attempting to start AP ");
+  Serial.println(ssid);
+  // Connect to WPA/WPA2 network
+  status = WiFi.beginAP(ssid, pass, 10, 3);
 
   Serial.println("Access point started");
   printWifiStatus();
@@ -129,4 +127,3 @@ void printWifiStatus() {
   Serial.println(ip);
   Serial.println();
 }
-

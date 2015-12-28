@@ -6,10 +6,7 @@
  to the Serial monitor. From there, you can open that address in a web browser
  to turn on and off the LED on pin 13.
 
- This example is written for a network using WPA encryption. For
- WEP or WPA, change the Wifi.begin() call accordingly.
-
- Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+ For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
 */
 
 #include "WiFiEsp.h"
@@ -18,7 +15,6 @@
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
 #endif
-
 
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
@@ -34,9 +30,10 @@ RingBuffer buf(8);
 void setup() {
   // initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial); // needed for Leonardo only
+  while (!Serial);
 
-  WiFi.init();  // initialize ESP8266 module
+  // initialize ESP8266 module setting the baud rate to 9600
+  WiFi.init(9600);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {

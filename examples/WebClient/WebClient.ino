@@ -1,12 +1,10 @@
 /*
  WiFiEsp example: WebClient
 
- This sketch connects to a website (http://www.google.com) using an ESP8266 module.
+ This sketch connects to google website using an ESP8266 module to
+ perform a simple web search.
 
- This example is written for a network using WPA encryption.
- For WEP or WPA, change the Wifi.begin() call accordingly.
- 
- Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+ For more details see: http://yaab-arduino.blogspot.com/p/wifiesp-example-client.html
 */
 
 #include "WiFiEsp.h"
@@ -16,12 +14,11 @@
 #include "SoftwareSerial.h"
 #endif
 
-
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
-char server[] = "www.google.com";
+char server[] = "arduino.cc";
 
 // Initialize the Ethernet client object
 WiFiEspClient client;
@@ -29,9 +26,10 @@ WiFiEspClient client;
 void setup() {
   // initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial); // wait for serial port to connect. Needed for Leonardo only
+  while (!Serial);
 
-  WiFi.init();  // initialize ESP8266 module
+  // initialize ESP8266 module setting the baud rate to 9600
+  WiFi.init(9600);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -59,8 +57,8 @@ void setup() {
   if (client.connect(server, 80)) {
     Serial.println("Connected to server");
     // Make a HTTP request
-    client.println("GET /search?q=arduino HTTP/1.1");
-    client.println("Host: www.google.com");
+    client.println("GET /asciilogo.txt HTTP/1.1");
+    client.println("Host: arduino.cc");
     client.println("Connection: close");
     client.println();
   }
@@ -102,7 +100,3 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-
-
-

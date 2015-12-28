@@ -5,7 +5,7 @@
  Then it prints the  MAC address of the WiFi shield, the IP address obtained
  and other network details.
 
- Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+ For more details see: http://yaab-arduino.blogspot.com/p/wifiesp-example-connect.html
 */
 
 #include "WiFiEsp.h"
@@ -15,7 +15,6 @@
 #include "SoftwareSerial.h"
 #endif
 
-
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
@@ -23,9 +22,10 @@ int status = WL_IDLE_STATUS;     // the Wifi radio's status
 void setup() {
   // initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial); // wait for serial port to connect. Needed for Leonardo only
+  while (!Serial);
 
-  WiFi.init();  // initialize ESP8266 module
+  // initialize ESP8266 module setting the baud rate to 9600
+  WiFi.init(9600);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -42,13 +42,12 @@ void setup() {
     status = WiFi.begin(ssid, pass);
   }
 
-  // you're connected now, so print out the data
   Serial.println("You're connected to the network");
 }
 
 void loop()
 {
-  // check the network connection once every 10 seconds
+  // print the network connection information every 10 seconds
   Serial.println();
   printCurrentNet();
   printWifiData();
@@ -91,4 +90,3 @@ void printCurrentNet()
   Serial.print("Signal strength (RSSI): ");
   Serial.println(rssi);
 }
-

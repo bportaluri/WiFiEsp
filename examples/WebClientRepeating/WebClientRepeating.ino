@@ -4,8 +4,8 @@
  This sketch connects to a web server and makes an HTTP request
  using an Arduino ESP8266 module.
  It repeats the HTTP call each 10 seconds.
- 
- Circuit: http://yaab-arduino.blogspot.com/2015/03/esp8266-wiring-schemas.html
+
+ For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
 */
 
 #include "WiFiEsp.h"
@@ -14,7 +14,6 @@
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
 #endif
-
 
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
@@ -31,9 +30,10 @@ WiFiEspClient client;
 void setup() {
   // initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial); // wait for serial port to connect. Needed for Leonardo only
+  while (!Serial);
 
-  WiFi.init();  // initialize ESP8266 module
+  // initialize ESP8266 module setting the baud rate to 9600
+  WiFi.init(9600);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -85,7 +85,6 @@ void httpRequest() {
     // send the HTTP PUT request
     client.println("GET /asciilogo.txt HTTP/1.1");
     client.println("Host: arduino.cc");
-    client.println("User-Agent: ArduinoWiFiEsp/1.1");
     client.println("Connection: close");
     client.println();
 
@@ -115,4 +114,3 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
