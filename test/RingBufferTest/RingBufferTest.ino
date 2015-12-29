@@ -1,3 +1,8 @@
+/*
+ WiFiEsp test: RingBufferTest
+ 
+ Test of the RingBuffer class.
+*/
 
 #include "WiFiEsp.h"
 

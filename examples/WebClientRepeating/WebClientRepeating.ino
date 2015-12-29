@@ -10,9 +10,10 @@
 
 #include "WiFiEsp.h"
 
-// Emulate Serial1 on pins 7/6 if not present
+// Emulate Serial1 on pins 6/7 if not present
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
+SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
 char ssid[] = "Twim";            // your network SSID (name)
@@ -27,13 +28,14 @@ const unsigned long postingInterval = 10000L; // delay between updates, in milli
 // Initialize the Ethernet client object
 WiFiEspClient client;
 
-void setup() {
-  // initialize serial and wait for port to open
+void setup()
+{
+  // initialize serial for debugging
   Serial.begin(115200);
-  while (!Serial);
-
-  // initialize ESP8266 module setting the baud rate to 9600
-  WiFi.init(9600);
+  // initialize serial for ESP module
+  Serial1.begin(9600);
+  // initialize ESP module
+  WiFi.init(&Serial1);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -55,7 +57,8 @@ void setup() {
   printWifiStatus();
 }
 
-void loop() {
+void loop()
+{
   // if there's incoming data from the net connection send it out the serial port
   // this is for debugging purposes only
   while (client.available()) {
@@ -71,7 +74,8 @@ void loop() {
 }
 
 // this method makes a HTTP connection to the server
-void httpRequest() {
+void httpRequest()
+{
   Serial.println();
     
   // close any connection before send a new request
@@ -98,7 +102,8 @@ void httpRequest() {
 }
 
 
-void printWifiStatus() {
+void printWifiStatus()
+{
   // print the SSID of the network you're attached to
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());

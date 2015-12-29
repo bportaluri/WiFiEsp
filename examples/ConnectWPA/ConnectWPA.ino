@@ -10,22 +10,24 @@
 
 #include "WiFiEsp.h"
 
-// Emulate Serial1 on pins 7/6 if not present
+// Emulate Serial1 on pins 6/7 if not present
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
+SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
-void setup() {
-  // initialize serial and wait for port to open
+void setup()
+{
+  // initialize serial for debugging
   Serial.begin(115200);
-  while (!Serial);
-
-  // initialize ESP8266 module setting the baud rate to 9600
-  WiFi.init(9600);
+  // initialize serial for ESP module
+  Serial1.begin(9600);
+  // initialize ESP module
+  WiFi.init(&Serial1);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {

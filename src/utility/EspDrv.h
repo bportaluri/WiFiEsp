@@ -1,13 +1,9 @@
-
-#ifndef ESP8266_h
-#define ESP8266_h
+#ifndef EspDrv_h
+#define EspDrv_h
 
 #include "Stream.h"
 #include "IPAddress.h"
 
-#ifndef HAVE_HWSERIAL1
-#include "SoftwareSerial.h"
-#endif
 
 #include "RingBuffer.h"
 
@@ -114,7 +110,7 @@ class EspDrv
 
 public:
 
-    static void wifiDriverInit(unsigned long baud);
+    static void wifiDriverInit(Stream *espSerial);
 
     static void reset();
 
@@ -251,18 +247,10 @@ public:
 
 private:
 
-
-#ifndef HAVE_HWSERIAL1
-	static SoftwareSerial Serial1;
-#endif
-
+	static Stream *espSerial;
+	
 	static long _bufPos;
 	static uint8_t _connId;
-	
-	// settings of requested network
-	//char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
-	//int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
-	//uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
 
 	// firmware version string
 	static char 	fwVersion[WL_FW_VER_LENGTH];
@@ -272,8 +260,6 @@ private:
 	static uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
 	static uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
 	static uint8_t  _localIp[WL_IPV4_LENGTH];
-	//uint8_t  _subnetMask[WL_IPV4_LENGTH];
-	//uint8_t  _gatewayIp[WL_IPV4_LENGTH];
 
 	static char cmdBuf[200];
 

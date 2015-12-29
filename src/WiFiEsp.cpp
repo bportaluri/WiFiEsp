@@ -18,12 +18,8 @@ along with The Arduino WiFiEsp library.  If not, see
 
 #include "WiFiEsp.h"
 
-#include "utility/EspDrv.h"
-#include "utility/debug.h"
-
 
 int16_t 	WiFiEspClass::_state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
-//uint16_t 	WiFiEspClass::_server_port[MAX_SOCK_NUM] = { 0, 0, 0, 0 };
 
 uint8_t WiFiEspClass::espMode=0;
 
@@ -33,10 +29,10 @@ WiFiEspClass::WiFiEspClass()
 
 }
 
-void WiFiEspClass::init(unsigned long baud)
+void WiFiEspClass::init(Stream *espSerial)
 {
     LOGINFO(F("Initializing ESP module"));
-	EspDrv::wifiDriverInit(baud);
+	EspDrv::wifiDriverInit(espSerial);
 }
 
 

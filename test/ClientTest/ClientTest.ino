@@ -1,9 +1,15 @@
+/*
+ WiFiEsp test: ClientTest
+ 
+ Test client functions.
+*/
 
 #include "WiFiEsp.h"
 
 // Emulate Serial1 on pins 7/6 if not present
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
+SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
 
@@ -18,11 +24,9 @@ WiFiEspClient client;
 
 void setup()
 {
-  // Initialize serial and wait for port to open
   Serial.begin(115200);
-  while (!Serial);
-  
-  WiFi.init();
+  Serial1.begin(9600);
+  WiFi.init(&Serial1);
 }
 
 void loop()

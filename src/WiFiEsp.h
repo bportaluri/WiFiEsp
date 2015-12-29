@@ -20,13 +20,16 @@ along with The Arduino WiFiEsp library.  If not, see
 #define WiFiEsp_h
 
 #include <Arduino.h>
+#include <Stream.h>
 #include <IPAddress.h>
 #include <inttypes.h>
+
 
 #include "WiFiEspClient.h"
 #include "WiFiEspServer.h"
 #include "utility/EspDrv.h"
 #include "utility/RingBuffer.h"
+#include "utility/debug.h"
 
 
 class WiFiEspClass
@@ -40,10 +43,11 @@ public:
 	
 
 	/**
-	* Initialize the ESP serial interface.
-	* The default baud rate is 115200.
+	* Initialize the ESP module.
+	* 
+	* param espSerial: the serial interface (HW or SW) used to communicate with the ESP module
 	*/
-	static void init(unsigned long baud=115200);
+	static void init(Stream *espSerial);
 
 	
 	/**
