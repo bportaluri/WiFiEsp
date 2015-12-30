@@ -479,7 +479,7 @@ uint16_t EspDrv::availData(uint8_t connId)
 			_bufPos = espSerial->parseInt();
 			espSerial->read();  // read the ':' character
 			
-			LOGDEBUG2(F("Data packet"), _connId, _bufPos);
+			LOGDEBUG2(F("\r\nData packet"), _connId, _bufPos);
 			
 			if(_connId==connId || connId==0)
 				return _bufPos;
