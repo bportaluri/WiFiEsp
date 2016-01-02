@@ -13,10 +13,18 @@ WiFiEspServer::WiFiEspServer(uint16_t port)
 
 void WiFiEspServer::begin()
 {
-	LOGINFO(F("Starting server"));
+	LOGDEBUG(F("Starting server"));
 	
-	EspDrv::startServer(_port);
-	_started = true;
+	_started = EspDrv::startServer(_port);
+	
+	if (_started)
+	{
+		LOGINFO1(F("Server started on port"), 80);
+	}
+	else
+	{
+		LOGERROR(F("Server failed to start"));
+	}
 }
 
 WiFiEspClient WiFiEspServer::available(byte* status)

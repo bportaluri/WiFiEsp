@@ -8,25 +8,15 @@
 #include "RingBuffer.h"
 
 
-#define WL_SERIAL_SPEED 9600
 
 // Maximum size of a SSID
 #define WL_SSID_MAX_LENGTH 32
-
-// Length of passphrase. Valid lengths are 8-63.
-#define WL_WPA_KEY_MAX_LENGTH 63
-
-// Length of key in bytes. Valid values are 5 and 13.
-#define WL_WEP_KEY_MAX_LENGTH 13
 
 // Size of a MAC-address or BSSID
 #define WL_MAC_ADDR_LENGTH 6
 
 // Size of a MAC-address or BSSID
 #define WL_IPV4_LENGTH 4
-
-// Maximum size of a SSID list
-#define WL_NETWORKS_LIST_MAXNUM	10
 
 // Maxmium number of socket
 #define	MAX_SOCK_NUM		4
@@ -36,9 +26,6 @@
 
 // Default state value for Wifi state field
 #define NA_STATE -1
-
-//Maximum number of attempts to establish wifi connection
-#define WL_MAX_ATTEMPT_CONNECTION 10
 
 #define WL_FW_VER_LENGTH 10
 
@@ -80,13 +67,12 @@ typedef enum {
 } wl_status_t;
 
 /* Encryption modes */
-enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
-	ENC_TYPE_WEP  = 5,
-	ENC_TYPE_TKIP = 2,
-	ENC_TYPE_CCMP = 4,
-	/* ... except these two, 7 and 8 are reserved in 802.11-2007 */
-	ENC_TYPE_NONE = 7,
-	ENC_TYPE_AUTO = 8
+enum wl_enc_type {
+	ENC_TYPE_NONE = 0,
+	ENC_TYPE_WEP  = 1,
+	ENC_TYPE_WPA_PSK = 2,
+	ENC_TYPE_WPA2_PSK = 3,
+	ENC_TYPE_WPA_WPA2_PSK = 4
 };
 
 enum wl_tcp_state {
@@ -112,9 +98,6 @@ public:
 
     static void wifiDriverInit(Stream *espSerial);
 
-    static void reset();
-
-
 	
     /* Start Wifi connection with passphrase
      *
@@ -135,15 +118,6 @@ public:
 	*/
     static void config(uint32_t local_ip);
 
-    /* Set DNS ip configuration
-	*
-	* param validParams: set the number of parameters that we want to change
-	* 					 i.e. validParams = 1 means that we'll change only dns_server1
-	* 					 	  validParams = 2 means that we'll change dns_server1 and dns_server2
-	* param dns_server1: DNS server1 configuration
-	* param dns_server2: DNS server2 configuration
-	*/
-    //static void setDNS(uint8_t validParams, uint32_t dns_server1, uint32_t dns_server2);
 
     /*
      * Disconnect from the network
@@ -213,7 +187,7 @@ public:
     /*
 	* Start a TCP server on the specified port
 	*/
-	static void startServer(uint16_t port);
+	static bool startServer(uint16_t port);
 	
     static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
 
@@ -242,6 +216,8 @@ public:
 	static bool ping(const char *host);
 	
 
+    static void reset();
+	
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -261,6 +237,7 @@ private:
 	static uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
 	static uint8_t  _localIp[WL_IPV4_LENGTH];
 
+	// string buffer to store AT commands
 	static char cmdBuf[200];
 
 	// the ring buffer is used to search the tags in the stream

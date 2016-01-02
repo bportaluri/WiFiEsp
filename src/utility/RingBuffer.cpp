@@ -4,55 +4,73 @@
 
 RingBuffer::RingBuffer(unsigned int size)
 {
-  _size = size;
-  ringBuf = new char[size];
+	_size = size;
+	// add one char to terminate the string
+	ringBuf = new char[size+1];
+	ringBufEnd = &ringBuf[size];
+	init();
 }
 
 RingBuffer::~RingBuffer() {}
 
+void RingBuffer::reset()
+{
+	ringBufP = ringBuf;
+}
+
 void RingBuffer::init()
 {
-  ringBufPos = 0;
+	ringBufP = ringBuf;
+	memset(ringBuf, 0, _size+1);
 }
 
 void RingBuffer::push(char c)
 {
-  ringBuf[ringBufPos % _size] = c;
-  ringBufPos++;
+	*ringBufP = c;
+	ringBufP++;
+	if (ringBufP>=ringBufEnd)
+		ringBufP = ringBuf;
 }
 
-int RingBuffer::getPos()
-{
-  return ringBufPos;
-}
 
 
 bool RingBuffer::endsWith(const char* str)
 {
-  int findStrLen = strlen(str);
-  
-  if(ringBufPos < findStrLen)
-    return false;
+	int findStrLen = strlen(str);
 
-  unsigned int j = ringBufPos-findStrLen;
+	// b is the start position into the ring buffer
+	char* b = ringBufP-findStrLen;
+	if(b < ringBuf)
+		b = b + _size;
 
-  for(unsigned int i=0; i<findStrLen; i++)
-  {
-    if(str[i] != ringBuf[(j+i) % _size])
-        return false;
-  }
-  
-  return true;
+	char *p1 = (char*)&str[0];
+	char *p2 = p1 + findStrLen;
+
+	for(char *p=p1; p<p2; p++)
+	{
+		if(*p != *b)
+			return false;
+
+		b++;
+		if (b == ringBufEnd)
+			b=ringBuf;
+	}
+
+	return true;
 }
 
 
-char * RingBuffer::getStr(char * destination, unsigned int num)
+
+void RingBuffer::getStr(char * destination, unsigned int skipChars)
 {
+  int len = ringBufP-ringBuf-skipChars;
+  
   // copy buffer to destination string
-  char * ret = strncpy(destination, ringBuf, num);
+  strncpy(destination, ringBuf, len);
   
   // terminate output string
-  destination[num]=0;
+  destination[len]=0;
   
-  return ret;
+  //Serial.print("xxxxxxxxxxxxxxxxxxx");
+  //Serial.println(destination);
 }

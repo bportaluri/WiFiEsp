@@ -49,11 +49,33 @@ char EspDrv::cmdBuf[] = {0};
 void EspDrv::wifiDriverInit(Stream *espSerial)
 {
 	LOGDEBUG(F("> wifiDriverInit"));
-	
-	//espSerial->begin(baud);
+
 	EspDrv::espSerial = espSerial;
 
+	if (sendCmd(F("AT")) != TAG_OK)
+	{
+		LOGERROR(F("Cannot initialize ESP module"));
+		delay(8000);
+		return;
+	}
+
 	reset();
+
+	// check firmware version
+	getFwVersion();
+	LOGDEBUG1(F("Firmware version"), fwVersion);
+	
+	// prints a warning message if the firmware is not 1.X
+	if (fwVersion[0] != '1' or
+		fwVersion[1] != '.')
+	{
+		LOGWARN1(F("Warning: Unsupported firmware"), fwVersion);
+		delay(4000);
+	}
+	else
+	{
+		LOGINFO1(F("Initilization successful -"), fwVersion);
+	}
 }
 
 
@@ -67,18 +89,6 @@ void EspDrv::reset()
 	
 	// disable echo of commands
 	sendCmd(F("ATE0"), 1000);
-	
-	// check firmware version
-	getFwVersion();
-	LOGDEBUG1(F("Firmware version"), fwVersion);
-	
-	// prints a warning message if the firmware is not 1.X
-	if (fwVersion[0] != '1' or
-		fwVersion[1] != '.')
-	{
-		LOGWARN1(F("Warning: Unsupported firmware"), fwVersion);
-		delay(5000);
-	}
 
 	// set station mode
 	sendCmd(F("AT+CWMODE=1"));
@@ -168,7 +178,6 @@ void EspDrv::config(uint32_t local_ip)
 	
 	// TODO Not tested yet
 	
-	// disable DHCP
 	// disable DHCP
 	sendCmd(F("AT+CWDHCP_DEF=0,0"));
 	
@@ -400,13 +409,14 @@ bool EspDrv::ping(const char *host)
 
 
 // Start server TCP on port specified
-void EspDrv::startServer(uint16_t port)
+bool EspDrv::startServer(uint16_t port)
 {
 	LOGDEBUG1(F("> startServer"), port);
 	
 	sprintf(cmdBuf, "AT+CIPSERVER=1,%d", port);
 	
-	sendCmd(cmdBuf);
+	bool ret = sendCmd(cmdBuf);
+	return ret==TAG_OK;
 }
 
 
@@ -506,25 +516,12 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 			_bufPos--;
 			//Serial.print((char)*data);
 
-/*
-			// empty buffer if finished receiving data
-			// based on the request the ESP is returning "\r\nOK\r\n" or "\r\nOK\r\n\r\nOK\r\nUnlink\r\n"
-			if (_bufPos==0)
-			{
-				LOGDEBUG();
-				LOGDEBUG(F(">>> Trailing data >>>"));
-				int c;
-				while( (c = timedRead()) > 0)
-					LOGDEBUG0((char)c);
-				LOGDEBUG("<<<<<<<<<<<<<<<<<<<<<");
-			}
-*/
 			return true;
 		}
 	} while(millis() - _startMillis < 2000);
 	
     // timed out, reset the buffer
-	LOGDEBUG1(F("TIMEOUT:"), _bufPos);
+	LOGERROR1(F("TIMEOUT:"), _bufPos);
 	
     _bufPos = 0;
 	_connId = 0;
@@ -552,7 +549,6 @@ bool EspDrv::sendUdpData(uint8_t sock)
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
-	//INFO("> sendData (%d, %d): %s", sock, len, data);
 	LOGDEBUG2(F("> sendData:"), sock, len);
 	
 	sprintf(cmdBuf, "AT+CIPSEND=%d,%d", sock, len);
@@ -570,7 +566,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	//LOGDEBUG(F("Sending data"));
 	espSerial->write(data, len);
 
-//if(!espSerial->find((char *)"\r\nSEND OK\r\n"))
+	//if(!espSerial->find((char *)"\r\nSEND OK\r\n"))
 
 	idx = readUntil(2000);
 	if(idx!=TAG_SENDOK)
@@ -614,24 +610,19 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 	
 	if(idx==NUMESPTAGS)
 	{
-		// start tag found, serch the endTag
+		// clean the buffer to get a clean string
+		ringBuf.init();
+		
+		// start tag found, search the endTag
 		idx = readUntil(500, endTag);
 		
 		if(idx==NUMESPTAGS)
 		{
 			// end tag found
+			ringBuf.getStr(outStr, strlen(endTag));
 			
-			// copy the result to the output buffer
-			//ringBuf[ringBufPos-strlen(endTag)] = 0;
-			//strncpy(outStr, ringBuf, outStrLen);
-			
-			ringBuf.getStr(outStr, ringBuf.getPos()-strlen(endTag));
-			
-			//LOGINFO1("outStr: '", outStr);
-			
-			// lead the remaining part of the response
+			// read the remaining part of the response
 			readUntil(2000);
-			//LOGINFO("outStr: '%s'", outStr);
 			
 			ret = true;
 		}
@@ -653,8 +644,6 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 
 	LOGDEBUG1(F("---------------------------------------------- >"), outStr);
 	LOGDEBUG();
-	
-	//INFO("outStr: '%s'", outStr);
 	
 	return ret;
 }
@@ -701,7 +690,7 @@ int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout)
 //   -1 if no tag was found (timeout)
 int EspDrv::readUntil(int timeout, const char* tag, bool findTags)
 {
-	ringBuf.init();
+	ringBuf.reset();
 	
 	char c;
     unsigned long start = millis();
@@ -772,7 +761,7 @@ void EspDrv::espEmptyBuf(bool warn)
 // copied from Serial::timedRead
 int EspDrv::timedRead()
 {
-  int _timeout = 500;
+  int _timeout = 1000;
   int c;
   long _startMillis = millis();
   do

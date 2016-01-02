@@ -5,20 +5,23 @@
 class RingBuffer
 {
 public:
-  RingBuffer(unsigned int size);
-  ~RingBuffer();
+	RingBuffer(unsigned int size);
+	~RingBuffer();
 
- void init();
- void push(char c);
- int getPos();
- bool endsWith(const char* str);
- char * getStr(char * destination, unsigned int num);
+	void reset();
+	void init();
+	void push(char c);
+	int getPos();
+	bool endsWith(const char* str);
+	void getStr(char * destination, unsigned int skipChars);
   
+
 private:
 
-  unsigned int _size;
-  unsigned int ringBufPos;
-  char* ringBuf;
+	unsigned int _size;
+	char* ringBuf;
+	char* ringBufEnd;
+	char* ringBufP;
 
 };
 
