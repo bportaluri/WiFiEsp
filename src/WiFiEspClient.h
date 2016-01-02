@@ -69,11 +69,13 @@ public:
   virtual void stop();
   
   /*
-  * Whether or not the client is connected. Note that a client is considered connected if the connection has been closed but there is still unread data.
+  * Whether or not the client is connected.
+  * Note that a client is considered connected if the connection has been closed but there is still unread data.
   * Returns true if the client is connected, false if not.
   */
   virtual uint8_t connected();
-  
+
+
   virtual operator bool();
 
   /*

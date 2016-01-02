@@ -64,7 +64,7 @@ bool RingBuffer::endsWith(const char* str)
 void RingBuffer::getStr(char * destination, unsigned int skipChars)
 {
   int len = ringBufP-ringBuf-skipChars;
-  
+
   // copy buffer to destination string
   strncpy(destination, ringBuf, len);
   

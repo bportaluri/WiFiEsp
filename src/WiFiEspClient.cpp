@@ -44,6 +44,7 @@ int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 {
 	char s[18];  
 	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	
 	return connect(s, port);
 }
 
@@ -76,13 +77,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 		stop();
 		return 0;
 	}
-/*
-	if (!EspDrv::checkDataSent(_sock))
-	{
-		setWriteError();
-		return 0;
-	}
-*/
+
 	return size;
 }
 
@@ -103,39 +98,53 @@ int WiFiEspClient::available()
 
 int WiFiEspClient::read()
 {
-  uint8_t b;
-  if (!available())
-    return -1;
+	uint8_t b;
+	if (!available())
+		return -1;
 
-  EspDrv::getData(_sock, &b);
-  
-  //Serial.print((char)b);
-  
-  return b;
+	bool connClose = false;
+	EspDrv::getData(_sock, &b, false, &connClose);
+	
+	if (connClose)
+	{
+		WiFiEspClass::_state[_sock] = NA_STATE;
+		_sock = 255;
+	}
+
+	return b;
 }
 
 int WiFiEspClient::read(uint8_t* buf, size_t size)
 {
-  uint16_t _size = size;
-  if (!EspDrv::getDataBuf(_sock, buf, &_size))
-      return -1;
-  return 0;
+	uint16_t _size = size;
+
+	if (!EspDrv::getDataBuf(_sock, buf, &_size))
+		return -1;
+	return 0;
 }
 
 int WiFiEspClient::peek()
 {
-	  uint8_t b;
-	  if (!available())
-	    return -1;
+	uint8_t b;
+	if (!available())
+		return -1;
 
-	  EspDrv::getData(_sock, &b, 1);
-	  return b;
+	bool connClose = false;
+	EspDrv::getData(_sock, &b, true, &connClose);
+	
+	if (connClose)
+	{
+		WiFiEspClass::_state[_sock] = NA_STATE;
+		_sock = 255;
+	}
+	
+	return b;
 }
 
 void WiFiEspClient::flush()
 {
-  while (available())
-    read();
+	while (available())
+		read();
 }
 
 
@@ -154,20 +163,7 @@ void WiFiEspClient::stop()
 
 uint8_t WiFiEspClient::connected()
 {
-	if (_sock == 255)
-	{
-		return 0;
-	}
-	
-	return 1;
-/*
-	uint8_t s = status();
-	
-    return !(s == LISTEN || s == CLOSED || s == FIN_WAIT_1 ||
-    		s == FIN_WAIT_2 || s == TIME_WAIT ||
-    		s == SYN_SENT || s== SYN_RCVD ||
-    		(s == CLOSE_WAIT));
-*/
+	return (status() == ESTABLISHED);
 }
 
 
@@ -188,6 +184,7 @@ uint8_t WiFiEspClient::status()
 		return ESTABLISHED;
 	}
 	
+	WiFiEspClass::_state[_sock] = NA_STATE;
 	_sock = 255;
 	
 	return CLOSED;

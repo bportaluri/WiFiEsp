@@ -169,7 +169,7 @@ int8_t EspDrv::disconnect()
 	delay(2000);
 	espEmptyBuf(false);
 	
-	return WL_IDLE_STATUS;
+	return WL_DISCONNECTED;
 }
 
 void EspDrv::config(uint32_t local_ip)
@@ -185,7 +185,7 @@ void EspDrv::config(uint32_t local_ip)
 
 	if (sendCmd(cmdBuf, 5000)==TAG_OK)
 	{
-		LOGINFO1(F("IP address successfully set"), local_ip);
+		LOGINFO1(F("IP address set"), local_ip);
 	}
 
 }
@@ -222,11 +222,13 @@ uint8_t EspDrv::getConnectionStatus()
 	if(!sendCmd(F("AT+CIPSTATUS"), "STATUS:", "\r\n", buf, sizeof(buf)))
 		return WL_NO_SHIELD;
 
+	// 4: client disconnected
+	// 5: wifi disconnected
 	int s = atoi(buf);
-	if(s>=4)
-		return WL_DISCONNECTED;
-	else if(s==2 or s==3)
+	if(s==2 or s==3 or s==4)
 		return WL_CONNECTED;
+	else if(s==5)
+		return WL_DISCONNECTED;
 
 	return WL_IDLE_STATUS;
 }
@@ -489,7 +491,8 @@ uint16_t EspDrv::availData(uint8_t connId)
 			_bufPos = espSerial->parseInt();
 			espSerial->read();  // read the ':' character
 			
-			LOGDEBUG2(F("\r\nData packet"), _connId, _bufPos);
+			LOGDEBUG();
+			LOGDEBUG2(F("Data packet"), _connId, _bufPos);
 			
 			if(_connId==connId || connId==0)
 				return _bufPos;
@@ -499,7 +502,7 @@ uint16_t EspDrv::availData(uint8_t connId)
 }
 
 
-bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
+bool EspDrv::getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose)
 {
 	if (connId!=_connId)
 		return false;
@@ -512,9 +515,45 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, uint8_t peek)
 	{
 		if (espSerial->available())
 		{
-			 *data = (char)espSerial->read();
-			_bufPos--;
+			if (peek)
+			{
+				*data = (char)espSerial->peek();
+			}
+			else
+			{
+				*data = (char)espSerial->read();
+				_bufPos--;
+			}
 			//Serial.print((char)*data);
+
+			if (_bufPos == 0)
+			{
+				// after the data packet a ",CLOSED" string may be received
+				// this means that the socket is now closed
+
+				delay(5);
+
+				if (espSerial->available())
+				{
+					//LOGDEBUG(".2");
+					//LOGDEBUG(espSerial->peek());
+					
+					// 48 = '0'
+					if (espSerial->peek()==48+connId)
+					{
+						int idx = readUntil(500, ",CLOSED\r\n", false);
+						if(idx!=NUMESPTAGS)
+						{
+							LOGERROR(F("Tag CLOSED not found"));
+						}
+						
+						LOGDEBUG();
+						LOGDEBUG(F("Connection closed"));
+						
+						*connClose=true;
+					}
+				}
+			}
 
 			return true;
 		}
@@ -555,7 +594,6 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 
 	espSerial->println(cmdBuf);
 
-	//if(!espSerial->find((char *)">"))
 	int idx = readUntil(1000, (char *)">", false);
 	if(idx!=NUMESPTAGS)
 	{
@@ -563,11 +601,8 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 		return false;
 	}
 
-	//LOGDEBUG(F("Sending data"));
 	espSerial->write(data, len);
-
-	//if(!espSerial->find((char *)"\r\nSEND OK\r\n"))
-
+	
 	idx = readUntil(2000);
 	if(idx!=TAG_SENDOK)
 	{

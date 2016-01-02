@@ -58,11 +58,11 @@ enum wl_auth_mode {
 typedef enum {
 	WL_NO_SHIELD = 255,
 	WL_IDLE_STATUS = 0,
-	WL_NO_SSID_AVAIL,
-	WL_SCAN_COMPLETED,
+	//WL_NO_SSID_AVAIL,
+	//WL_SCAN_COMPLETED,
 	WL_CONNECTED,
 	WL_CONNECT_FAILED,
-	WL_CONNECTION_LOST,
+	//WL_CONNECTION_LOST,
 	WL_DISCONNECTED
 } wl_status_t;
 
@@ -197,7 +197,7 @@ public:
 
     static uint8_t getClientState(uint8_t sock);
 
-    static bool getData(uint8_t connId, uint8_t *data, uint8_t peek = 0);
+    static bool getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose);
 
     static bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
 

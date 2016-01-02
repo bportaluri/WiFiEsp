@@ -162,6 +162,7 @@ public:
 	* Return Connection status.
 	*
 	* return: one of the value defined in wl_status_t
+	*         see https://www.arduino.cc/en/Reference/WiFiStatus
 	*/
 	uint8_t status();
 
