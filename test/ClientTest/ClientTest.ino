@@ -15,8 +15,6 @@ SoftwareSerial Serial1(6, 7); // RX, TX
 
 char ssid[] = "Twim";    // network SSID (name)
 char pwd[] = "12345678"; // network password
-//char ssid[] = "WTwimRoma";    // network SSID (name)
-//char pwd[] = "NonLaTrovi0.";  // network password
 
 
 // Initialize the Wifi client library
@@ -33,18 +31,26 @@ void loop()
 {
   bool f;
   int c;
+
+  
+  assertEquals("Check status WL_DISCONNECTED", WiFi.status(), WL_DISCONNECTED);
   
   assertEquals("Connect", WiFi.begin(ssid, pwd), WL_CONNECTED);
+  
   assertEquals("Check status WL_CONNECTED", WiFi.status(), WL_CONNECTED);
+  
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
   
-  assertEquals("Not yet connected", client.connected(), false);
+  assertEquals("Ping", WiFi.ping("www.google.com"), true);
+  
+  assertEquals("Not connected", client.connected(), false);
   assertEquals("Connect to server", client.connect("www.brainjar.com", 80), 1);
   assertEquals("Connected", client.connected(), true);
 
 
+  //--------------------------------------------------------------
   // HTTP request without 'Connection: close' command
   
   client.println("GET /java/host/test.html HTTP/1.1");
@@ -67,11 +73,19 @@ void loop()
       Serial.print((char)c);
   }
 
-WiFi.status();
+  assertEquals("Connected", client.connected(), true);
+
+
+  //--------------------------------------------------------------
+  
+  delay(5000);
+  
+  assertEquals("Check status WL_CONNECTED", WiFi.status(), WL_CONNECTED);
 
   assertEquals("Connected", client.connected(), true);
-  
 
+
+  //--------------------------------------------------------------
   // HTTP request without 'Connection: close' command
   
   client.println("GET /java/host/test.html HTTP/1.1");
@@ -96,11 +110,18 @@ WiFi.status();
       Serial.print((char)c);
   }
 
+  //--------------------------------------------------------------
   
+  assertEquals("Check status WL_CONNECTED", WiFi.status(), WL_CONNECTED);
   assertEquals("Not connected", client.connected(), false);
 
+  assertEquals("Ping", WiFi.ping("www.google.com"), true);
+
+  assertEquals("Connect", WiFi.disconnect(), WL_DISCONNECTED);
+  assertEquals("Check status WL_DISCONNECTED", WiFi.status(), WL_DISCONNECTED);
+
   Serial.println("END OF TESTS");
-  delay(60000);
+  delay(30000);
 }
 
 
