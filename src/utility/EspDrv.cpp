@@ -111,7 +111,7 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	// any special characters (',', '"' and '/')
 
 	// connect to access point
-	sprintf(cmdBuf, "AT+CWJAP_CUR=\"%s\",\"%s\"", ssid, passphrase);
+	sprintf_P(cmdBuf, PSTR("AT+CWJAP_CUR=\"%s\",\"%s\""), ssid, passphrase);
 
 	if (sendCmd(cmdBuf, 20000)==TAG_OK)
 	{
@@ -145,7 +145,7 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 	}
 	
 	// start access point
-	sprintf(cmdBuf, "AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d", ssid, pwd, channel, enc);
+	sprintf_P(cmdBuf, PSTR("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), ssid, pwd, channel, enc);
 
 	if (sendCmd(cmdBuf, 10000)==TAG_OK)
 	{
@@ -181,7 +181,7 @@ void EspDrv::config(uint32_t local_ip)
 	// disable DHCP
 	sendCmd(F("AT+CWDHCP_DEF=0,0"));
 	
-	sprintf(cmdBuf, "AT+CIPSTA_CUR=\"%s\"", local_ip);
+	sprintf_P(cmdBuf, PSTR("AT+CIPSTA_CUR=\"%s\""), local_ip);
 
 	if (sendCmd(cmdBuf, 5000)==TAG_OK)
 	{
@@ -240,7 +240,7 @@ uint8_t EspDrv::getClientState(uint8_t sock)
 	char buf[10];
 	char buf2[20];
 
-	sprintf(buf2, "+CIPSTATUS:%d,", sock);
+	sprintf_P(buf2, PSTR("+CIPSTATUS:%d,"), sock);
 
 	if (sendCmd(F("AT+CIPSTATUS"), buf2, ",", buf, sizeof(buf)))
 	{
@@ -398,7 +398,7 @@ bool EspDrv::ping(const char *host)
 {
 	LOGDEBUG(F("> ping"));
 	
-	sprintf(cmdBuf, "AT+PING=\"%s\"", host);
+	sprintf_P(cmdBuf, PSTR("AT+PING=\"%s\""), host);
 
 	if (sendCmd(cmdBuf, 2000)==TAG_OK);
 	{
@@ -415,7 +415,7 @@ bool EspDrv::startServer(uint16_t port)
 {
 	LOGDEBUG1(F("> startServer"), port);
 	
-	sprintf(cmdBuf, "AT+CIPSERVER=1,%d", port);
+	sprintf_P(cmdBuf, PSTR("AT+CIPSERVER=1,%d"), port);
 	
 	bool ret = sendCmd(cmdBuf);
 	return ret==TAG_OK;
@@ -429,9 +429,9 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	bool ret;
 
 	if (protMode==TCP_MODE)
-		sprintf(cmdBuf, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
+		sprintf_P(cmdBuf, PSTR("AT+CIPSTART=%d,\"TCP\",\"%s\",%d"), sock, host, port);
 	else
-		sprintf(cmdBuf, "AT+CIPSTART=%d,\"UDP\",\"%s\",%d", sock, host, port);
+		sprintf_P(cmdBuf, PSTR("AT+CIPSTART=%d,\"UDP\",\"%s\",%d"), sock, host, port);
 	
 	if (sendCmd(cmdBuf, 5000)==TAG_OK)
 		return true;
@@ -447,7 +447,7 @@ void EspDrv::stopClient(uint8_t sock)
 
 	bool ret;
 	
-	sprintf(cmdBuf, "AT+CIPCLOSE=%d", sock);    
+	sprintf_P(cmdBuf, PSTR("AT+CIPCLOSE=%d"), sock);    
 	
 	int r = sendCmd(cmdBuf, 4000);
 }
@@ -602,7 +602,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
 	LOGDEBUG2(F("> sendData:"), sock, len);
 	
-	sprintf(cmdBuf, "AT+CIPSEND=%d,%d", sock, len);
+	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len);
 
 	espSerial->println(cmdBuf);
 
