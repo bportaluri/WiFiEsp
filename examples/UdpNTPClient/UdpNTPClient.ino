@@ -1,10 +1,5 @@
 /*
- WiFiEsp example: WebClient
-
- This sketch connects to google website using an ESP8266 module to
- perform a simple web search.
-
- For more details see: http://yaab-arduino.blogspot.com/p/wifiesp-example-client.html
+ WiFiEsp example: UdpNTPClient
 */
 
 #include "WiFiEsp.h"
