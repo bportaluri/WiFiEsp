@@ -16,8 +16,19 @@ Supports ESP SDK version 1.1.1 and above (AT version 0.25 and above).
 
 ##Wiring
 
-The WiFiEsp library has been designed to work with the [ESP WiFi shield] (http://www.instructables.com/id/Cheap-Arduino-WiFi-Shield-With-ESP8266/).
+The WiFiEsp library has been designed to work with the [ESP WiFi shield](http://www.instructables.com/id/Cheap-Arduino-WiFi-Shield-With-ESP8266/).
 It is a cheap version of the Arduino WiFi shield that uses an ESP-01 module to provide networking capabilities to Arduino boards.
+
+
+##Examples
+
+- [ConnectWPA](https://github.com/bportaluri/WiFiEsp/blob/master/examples/ConnectWPA/ConnectWPA.ino) - Demonstrates how to connect to a network that is encrypted with WPA2 Personal
+- [WebClient](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebClient/WebClient.ino) - Connect to a remote webserver 
+- [WebClientRepeating](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebClientRepeating/WebClientRepeating.ino) - Make repeated HTTP calls to a webserver 
+- [WebServer](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebServer/WebServer.ino) - Serve a webpage from the WiFi shield 
+- [WebServerAP](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebServerAP/WebServerAP.ino) - Serve a webpage from the WiFi shield starting a local Access Point
+- [WebServerLed](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebServerLed/WebServerLed.ino) - Turn on and off a led from a webpage
+- [UdpNTPClient](https://github.com/bportaluri/WiFiEsp/blob/master/examples/UdpNTPClient/UdpNTPClient.ino) - Query a Network Time Protocol (NTP) server using UDP
 
 
 ##Supported APIs
@@ -67,11 +78,23 @@ The WiFiEspClient class creates clients that can connect to servers and send and
 - stop() - YES
 
 
-###UDP class
+###WiFiUDP class (Experimental)
 
 The UDP class enables UDP message to be sent and received.
 
-TODO
+- WiFiUDP - YES
+- begin() - YES
+- available() - YES
+- beginPacket()
+- endPacket()
+- write()
+- parsePacket()
+- peek()
+- read()
+- flush()
+- stop()
+- remoteIP()
+- remotePort() 
 
 
 ##Contributing
