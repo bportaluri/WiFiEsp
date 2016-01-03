@@ -219,7 +219,7 @@ uint8_t EspDrv::getConnectionStatus()
 */
 
 	char buf[10];
-	if(!sendCmd(F("AT+CIPSTATUS"), "STATUS:", "\r\n", buf, sizeof(buf)))
+	if(!sendCmd(F("AT+CIPSTATUS"), F("STATUS:"), F("\r\n"), buf, sizeof(buf)))
 		return WL_NO_SHIELD;
 
 	// 4: client disconnected
@@ -259,7 +259,7 @@ uint8_t* EspDrv::getMacAddress()
 	memset(_mac, 0, WL_MAC_ADDR_LENGTH);
 	
 	char buf[20];
-	if (sendCmd(F("AT+CIFSR"), ":STAMAC,\"", "\"", buf, sizeof(buf)))
+	if (sendCmd(F("AT+CIFSR"), F(":STAMAC,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 
@@ -286,7 +286,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	
 	// AT+CIFSR or AT+CIPSTA?
 	char buf[20];
-	if (sendCmd(F("AT+CIFSR"), ":STAIP,\"", "\"", buf, sizeof(buf)))
+	if (sendCmd(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 		
@@ -308,7 +308,7 @@ void EspDrv::getIpAddressAP(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddressAP"));
 	
 	char buf[20];
-	if (sendCmd(F("AT+CIPAP?"), "+CIPAP:ip:\"", "\"", buf, sizeof(buf)))
+	if (sendCmd(F("AT+CIPAP?"), F("+CIPAP:ip:\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 		
@@ -332,7 +332,7 @@ char* EspDrv::getCurrentSSID()
 	LOGDEBUG(F("> getCurrentSSID"));
 
 	_ssid[0] = 0;
-	sendCmd(F("AT+CWJAP?"), "+CWJAP:\"", "\"", _ssid, sizeof(_ssid));
+	sendCmd(F("AT+CWJAP?"), F("+CWJAP:\""), F("\""), _ssid, sizeof(_ssid));
 	
 	return _ssid;
 }
@@ -344,7 +344,7 @@ uint8_t* EspDrv::getCurrentBSSID()
 	memset(_bssid, 0, WL_MAC_ADDR_LENGTH);
 
 	char buf[20];
-	if (sendCmd(F("AT+CWJAP?"), ",\"", "\",", buf, sizeof(buf)))
+	if (sendCmd(F("AT+CWJAP?"), F(",\""), F("\","), buf, sizeof(buf)))
 	{
 		char* token;
 
@@ -371,7 +371,7 @@ int32_t EspDrv::getCurrentRSSI()
 
     int ret=0;
 	char buf[10];
-	sendCmd(F("AT+CWJAP?"), ",-", "\r\n", buf, sizeof(buf));
+	sendCmd(F("AT+CWJAP?"), F(",-"), F("\r\n"), buf, sizeof(buf));
 	
 	if (isDigit(buf[0])) {
       ret = -atoi(buf);
@@ -387,7 +387,7 @@ char* EspDrv::getFwVersion()
 
 	fwVersion[0] = 0;
 	
-	sendCmd(F("AT+GMR"), "SDK version:", "\r\n", fwVersion, sizeof(fwVersion));
+	sendCmd(F("AT+GMR"), F("SDK version:"), F("\r\n"), fwVersion, sizeof(fwVersion));
 
     return fwVersion;
 }
@@ -701,7 +701,18 @@ bool EspDrv::sendCmd(const __FlashStringHelper* cmd, const char* startTag, const
 	return sendCmd(cmdBuf, startTag, endTag, outStr, outStrLen);
 }
 
+bool EspDrv::sendCmd(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen)
+{
+	strcpy_P(cmdBuf, (char*)cmd);
 
+	char _startTag[strlen_P((char*)startTag)+1];
+	strcpy_P(_startTag,  (char*)startTag);
+
+	char _endTag[strlen_P((char*)endTag)+1];
+	strcpy_P(_endTag,  (char*)endTag);
+
+	return sendCmd(cmdBuf, _startTag, _endTag, outStr, outStrLen);
+}
 
 /*
 * Sends the AT command and returns the id of the TAG.
