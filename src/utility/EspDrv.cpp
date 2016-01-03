@@ -28,7 +28,7 @@ typedef enum
 
 Stream *EspDrv::espSerial;
 
-RingBuffer EspDrv::ringBuf(30);
+RingBuffer EspDrv::ringBuf(20);
 
 
 // Cached values of retrieved data
