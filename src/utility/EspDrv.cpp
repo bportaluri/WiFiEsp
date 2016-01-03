@@ -185,7 +185,7 @@ void EspDrv::config(uint32_t local_ip)
 
 	if (sendCmd(cmdBuf, 5000)==TAG_OK)
 	{
-		LOGINFO1(F("IP address set"), local_ip);
+		LOGINFO1(F("IP address"), local_ip);
 	}
 
 }
@@ -428,7 +428,10 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	
 	bool ret;
 
-	sprintf(cmdBuf, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
+	if (protMode==TCP_MODE)
+		sprintf(cmdBuf, "AT+CIPSTART=%d,\"TCP\",\"%s\",%d", sock, host, port);
+	else
+		sprintf(cmdBuf, "AT+CIPSTART=%d,\"UDP\",\"%s\",%d", sock, host, port);
 	
 	if (sendCmd(cmdBuf, 5000)==TAG_OK)
 		return true;
@@ -571,7 +574,16 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose)
 
 bool EspDrv::getDataBuf(uint8_t sock, uint8_t *_data, uint16_t *_dataLen)
 {
-    return false;
+	for(int i=0; i<_bufPos; i++)
+	{
+		int c = timedRead();
+		_data[i] = (char)c;
+	}
+	
+	*_dataLen = _bufPos;
+	_bufPos = 0;
+	
+	return true;
 }
 
 /*

@@ -20,8 +20,10 @@ along with The Arduino WiFiEsp library.  If not, see
 
 
 int16_t 	WiFiEspClass::_state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
+uint16_t 	WiFiEspClass::_server_port[MAX_SOCK_NUM] = { 0, 0, 0, 0 };
 
-uint8_t WiFiEspClass::espMode=0;
+
+uint8_t WiFiEspClass::espMode = 0;
 
 
 WiFiEspClass::WiFiEspClass()

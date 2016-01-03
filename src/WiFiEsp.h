@@ -38,6 +38,7 @@ class WiFiEspClass
 public:
 
 	static int16_t _state[MAX_SOCK_NUM];
+	static uint16_t _server_port[MAX_SOCK_NUM];
 
 	WiFiEspClass();
 	
