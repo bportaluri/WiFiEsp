@@ -42,9 +42,6 @@ long EspDrv::_bufPos=0;
 uint8_t EspDrv::_connId=0;
 
 
-char EspDrv::cmdBuf[] = {0};
-
-
 
 void EspDrv::wifiDriverInit(Stream *espSerial)
 {
@@ -63,7 +60,6 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 
 	// check firmware version
 	getFwVersion();
-	LOGDEBUG1(F("Firmware version"), fwVersion);
 	
 	// prints a warning message if the firmware is not 1.X
 	if (fwVersion[0] != '1' or
@@ -83,12 +79,12 @@ void EspDrv::reset()
 {
 	LOGDEBUG(F("> reset"));
 
-	sendCmd(F("AT+RST"), 1000);
+	sendCmd(F("AT+RST"));
 	delay(3000);
 	espEmptyBuf(false);  // empty dirty characters from the buffer
 	
 	// disable echo of commands
-	sendCmd(F("ATE0"), 1000);
+	sendCmd(F("ATE0"));
 
 	// set station mode
 	sendCmd(F("AT+CWMODE=1"));
@@ -111,9 +107,9 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	// any special characters (',', '"' and '/')
 
 	// connect to access point
-	sprintf_P(cmdBuf, PSTR("AT+CWJAP_CUR=\"%s\",\"%s\""), ssid, passphrase);
+	int ret = sendCmd(F("AT+CWJAP_CUR=\"%s\",\"%s\""), 20000, ssid, passphrase);
 
-	if (sendCmd(cmdBuf, 20000)==TAG_OK)
+	if (ret==TAG_OK)
 	{
 		LOGINFO1(F("Connected to"), ssid);
 		return true;
@@ -133,21 +129,22 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 {
 	LOGDEBUG(F("> wifiStartAP"));
 
-	// TODO
-	// Escape character syntax is needed if "SSID" or "password" contains 
-	// any special characters (',', '"' and '/')
-
 	// set AP mode, use CUR mode to avoid starting the AP at reboot
 	if (sendCmd(F("AT+CWMODE_CUR=2"))!=TAG_OK)
 	{
 		LOGWARN1(F("Failed to set AP mode"), ssid);
 		return false;
 	}
+
+
+	// TODO
+	// Escape character syntax is needed if "SSID" or "password" contains 
+	// any special characters (',', '"' and '/')
 	
 	// start access point
-	sprintf_P(cmdBuf, PSTR("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), ssid, pwd, channel, enc);
+	int ret = sendCmd(F("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), 10000, ssid, pwd, channel, enc);
 
-	if (sendCmd(cmdBuf, 10000)==TAG_OK)
+	if (ret==TAG_OK)
 	{
 		LOGINFO1(F("Access point started"), ssid);
 		return true;
@@ -181,9 +178,9 @@ void EspDrv::config(uint32_t local_ip)
 	// disable DHCP
 	sendCmd(F("AT+CWDHCP_DEF=0,0"));
 	
-	sprintf_P(cmdBuf, PSTR("AT+CIPSTA_CUR=\"%s\""), local_ip);
+	int ret = sendCmd(F("AT+CIPSTA_CUR=\"%s\""), 5000, local_ip);
 
-	if (sendCmd(cmdBuf, 5000)==TAG_OK)
+	if (ret==TAG_OK)
 	{
 		LOGINFO1(F("IP address"), local_ip);
 	}
@@ -219,7 +216,7 @@ uint8_t EspDrv::getConnectionStatus()
 */
 
 	char buf[10];
-	if(!sendCmd(F("AT+CIPSTATUS"), F("STATUS:"), F("\r\n"), buf, sizeof(buf)))
+	if(!sendCmdGet(F("AT+CIPSTATUS"), F("STATUS:"), F("\r\n"), buf, sizeof(buf)))
 		return WL_NO_SHIELD;
 
 	// 4: client disconnected
@@ -237,12 +234,11 @@ uint8_t EspDrv::getClientState(uint8_t sock)
 {
 	LOGDEBUG1(F("> getClientState"), sock);
 
+	char findBuf[20];
+	sprintf_P(findBuf, PSTR("+CIPSTATUS:%d,"), sock);
+
 	char buf[10];
-	char buf2[20];
-
-	sprintf_P(buf2, PSTR("+CIPSTATUS:%d,"), sock);
-
-	if (sendCmd(F("AT+CIPSTATUS"), buf2, ",", buf, sizeof(buf)))
+	if (sendCmdGet(F("AT+CIPSTATUS"), findBuf, ",", buf, sizeof(buf)))
 	{
 		LOGDEBUG(F("Connected"));
 		return true;
@@ -259,7 +255,7 @@ uint8_t* EspDrv::getMacAddress()
 	memset(_mac, 0, WL_MAC_ADDR_LENGTH);
 	
 	char buf[20];
-	if (sendCmd(F("AT+CIFSR"), F(":STAMAC,\""), F("\""), buf, sizeof(buf)))
+	if (sendCmdGet(F("AT+CIFSR"), F(":STAMAC,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 
@@ -286,7 +282,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	
 	// AT+CIFSR or AT+CIPSTA?
 	char buf[20];
-	if (sendCmd(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
+	if (sendCmdGet(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 		
@@ -308,7 +304,7 @@ void EspDrv::getIpAddressAP(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddressAP"));
 	
 	char buf[20];
-	if (sendCmd(F("AT+CIPAP?"), F("+CIPAP:ip:\""), F("\""), buf, sizeof(buf)))
+	if (sendCmdGet(F("AT+CIPAP?"), F("+CIPAP:ip:\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
 		
@@ -332,7 +328,7 @@ char* EspDrv::getCurrentSSID()
 	LOGDEBUG(F("> getCurrentSSID"));
 
 	_ssid[0] = 0;
-	sendCmd(F("AT+CWJAP?"), F("+CWJAP:\""), F("\""), _ssid, sizeof(_ssid));
+	sendCmdGet(F("AT+CWJAP?"), F("+CWJAP:\""), F("\""), _ssid, sizeof(_ssid));
 	
 	return _ssid;
 }
@@ -344,7 +340,7 @@ uint8_t* EspDrv::getCurrentBSSID()
 	memset(_bssid, 0, WL_MAC_ADDR_LENGTH);
 
 	char buf[20];
-	if (sendCmd(F("AT+CWJAP?"), F(",\""), F("\","), buf, sizeof(buf)))
+	if (sendCmdGet(F("AT+CWJAP?"), F(",\""), F("\","), buf, sizeof(buf)))
 	{
 		char* token;
 
@@ -371,7 +367,7 @@ int32_t EspDrv::getCurrentRSSI()
 
     int ret=0;
 	char buf[10];
-	sendCmd(F("AT+CWJAP?"), F(",-"), F("\r\n"), buf, sizeof(buf));
+	sendCmdGet(F("AT+CWJAP?"), F(",-"), F("\r\n"), buf, sizeof(buf));
 	
 	if (isDigit(buf[0])) {
       ret = -atoi(buf);
@@ -387,7 +383,7 @@ char* EspDrv::getFwVersion()
 
 	fwVersion[0] = 0;
 	
-	sendCmd(F("AT+GMR"), F("SDK version:"), F("\r\n"), fwVersion, sizeof(fwVersion));
+	sendCmdGet(F("AT+GMR"), F("SDK version:"), F("\r\n"), fwVersion, sizeof(fwVersion));
 
     return fwVersion;
 }
@@ -398,9 +394,9 @@ bool EspDrv::ping(const char *host)
 {
 	LOGDEBUG(F("> ping"));
 	
-	sprintf_P(cmdBuf, PSTR("AT+PING=\"%s\""), host);
+	int ret = sendCmd(F("AT+PING=\"%s\""), 2000, host);
 
-	if (sendCmd(cmdBuf, 2000)==TAG_OK);
+	if (ret==TAG_OK);
 	{
 		return true;
 	}
@@ -415,9 +411,8 @@ bool EspDrv::startServer(uint16_t port)
 {
 	LOGDEBUG1(F("> startServer"), port);
 	
-	sprintf_P(cmdBuf, PSTR("AT+CIPSERVER=1,%d"), port);
-	
-	bool ret = sendCmd(cmdBuf);
+	int ret = sendCmd(F("AT+CIPSERVER=1,%d"), 1000, port);
+
 	return ret==TAG_OK;
 }
 
@@ -425,18 +420,14 @@ bool EspDrv::startServer(uint16_t port)
 bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode)
 {
 	LOGDEBUG2(F("> startClient"), host, port);
-	
-	bool ret;
 
+	int ret;
 	if (protMode==TCP_MODE)
-		sprintf_P(cmdBuf, PSTR("AT+CIPSTART=%d,\"TCP\",\"%s\",%d"), sock, host, port);
+		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%d"), 5000, sock, host, port);
 	else
-		sprintf_P(cmdBuf, PSTR("AT+CIPSTART=%d,\"UDP\",\"%s\",%d"), sock, host, port);
-	
-	if (sendCmd(cmdBuf, 5000)==TAG_OK)
-		return true;
-	
-	return false;
+		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"%s\",%d"), 5000, sock, host, port);
+
+	return ret==TAG_OK;
 }
 
 
@@ -445,11 +436,7 @@ void EspDrv::stopClient(uint8_t sock)
 {
 	LOGDEBUG1(F("> stopClient"), sock);
 
-	bool ret;
-	
-	sprintf_P(cmdBuf, PSTR("AT+CIPCLOSE=%d"), sock);    
-	
-	int r = sendCmd(cmdBuf, 4000);
+	int ret = sendCmd(F("AT+CIPCLOSE=%d"), 4000, sock);    
 }
 
 
@@ -602,6 +589,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
 	LOGDEBUG2(F("> sendData:"), sock, len);
 	
+	char cmdBuf[20];
 	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len);
 
 	espSerial->println(cmdBuf);
@@ -637,7 +625,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 * Extract the string enclosed in the passed tags and returns it in the outStr buffer.
 * Returns true if the string is extracted, false if tags are not found of timed out.
 */
-bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen)
+bool EspDrv::sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen)
 {
     int idx;
 	bool ret = false;
@@ -695,30 +683,23 @@ bool EspDrv::sendCmd(const char* cmd, const char* startTag, const char* endTag, 
 	return ret;
 }
 
-bool EspDrv::sendCmd(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen)
+bool EspDrv::sendCmdGet(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen)
 {
-	strcpy_P(cmdBuf, (char*)cmd);
-	return sendCmd(cmdBuf, startTag, endTag, outStr, outStrLen);
-}
-
-bool EspDrv::sendCmd(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen)
-{
-	strcpy_P(cmdBuf, (char*)cmd);
-
 	char _startTag[strlen_P((char*)startTag)+1];
 	strcpy_P(_startTag,  (char*)startTag);
 
 	char _endTag[strlen_P((char*)endTag)+1];
 	strcpy_P(_endTag,  (char*)endTag);
 
-	return sendCmd(cmdBuf, _startTag, _endTag, outStr, outStrLen);
+	return sendCmdGet(cmd, _startTag, _endTag, outStr, outStrLen);
 }
+
 
 /*
 * Sends the AT command and returns the id of the TAG.
 * Return -1 if no tag is found.
 */
-int EspDrv::sendCmd(const char* cmd, int timeout)
+int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout)
 {
     espEmptyBuf();
 
@@ -735,10 +716,34 @@ int EspDrv::sendCmd(const char* cmd, int timeout)
     return idx;
 }
 
-int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout)
+
+/*
+* Sends the AT command and returns the id of the TAG.
+* The additional arguments are formatted into the command using sprintf.
+* Return -1 if no tag is found.
+*/
+int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout, ...)
 {
-	strcpy_P(cmdBuf, (char*)cmd);
-	return sendCmd(cmdBuf, timeout);
+	char cmdBuf[CMD_BUFFER_SIZE];
+
+	va_list args;
+	va_start (args, timeout);
+	vsnprintf_P (cmdBuf, CMD_BUFFER_SIZE, (char*)cmd, args);
+	va_end (args);
+
+	espEmptyBuf();
+
+	LOGDEBUG(F("----------------------------------------------"));
+	LOGDEBUG1(F(">>"), cmdBuf);
+
+	espSerial->println(cmdBuf);
+
+	int idx = readUntil(timeout);
+
+	LOGDEBUG1(F("---------------------------------------------- >"), idx);
+	LOGDEBUG();
+
+	return idx;
 }
 
 
@@ -784,14 +789,10 @@ int EspDrv::readUntil(int timeout, const char* tag, bool findTags)
 		}
     }
 
-
 	if (millis() - start >= timeout)
 	{
 		LOGWARN(F(">>> TIMEOUT >>>"));
 	}
-	
-	//ringBuf.init();
-	//INFO("Return: %d > '%s'", ret, ringBuf);
 	
     return ret;
 }

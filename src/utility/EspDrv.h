@@ -32,6 +32,8 @@
 #define NO_SOCKET_AVAIL 255
 
 
+// maximum size of AT command
+#define CMD_BUFFER_SIZE 200
 
 
 typedef enum eProtMode {TCP_MODE, UDP_MODE} tProtMode;
@@ -74,6 +76,7 @@ enum wl_enc_type {
 	ENC_TYPE_WPA2_PSK = 3,
 	ENC_TYPE_WPA_WPA2_PSK = 4
 };
+
 
 enum wl_tcp_state {
 	CLOSED      = 0,
@@ -237,20 +240,19 @@ private:
 	static uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
 	static uint8_t  _localIp[WL_IPV4_LENGTH];
 
-	// string buffer to store AT commands
-	static char cmdBuf[200];
 
 	// the ring buffer is used to search the tags in the stream
 	static RingBuffer ringBuf;
 
 	
+	//static int sendCmd(const char* cmd, int timeout=1000);
 	static int sendCmd(const __FlashStringHelper* cmd, int timeout=1000);
-	static int sendCmd(const char* cmd, int timeout=1000);
-	static bool sendCmd(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
-	static bool sendCmd(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen);
-	static bool sendCmd(const char* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
-	static int readUntil(int timeout, const char* tag=NULL, bool findTags=true);
+	static int sendCmd(const __FlashStringHelper* cmd, int timeout, ...);
 	
+	static bool sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
+	static bool sendCmdGet(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen);
+	
+	static int readUntil(int timeout, const char* tag=NULL, bool findTags=true);
 
 	static void espEmptyBuf(bool warn=true);
 	
