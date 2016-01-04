@@ -1,3 +1,21 @@
+/*--------------------------------------------------------------------
+This file is part of the Arduino WiFiEsp library.
+
+The Arduino WiFiEsp library is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+The Arduino WiFiEsp library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The Arduino WiFiEsp library.  If not, see
+<http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------*/
+
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
@@ -585,13 +603,12 @@ bool EspDrv::sendUdpData(uint8_t sock)
 }
 */
 
-bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
+bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len, bool appendCrLf)
 {
 	LOGDEBUG2(F("> sendData:"), sock, len);
 
 	char cmdBuf[20];
 	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len);
-
 	espSerial->println(cmdBuf);
 
 	int idx = readUntil(1000, (char *)">", false);
@@ -602,6 +619,46 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	}
 
 	espSerial->write(data, len);
+
+	idx = readUntil(2000);
+	if(idx!=TAG_SENDOK)
+	{
+		LOGERROR(F("Data packet send error (2)"));
+		return false;
+	}
+
+    return true;
+}
+
+// Overrided sendData method for __FlashStringHelper strings
+bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t len, bool appendCrLf)
+{
+	LOGDEBUG2(F("> sendData:"), sock, len);
+
+	char cmdBuf[20];
+	int len2 = len + 2*appendCrLf;
+	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len2);
+	espSerial->println(cmdBuf);
+
+	int idx = readUntil(1000, (char *)">", false);
+	if(idx!=NUMESPTAGS)
+	{
+		LOGERROR(F("Data packet send error (1)"));
+		return false;
+	}
+
+	//espSerial->write(data, len);
+	PGM_P p = reinterpret_cast<PGM_P>(data);
+	for (int i=0; i<len; i++)
+	{
+		unsigned char c = pgm_read_byte(p++);
+		espSerial->write(c);
+	}
+	if (appendCrLf)
+	{
+		espSerial->write('\r');
+		espSerial->write('\n');
+	}
 
 	idx = readUntil(2000);
 	if(idx!=TAG_SENDOK)

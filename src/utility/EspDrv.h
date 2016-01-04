@@ -1,3 +1,21 @@
+/*--------------------------------------------------------------------
+This file is part of the Arduino WiFiEsp library.
+
+The Arduino WiFiEsp library is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+The Arduino WiFiEsp library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The Arduino WiFiEsp library.  If not, see
+<http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------*/
+
 #ifndef EspDrv_h
 #define EspDrv_h
 
@@ -204,7 +222,9 @@ public:
 
     static bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
 
-    static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
+    static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len, bool appendCrLf=false);
+
+    static bool sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t len, bool appendCrLf=false);
 
     static uint16_t availData(uint8_t connId);
 
@@ -260,6 +280,7 @@ private:
 
 
 	friend class WiFiEspServer;
+	friend class WiFiEspClient;
 };
 
 extern EspDrv espDrv;

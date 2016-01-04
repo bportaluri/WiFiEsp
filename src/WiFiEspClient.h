@@ -1,3 +1,21 @@
+/*--------------------------------------------------------------------
+This file is part of the Arduino WiFiEsp library.
+
+The Arduino WiFiEsp library is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+The Arduino WiFiEsp library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with The Arduino WiFiEsp library.  If not, see
+<http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------*/
+
 #ifndef WiFiEspClient_h
 #define WiFiEspClient_h
 
@@ -14,8 +32,13 @@ class WiFiEspClient : public Client
 public:
   WiFiEspClient();
   WiFiEspClient(uint8_t sock);
+  
+  
+  // override Print.print method
+  
+  size_t print(const __FlashStringHelper *ifsh);
+  size_t println(const __FlashStringHelper *ifsh);
 
-  uint8_t status();
 
   /*
   * Connect to the specified IP address and port. The return value indicates success or failure.
@@ -76,25 +99,26 @@ public:
   virtual uint8_t connected();
 
 
+  uint8_t status();
+  
   virtual operator bool();
 
-  /*
-  * Write data to the server the client is connected to.
-  * Returns the number of bytes written.
-  */
+  
+  // needed to correctly handle overriding
+  // see http://stackoverflow.com/questions/888235/overriding-a-bases-overloaded-function-in-c
   using Print::write;
+  using Print::println;
 
 
   friend class WiFiEspServer;
 
 private:
 
-  static uint16_t _srcport;
   uint8_t _sock;     // connection id
-  uint16_t  _socket;
 
   uint8_t getFirstSocket();
-
+  
+  size_t printFSH(const __FlashStringHelper *ifsh, bool appendCrLf);
 
 };
 
