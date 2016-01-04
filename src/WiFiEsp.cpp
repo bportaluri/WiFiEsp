@@ -85,7 +85,7 @@ uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
 	memcpy(mac, _mac, WL_MAC_ADDR_LENGTH);
     return mac;
 }
-   
+
 IPAddress WiFiEspClass::localIP()
 {
 	IPAddress ret;

@@ -82,7 +82,7 @@ int WiFiEspUDP::beginPacket(IPAddress ip, uint16_t port)
 {
 	char s[18];
 	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-	
+
 	return beginPacket(s, port);
 }
 
@@ -128,13 +128,13 @@ int WiFiEspUDP::read()
 int WiFiEspUDP::read(unsigned char* buffer, size_t len)
 {
 	int bytes = available();
-	
+
 	if(bytes==-1)
 		return -1;
-	
+
 	if (bytes!=len)
 		LOGWARN1(bytes, len);
-	
+
 
 	uint16_t size = 0;
 	if (!EspDrv::getDataBuf(_sock, buffer, &size))

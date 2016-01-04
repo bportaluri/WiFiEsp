@@ -101,7 +101,7 @@ public:
 
     static void wifiDriverInit(Stream *espSerial);
 
-	
+
     /* Start Wifi connection with passphrase
      *
      * param ssid: Pointer to the SSID string.
@@ -114,8 +114,8 @@ public:
 	* Start the Access Point
 	*/
 	static bool wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t enc);
-	
-	
+
+
     /*
 	 *Set ip configuration disabling dhcp client
 	*/
@@ -130,7 +130,7 @@ public:
     static int8_t disconnect();
 
     /*
-     * 
+     *
      *
      * return: one value of wl_status_t enum
      */
@@ -181,17 +181,17 @@ public:
      * Get the firmware version
      */
     static char* getFwVersion();
-	
-	
+
+
 	////////////////////////////////////////////////////////////////////////////
 	// Client/Server methods
 	////////////////////////////////////////////////////////////////////////////
-	
+
     /*
 	* Start a TCP server on the specified port
 	*/
 	static bool startServer(uint16_t port);
-	
+
     static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
 
     static void stopClient(uint8_t sock);
@@ -207,8 +207,8 @@ public:
     static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
 
     static uint16_t availData(uint8_t connId);
-	
-	
+
+
 	////////////////////////////////////////////////////////////////////////////
 	// Non standard methods
 	////////////////////////////////////////////////////////////////////////////
@@ -217,17 +217,17 @@ public:
 	* Ping a host.
 	*/
 	static bool ping(const char *host);
-	
+
 
     static void reset();
-	
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
 private:
 
 	static Stream *espSerial;
-	
+
 	static long _bufPos;
 	static uint8_t _connId;
 
@@ -244,21 +244,21 @@ private:
 	// the ring buffer is used to search the tags in the stream
 	static RingBuffer ringBuf;
 
-	
+
 	//static int sendCmd(const char* cmd, int timeout=1000);
 	static int sendCmd(const __FlashStringHelper* cmd, int timeout=1000);
 	static int sendCmd(const __FlashStringHelper* cmd, int timeout, ...);
-	
+
 	static bool sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
 	static bool sendCmdGet(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen);
-	
+
 	static int readUntil(int timeout, const char* tag=NULL, bool findTags=true);
 
 	static void espEmptyBuf(bool warn=true);
-	
+
 	static int timedRead();
 
-	
+
 	friend class WiFiEspServer;
 };
 

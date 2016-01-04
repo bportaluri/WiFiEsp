@@ -67,10 +67,10 @@ void RingBuffer::getStr(char * destination, unsigned int skipChars)
 
   // copy buffer to destination string
   strncpy(destination, ringBuf, len);
-  
+
   // terminate output string
   destination[len]=0;
-  
+
   //Serial.print("xxxxxxxxxxxxxxxxxxx");
   //Serial.println(destination);
 }

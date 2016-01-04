@@ -14,7 +14,7 @@ public:
 	int getPos();
 	bool endsWith(const char* str);
 	void getStr(char * destination, unsigned int skipChars);
-  
+
 
 private:
 

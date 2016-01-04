@@ -14,9 +14,9 @@ WiFiEspServer::WiFiEspServer(uint16_t port)
 void WiFiEspServer::begin()
 {
 	LOGDEBUG(F("Starting server"));
-	
+
 	_started = EspDrv::startServer(_port);
-	
+
 	if (_started)
 	{
 		LOGINFO1(F("Server started on port"), 80);
@@ -30,7 +30,7 @@ void WiFiEspServer::begin()
 WiFiEspClient WiFiEspServer::available(byte* status)
 {
 	// TODO the original method seems to handle automatic server restart
-	
+
 	int bytes = EspDrv::availData(0);
 	if (bytes>0)
 	{

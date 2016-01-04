@@ -22,7 +22,7 @@ WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
 int WiFiEspClient::connect(const char* host, uint16_t port)
 {
 	LOGINFO1(F("Connecting to"), host);
-	
+
 	_sock = getFirstSocket();
 
     if (_sock != NO_SOCKET_AVAIL)
@@ -42,9 +42,9 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
 
 int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 {
-	char s[18];  
+	char s[18];
 	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-	
+
 	return connect(s, port);
 }
 
@@ -67,7 +67,7 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 		setWriteError();
 		return 0;
 	}
-	
+
 	bool r = EspDrv::sendData(_sock, buf, size);
 	if (!r)
 	{
@@ -104,7 +104,7 @@ int WiFiEspClient::read()
 
 	bool connClose = false;
 	EspDrv::getData(_sock, &b, false, &connClose);
-	
+
 	if (connClose)
 	{
 		WiFiEspClass::_state[_sock] = NA_STATE;
@@ -131,13 +131,13 @@ int WiFiEspClient::peek()
 
 	bool connClose = false;
 	EspDrv::getData(_sock, &b, true, &connClose);
-	
+
 	if (connClose)
 	{
 		WiFiEspClass::_state[_sock] = NA_STATE;
 		_sock = 255;
 	}
-	
+
 	return b;
 }
 
@@ -156,7 +156,7 @@ void WiFiEspClient::stop()
 	LOGINFO1(F("Disconnecting "), _sock);
 
 	EspDrv::stopClient(_sock);
-	
+
 	WiFiEspClass::_state[_sock] = NA_STATE;
 	_sock = 255;
 }
@@ -173,20 +173,20 @@ uint8_t WiFiEspClient::status()
 	{
 		return CLOSED;
 	}
-	
+
 	if (EspDrv::availData(_sock))
 	{
 		return ESTABLISHED;
 	}
-	
+
 	if (EspDrv::getClientState(_sock))
 	{
 		return ESTABLISHED;
 	}
-	
+
 	WiFiEspClass::_state[_sock] = NA_STATE;
 	_sock = 255;
-	
+
 	return CLOSED;
 }
 

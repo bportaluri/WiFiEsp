@@ -41,16 +41,16 @@ public:
 	static uint16_t _server_port[MAX_SOCK_NUM];
 
 	WiFiEspClass();
-	
+
 
 	/**
 	* Initialize the ESP module.
-	* 
+	*
 	* param espSerial: the serial interface (HW or SW) used to communicate with the ESP module
 	*/
 	static void init(Stream *espSerial);
 
-	
+
 	/**
 	* Get firmware version
 	*/
@@ -158,7 +158,7 @@ public:
 	*/
 	int32_t RSSI();
 
-	
+
 	/**
 	* Return Connection status.
 	*
@@ -167,7 +167,7 @@ public:
 	*/
 	uint8_t status();
 
-	
+
 
 	// NOT IMPLEMENTED
 	//uint8_t encryptionType();
@@ -189,7 +189,7 @@ public:
 	//int hostByName(const char* aHostname, IPAddress& aResult);
 
 
-	
+
 	////////////////////////////////////////////////////////////////////////////
 	// Non standard methods
 	////////////////////////////////////////////////////////////////////////////
@@ -204,18 +204,18 @@ public:
 	*/
 	int beginAP(char* ssid, const char* pwd, char channel, uint8_t enc);
 
-	
-	
+
+
 	/**
 	* Restart the ESP module.
 	*/
 	void reset();
-	
+
 	/**
 	* Ping a host.
 	*/
 	bool ping(const char *host);
-	
+
 
 	friend class WiFiEspClient;
 	friend class WiFiEspServer;

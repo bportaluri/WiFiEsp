@@ -38,7 +38,7 @@ public:
 private:
 	uint16_t _port;
 	bool _started;
-	
+
 };
 
 #endif
