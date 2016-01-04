@@ -65,8 +65,8 @@ void loop()
     buf.init();                               // initialize the circular buffer
     while (client.connected()) {              // loop while the client's connected
       if (client.available()) {               // if there's bytes to read from the client,
-        char c = client.read();               // read a byte
-        buf.push(c);                          // and push it to the ring buffer
+        char c = client.read();               // read a byte, then
+        buf.push(c);                          // push it to the ring buffer
 
         // you got two newline characters in a row
         // that's the end of the HTTP request, so send a response

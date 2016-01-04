@@ -56,7 +56,8 @@ void setup()
   Udp.begin(localPort);
 }
 
-void loop() {
+void loop()
+{
   sendNTPpacket(timeServer); // send an NTP packet to a time server
   // wait to see if a reply is available
   delay(1000);
@@ -108,7 +109,8 @@ void loop() {
 }
 
 // send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(IPAddress& address) {
+unsigned long sendNTPpacket(IPAddress& address)
+{
   //Serial.println("1");
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);

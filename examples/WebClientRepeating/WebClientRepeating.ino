@@ -87,8 +87,8 @@ void httpRequest()
     Serial.println("Connecting...");
     
     // send the HTTP PUT request
-    client.println("GET /asciilogo.txt HTTP/1.1");
-    client.println("Host: arduino.cc");
+    client.println(F("GET /asciilogo.txt HTTP/1.1"));
+    client.println(F("Host: arduino.cc"));
     client.println("Connection: close");
     client.println();
 

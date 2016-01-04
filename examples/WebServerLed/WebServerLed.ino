@@ -28,13 +28,11 @@ WiFiEspServer server(80);
 // use a ring buffer to increase speed and reduce memory allocation
 RingBuffer buf(8);
 
-void setup() {
-  // initialize serial for debugging
-  Serial.begin(115200);
-  // initialize serial for ESP module
-  Serial1.begin(9600);
-  // initialize ESP module
-  WiFi.init(&Serial1);
+void setup()
+{
+  Serial.begin(115200);   // initialize serial for debugging
+  Serial1.begin(9600);    // initialize serial for ESP module
+  WiFi.init(&Serial1);    // initialize ESP module
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -59,24 +57,24 @@ void setup() {
 }
 
 
-void loop() {
+void loop()
+{
   WiFiEspClient client = server.available();  // listen for incoming clients
 
-  if (client) {                             // if you get a client,
-    Serial.println("New client");           // print a message out the serial port
-    buf.init();                             // initialize the circular buffer
-    while (client.connected()) {            // loop while the client's connected
-      if (client.available()) {             // if there's bytes to read from the client,
-        char c = client.read();             // read a byte, then
-        
+  if (client) {                               // if you get a client,
+    Serial.println("New client");             // print a message out the serial port
+    buf.init();                               // initialize the circular buffer
+    while (client.connected()) {              // loop while the client's connected
+      if (client.available()) {               // if there's bytes to read from the client,
+        char c = client.read();               // read a byte, then
+        buf.push(c);                          // push it to the ring buffer
+
         // printing the stream to the serial monitor will slow down
         // the receiving of data from the ESP filling the serial buffer
         //Serial.write(c);
         
-        buf.push(c);
-
-        // if the current line is blank, you got two newline characters in a row.
-        // that's the end of the client HTTP request, so send a response:
+        // you got two newline characters in a row
+        // that's the end of the HTTP request, so send a response
         if (buf.endsWith("\r\n\r\n")) {
           sendHttpResponse(client);
           break;
@@ -96,14 +94,15 @@ void loop() {
       }
     }
     
-    // close the connection:
+    // close the connection
     client.stop();
     Serial.println("Client disconnected");
   }
 }
 
 
-void sendHttpResponse(WiFiEspClient client) {
+void sendHttpResponse(WiFiEspClient client)
+{
   // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
   // and a content-type so the client knows what's coming, then a blank line:
   client.println("HTTP/1.1 200 OK");
@@ -123,7 +122,8 @@ void sendHttpResponse(WiFiEspClient client) {
   client.println();
 }
 
-void printWifiStatus() {
+void printWifiStatus()
+{
   // print the SSID of the network you're attached to
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
