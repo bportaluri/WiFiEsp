@@ -26,27 +26,25 @@ int reqCount = 0;                // number of requests received
 
 WiFiEspServer server(80);
 
+// use a ring buffer to increase speed and reduce memory allocation
+RingBuffer buf(8);
 
 void setup()
 {
-  // initialize serial for debugging
-  Serial.begin(115200);
-  // initialize serial for ESP module
-  Serial1.begin(9600);
-  // initialize ESP module
-  WiFi.init(&Serial1);
+  Serial.begin(115200);   // initialize serial for debugging
+  Serial1.begin(9600);    // initialize serial for ESP module
+  WiFi.init(&Serial1);    // initialize ESP module
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
     Serial.println("WiFi shield not present");
-    // don't continue
-    while (true);
+    while (true); // don't continue
   }
 
-  // start access point
   Serial.print("Attempting to start AP ");
   Serial.println(ssid);
-  // Connect to WPA/WPA2 network
+  
+  // start access point
   status = WiFi.beginAP(ssid, pass, 10, 3);
 
   Serial.println("Access point started");
@@ -60,61 +58,53 @@ void setup()
 
 void loop()
 {
-  // listen for incoming clients
-  WiFiEspClient client = server.available();
-  if (client) {
-    Serial.println("New client");
-    // an http request ends with a blank line
-    boolean currentLineIsBlank = true;
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        // if you've gotten to the end of the line (received a newline
-        // character) and the line is blank, the http request has ended,
-        // so you can send a reply
-        if (c == '\n' && currentLineIsBlank) {
-          Serial.println("Sending response");
-          
-          // send a standard http response header
-          // use \r\n instead of many println statements to speedup data send
-          client.print(
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html\r\n"
-            "Connection: close\r\n"  // the connection will be closed after completion of the response
-            "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
-            "\r\n");
-          client.print("<!DOCTYPE HTML>\r\n");
-          client.print("<html>\r\n");
-          client.print("<h1>Hello World!</h1>\r\n");
-          client.print("Requests received: ");
-          client.print(++reqCount);
-          client.print("<br>\r\n");
-          client.print("Analog input A0: ");
-          client.print(analogRead(0));
-          client.print("<br>\r\n");
-          client.print("</html>\r\n");
+  WiFiEspClient client = server.available();  // listen for incoming clients
+
+  if (client) {                               // if you get a client,
+    Serial.println("New client");             // print a message out the serial port
+    buf.init();                               // initialize the circular buffer
+    while (client.connected()) {              // loop while the client's connected
+      if (client.available()) {               // if there's bytes to read from the client,
+        char c = client.read();               // read a byte
+        buf.push(c);                          // and push it to the ring buffer
+
+        // you got two newline characters in a row
+        // that's the end of the HTTP request, so send a response
+        if (buf.endsWith("\r\n\r\n")) {
+          sendHttpResponse(client);
           break;
-        }
-        if (c == '\n') {
-          // you're starting a new line
-          currentLineIsBlank = true;
-        }
-        else if (c != '\r') {
-          // you've gotten a character on the current line
-          currentLineIsBlank = false;
         }
       }
     }
+    
     // give the web browser time to receive the data
     delay(10);
 
-    // close the connection:
+    // close the connection
     client.stop();
     Serial.println("Client disconnected");
   }
 }
 
+void sendHttpResponse(WiFiEspClient client)
+{
+  client.print(
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/html\r\n"
+    "Connection: close\r\n"  // the connection will be closed after completion of the response
+    "Refresh: 20\r\n"        // refresh the page automatically every 20 sec
+    "\r\n");
+  client.print("<!DOCTYPE HTML>\r\n");
+  client.print("<html>\r\n");
+  client.print("<h1>Hello World!</h1>\r\n");
+  client.print("Requests received: ");
+  client.print(++reqCount);
+  client.print("<br>\r\n");
+  client.print("Analog input A0: ");
+  client.print(analogRead(0));
+  client.print("<br>\r\n");
+  client.print("</html>\r\n");
+}
 
 void printWifiStatus()
 {
