@@ -162,14 +162,17 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 	// start access point
 	int ret = sendCmd(F("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), 10000, ssid, pwd, channel, enc);
 
-	if (ret==TAG_OK)
+	if (ret!=TAG_OK)
 	{
-		LOGINFO1(F("Access point started"), ssid);
-		return true;
+		LOGWARN1(F("Failed to start AP"), ssid);
+		return false;
 	}
+	
+	// enable DHCP for AP mode
+	sendCmd(F("AT+CWDHCP_CUR=0,1"));
 
-	LOGWARN1(F("Failed to start AP"), ssid);
-	return false;
+	LOGINFO1(F("Access point started"), ssid);
+	return true;
 }
 
 
