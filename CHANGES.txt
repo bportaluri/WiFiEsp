@@ -1,3 +1,6 @@
+1.4.2 (2016-01-05)
+  * Fixed compilation problem when using WiFiEspClient.print
+
 1.4.1 (2016-01-05)
   * Speed optimizations
 

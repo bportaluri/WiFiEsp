@@ -15,6 +15,7 @@ WiFiEsp	KEYWORD3
 
 WiFiEspClient	KEYWORD1
 WiFiEspServer	KEYWORD1
+WiFiEspUDP	KEYWORD1
 RingBuffer	KEYWORD1
 
 #######################################

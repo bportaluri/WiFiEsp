@@ -107,6 +107,7 @@ public:
   // needed to correctly handle overriding
   // see http://stackoverflow.com/questions/888235/overriding-a-bases-overloaded-function-in-c
   using Print::write;
+  using Print::print;
   using Print::println;
 
 
