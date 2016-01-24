@@ -45,7 +45,7 @@ Most of the standard Arduino WiFi library methods are available. Refer to the [W
 - BSSID() - YES
 - RSSI() - YES
 - encryptionType() - NO (no AT command available)
-- scanNetworks() - NO
+- scanNetworks() - YES
 - getSocket()
 - macAddress() - YES
 
