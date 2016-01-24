@@ -103,7 +103,6 @@ char* WiFiEspClass::SSID()
     return EspDrv::getCurrentSSID();
 }
 
-
 uint8_t* WiFiEspClass::BSSID(uint8_t* bssid)
 {
 	// TODO we don't need _bssid
@@ -117,6 +116,26 @@ int32_t WiFiEspClass::RSSI()
     return EspDrv::getCurrentRSSI();
 }
 
+
+int8_t WiFiEspClass::scanNetworks()
+{
+	return EspDrv::getScanNetworks();
+}
+
+char* WiFiEspClass::SSID(uint8_t networkItem)
+{
+	return EspDrv::getSSIDNetoworks(networkItem);
+}
+
+int32_t WiFiEspClass::RSSI(uint8_t networkItem)
+{
+	return EspDrv::getRSSINetoworks(networkItem);
+}
+
+uint8_t WiFiEspClass::encryptionType(uint8_t networkItem)
+{
+    return EspDrv::getEncTypeNetowrks(networkItem);
+}
 
 
 uint8_t WiFiEspClass::status()

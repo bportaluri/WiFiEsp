@@ -46,8 +46,12 @@ typedef enum
 
 Stream *EspDrv::espSerial;
 
-RingBuffer EspDrv::ringBuf(20);
+RingBuffer EspDrv::ringBuf(32);
 
+// Array of data to cache the information related to the networks discovered
+char 	EspDrv::_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
+int32_t EspDrv::_networkRssi[WL_NETWORKS_LIST_MAXNUM] = { 0 };
+uint8_t EspDrv::_networkEncr[WL_NETWORKS_LIST_MAXNUM] = { 0 };
 
 // Cached values of retrieved data
 char EspDrv::_ssid[] = {0};
@@ -397,6 +401,85 @@ int32_t EspDrv::getCurrentRSSI()
     return ret;
 }
 
+
+uint8_t EspDrv::getScanNetworks()
+{
+    uint8_t ssidListNum = 0;
+    int idx;
+	bool ret = false;
+	
+
+	espEmptyBuf();
+
+	LOGDEBUG(F("----------------------------------------------"));
+	LOGDEBUG(F(">> AT+CWLAP"));
+	
+	espSerial->println(F("AT+CWLAP"));
+
+	char buf[100];
+	
+	idx = readUntil(10000, "+CWLAP:(");
+	
+	while (idx == NUMESPTAGS)
+	{
+		_networkEncr[ssidListNum] = espSerial->parseInt();
+		//LOGDEBUG1("enc:", _networkEncr[ssidListNum]);
+		
+		// discard , and " characters
+		readUntil(1000, "\"");
+
+		idx = readUntil(1000, "\"", false);
+		if(idx==NUMESPTAGS)
+		{
+			ringBuf.getStr(_networkSsid[ssidListNum], 1);  // 1 = strlen ("\"")
+		}
+		//LOGDEBUG1("ssid:", _networkSsid[ssidListNum]);
+		
+		// discard , character
+		readUntil(1000, ",");
+		
+		_networkRssi[ssidListNum] = espSerial->parseInt();
+		//LOGDEBUG1("rssi:", _networkRssi[ssidListNum]);
+		
+		idx = readUntil(1000, "+CWLAP:(");
+
+		if(ssidListNum==WL_SSID_MAX_LENGTH-1)
+			break;
+
+		ssidListNum++;
+	}
+	
+	if (idx==-1)
+		return -1;
+
+	LOGDEBUG1(F("---------------------------------------------- >"), ssidListNum);
+	LOGDEBUG();
+    return ssidListNum;
+}
+
+char* EspDrv::getSSIDNetoworks(uint8_t networkItem)
+{
+	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
+		return NULL;
+
+	return _networkSsid[networkItem];
+}
+
+uint8_t EspDrv::getEncTypeNetowrks(uint8_t networkItem)
+{
+	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
+		return NULL;
+
+    return _networkEncr[networkItem];
+}
+
+int32_t EspDrv::getRSSINetoworks(uint8_t networkItem)
+{
+	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
+		return NULL;
+
+    return _networkRssi[networkItem];
+}
 
 char* EspDrv::getFwVersion()
 {

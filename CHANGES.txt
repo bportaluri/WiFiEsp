@@ -1,3 +1,7 @@
+1.5 (2016-01-25)
+  * Implemented scanNetworks method
+  * Increased ring buffer size to 32 to read long SSID names
+
 1.4.2 (2016-01-05)
   * Fixed compilation problem when using WiFiEspClient.print
 

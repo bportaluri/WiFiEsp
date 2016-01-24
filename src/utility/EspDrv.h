@@ -36,6 +36,9 @@ along with The Arduino WiFiEsp library.  If not, see
 // Size of a MAC-address or BSSID
 #define WL_IPV4_LENGTH 4
 
+// Maximum size of a SSID list
+#define WL_NETWORKS_LIST_MAXNUM	10
+
 // Maxmium number of socket
 #define	MAX_SOCK_NUM		4
 
@@ -89,7 +92,7 @@ typedef enum {
 /* Encryption modes */
 enum wl_enc_type {
 	ENC_TYPE_NONE = 0,
-	ENC_TYPE_WEP  = 1,
+	ENC_TYPE_WEP = 1,
 	ENC_TYPE_WPA_PSK = 2,
 	ENC_TYPE_WPA2_PSK = 3,
 	ENC_TYPE_WPA_WPA2_PSK = 4
@@ -194,7 +197,41 @@ public:
      */
     static int32_t getCurrentRSSI();
 
+    /*
+     * Get the networks available
+     *
+     * return: Number of discovered networks
+     */
+    static uint8_t getScanNetworks();
 
+	/*
+     * Return the SSID discovered during the network scan.
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: ssid string of the specified item on the networks scanned list
+     */
+    static char* getSSIDNetoworks(uint8_t networkItem);
+
+    /*
+     * Return the RSSI of the networks discovered during the scanNetworks
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: signed value of RSSI of the specified item on the networks scanned list
+     */
+    static int32_t getRSSINetoworks(uint8_t networkItem);
+
+    /*
+     * Return the encryption type of the networks discovered during the scanNetworks
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
+     */
+    static uint8_t getEncTypeNetowrks(uint8_t networkItem);
+	
+	
     /*
      * Get the firmware version
      */
@@ -245,7 +282,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 private:
-
 	static Stream *espSerial;
 
 	static long _bufPos;
@@ -253,6 +289,12 @@ private:
 
 	// firmware version string
 	static char 	fwVersion[WL_FW_VER_LENGTH];
+
+	// settings of requested network
+	static char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
+	static int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
+	static uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
+	
 
 	// settings of current selected network
 	static char 	_ssid[WL_SSID_MAX_LENGTH];
@@ -279,6 +321,7 @@ private:
 	static int timedRead();
 
 
+	friend class WiFiEsp;
 	friend class WiFiEspServer;
 	friend class WiFiEspClient;
 };

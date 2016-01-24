@@ -168,21 +168,46 @@ public:
 	uint8_t status();
 
 
+    /*
+      * Return the Encryption Type associated with the network
+      *
+      * return: one value of wl_enc_type enum
+      */
+    //uint8_t	encryptionType();
 
-	// NOT IMPLEMENTED
-	//uint8_t encryptionType();
+    /*
+     * Start scan WiFi networks available
+     *
+     * return: Number of discovered networks
+     */
+    int8_t scanNetworks();
 
-	// NOT IMPLEMENTED
-	//int8_t scanNetworks();
+    /*
+     * Return the SSID discovered during the network scan.
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: ssid string of the specified item on the networks scanned list
+     */
+    char*	SSID(uint8_t networkItem);
 
-	// NOT IMPLEMENTED
-	//char*	SSID(uint8_t networkItem);
+    /*
+     * Return the encryption type of the networks discovered during the scanNetworks
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
+     */
+    uint8_t	encryptionType(uint8_t networkItem);
 
-	// NOT IMPLEMENTED
-	//uint8_t encryptionType(uint8_t networkItem);
-
-	// NOT IMPLEMENTED
-	//int32_t RSSI(uint8_t networkItem);
+    /*
+     * Return the RSSI of the networks discovered during the scanNetworks
+     *
+     * param networkItem: specify from which network item want to get the information
+	 *
+     * return: signed value of RSSI of the specified item on the networks scanned list
+     */
+    int32_t RSSI(uint8_t networkItem);
 
 
 	// NOT IMPLEMENTED
