@@ -443,7 +443,7 @@ uint8_t EspDrv::getScanNetworks()
 		
 		idx = readUntil(1000, "+CWLAP:(");
 
-		if(ssidListNum==WL_SSID_MAX_LENGTH-1)
+		if(ssidListNum==WL_NETWORKS_LIST_MAXNUM-1)
 			break;
 
 		ssidListNum++;
