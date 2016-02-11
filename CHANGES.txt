@@ -1,4 +1,8 @@
-1.5 (2016-01-25)
+1.5.1 (2016-02-11)
+  * Fix in EspDrv.getScanNetworks method 
+  * Fix buffer overflow in getFwVersion
+
+  1.5 (2016-01-25)
   * Implemented scanNetworks method
   * Increased ring buffer size to 32 to read long SSID names
 
