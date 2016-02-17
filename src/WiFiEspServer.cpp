@@ -36,7 +36,7 @@ void WiFiEspServer::begin()
 
 	if (_started)
 	{
-		LOGINFO1(F("Server started on port"), 80);
+		LOGINFO1(F("Server started on port"), _port);
 	}
 	else
 	{
