@@ -46,7 +46,7 @@ typedef enum
 
 Stream *EspDrv::espSerial;
 
-RingBuffer EspDrv::ringBuf(32);
+WifiEspRingBuffer EspDrv::ringBuf(32);
 
 // Array of data to cache the information related to the networks discovered
 char 	EspDrv::_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
@@ -871,7 +871,7 @@ int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout, ...)
 
 	va_list args;
 	va_start (args, timeout);
-	vsnprintf_P (cmdBuf, CMD_BUFFER_SIZE, (char*)cmd, args);
+	vsnprintf (cmdBuf, CMD_BUFFER_SIZE, (char*)cmd, args);
 	va_end (args);
 
 	espEmptyBuf();
