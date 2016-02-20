@@ -77,7 +77,9 @@ bool WifiEspRingBuffer::endsWith(const char* str)
 	return true;
 }
 
-
+unsigned int WifiEspRingBuffer::getLength() {
+	return ringBufP - ringBuf;
+}
 
 void WifiEspRingBuffer::getStr(char * destination, unsigned int skipChars)
 {

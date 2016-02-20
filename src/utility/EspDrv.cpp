@@ -797,12 +797,18 @@ bool EspDrv::sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, co
 		if(idx==NUMESPTAGS)
 		{
 			// end tag found
-			ringBuf.getStr(outStr, strlen(endTag));
+			if( ringBuf.getLength() - strlen(endTag) <= outStrLen ) {
+				ringBuf.getStr(outStr, strlen(endTag));
 
-			// read the remaining part of the response
-			readUntil(2000);
+				// read the remaining part of the response
+				readUntil(2000);
 
-			ret = true;
+				ret = true;
+			} else {
+				LOGERROR(F("Buffer overflow in sendCmdGet"));
+			}
+
+			
 		}
 		else
 		{
