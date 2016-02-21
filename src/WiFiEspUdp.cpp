@@ -25,6 +25,9 @@ along with The Arduino WiFiEsp library.  If not, see
 /* Constructor */
 WiFiEspUDP::WiFiEspUDP() : _sock(NO_SOCKET_AVAIL) {}
 
+
+
+
 /* Start WiFiUDP socket, listening at local port PORT */
 
 uint8_t WiFiEspUDP::begin(uint16_t port)
@@ -32,8 +35,8 @@ uint8_t WiFiEspUDP::begin(uint16_t port)
     uint8_t sock = getFirstSocket();
     if (sock != NO_SOCKET_AVAIL)
     {
-        //EspDrv::startClient(host, port, _sock)
-		//ServerDrv::startServer(port, sock, UDP_MODE);
+        EspDrv::startClient("0", port, sock, UDP_MODE);
+		
         WiFiEspClass::_server_port[sock] = port;
         _sock = sock;
         _port = port;
@@ -76,7 +79,9 @@ int WiFiEspUDP::beginPacket(const char *host, uint16_t port)
 	  _sock = getFirstSocket();
   if (_sock != NO_SOCKET_AVAIL)
   {
-	  EspDrv::startClient(host, port, _sock, UDP_MODE);
+	  //EspDrv::startClient(host, port, _sock, UDP_MODE);
+	  _remotePort = port;
+	  strcpy(_remoteHost, host);
 	  WiFiEspClass::_state[_sock] = _sock;
 	  return 1;
   }
@@ -105,7 +110,7 @@ size_t WiFiEspUDP::write(uint8_t byte)
 
 size_t WiFiEspUDP::write(const uint8_t *buffer, size_t size)
 {
-	bool r = EspDrv::sendData(_sock, buffer, size);
+	bool r = EspDrv::sendDataUdp(_sock, _remoteHost, _remotePort, buffer, size);
 	if (!r)
 	{
 		return 0;
@@ -141,7 +146,6 @@ int WiFiEspUDP::read(unsigned char* buffer, size_t len)
 	if (bytes!=len)
 		LOGWARN1(bytes, len);
 
-
 	uint16_t size = 0;
 	if (!EspDrv::getDataBuf(_sock, buffer, &size))
 		return -1;
@@ -154,7 +158,6 @@ int WiFiEspUDP::peek()
   if (!available())
     return -1;
 
-  //ServerDrv::getData(_sock, &b, 1);
   return b;
 }
 
@@ -163,25 +166,19 @@ void WiFiEspUDP::flush()
   // TODO: a real check to ensure transmission has been completed
 }
 
+
 IPAddress  WiFiEspUDP::remoteIP()
 {
-	uint8_t _remoteIp[4] = {0};
-	uint8_t _remotePort[2] = {0};
-
-	//WiFiDrv::getRemoteData(_sock, _remoteIp, _remotePort);
-	IPAddress ip(_remoteIp);
-	return ip;
+	IPAddress ret;
+	EspDrv::getRemoteIpAddress(ret);
+	return ret;
 }
 
 uint16_t  WiFiEspUDP::remotePort()
 {
-	uint8_t _remoteIp[4] = {0};
-	uint8_t _remotePort[2] = {0};
-
-	// 	WiFiDrv::getRemoteData(_sock, _remoteIp, _remotePort);
-	uint16_t port = (_remotePort[0]<<8)+_remotePort[1];
-	return port;
+	return EspDrv::getRemotePort();
 }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////

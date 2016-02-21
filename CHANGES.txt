@@ -1,8 +1,15 @@
+1.6 (2016-02-21)
+  * Improved UDP support
+  * Added WiFiEspClient.remoteIP() method
+  * Consistent use use of uint16_t to manage port numbers
+  * Added AT+CIPDINFO=1 during init to return remote IP and port with IPD
+  * Added AT+CWAUTOCONN=0 during init to disable autoconnect
+
 1.5.1 (2016-02-11)
   * Fix in EspDrv.getScanNetworks method 
   * Fix buffer overflow in getFwVersion
 
-  1.5 (2016-01-25)
+1.5 (2016-01-25)
   * Implemented scanNetworks method
   * Increased ring buffer size to 32 to read long SSID names
 

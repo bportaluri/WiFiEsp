@@ -1,5 +1,14 @@
 /*
  WiFiEsp example: UdpNTPClient
+
+ Get the time from a Network Time Protocol (NTP) time server.
+ Demonstrates use of UDP to send and receive data packets
+ For more on NTP time servers and the messages needed to communicate with them,
+ see http://en.wikipedia.org/wiki/Network_Time_Protocol
+
+ NOTE: If you use SoftwareSerial you should increase
+ the _SS_MAX_RX_BUFF buffer size to 128 in SoftwareSerial.h under
+ Arduino\hardware\arduino\avr\libraries\SoftwareSerial
 */
 
 #include "WiFiEsp.h"
@@ -63,10 +72,10 @@ void loop()
   Serial.println(Udp.parsePacket());
   if (Udp.parsePacket()) {
     Serial.println("packet received");
-    // We've received a packet, read the data from it
-    Udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
+    // We've received a packet, read the data from it into the buffer
+    int aa = Udp.read(packetBuffer, NTP_PACKET_SIZE);
 
-    //the timestamp starts at byte 40 of the received packet and is four bytes,
+    // the timestamp starts at byte 40 of the received packet and is four bytes,
     // or two words, long. First, esxtract the two words:
 
     unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);

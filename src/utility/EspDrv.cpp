@@ -545,9 +545,9 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 
 	int ret;
 	if (protMode==TCP_MODE)
-		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%d"), 5000, sock, host, port);
+		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%u"), 5000, sock, host, port);
 	else
-		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"0\",0,%d,2"), 5000, sock, host, port);
+		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"%s\",0,%u,2"), 5000, sock, host, port);
 
 	return ret==TAG_OK;
 }
@@ -699,6 +699,7 @@ bool EspDrv::getDataBuf(uint8_t sock, uint8_t *_data, uint16_t *_dataLen)
 	for(int i=0; i<_bufPos; i++)
 	{
 		int c = timedRead();
+		//LOGDEBUG(c);
 		_data[i] = (char)c;
 	}
 

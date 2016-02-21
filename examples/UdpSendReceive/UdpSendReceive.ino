@@ -17,8 +17,8 @@
 SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
-char ssid[] = "WTwimRoma";            // your network SSID (name)
-char pass[] = "NonLaTrovi0.";        // your network password
+char ssid[] = "Twim";            // your network SSID (name)
+char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
 unsigned int localPort = 10002;   // local port to listen on
@@ -57,6 +57,9 @@ void setup() {
   Serial.println("\nStarting connection to server...");
   // if you get a connection, report back via serial:
   Udp.begin(localPort);
+  
+  Serial.print("Listening on port ");
+  Serial.println(localPort);
 }
 
 void loop() {

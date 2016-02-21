@@ -27,6 +27,11 @@ class WiFiEspUDP : public UDP {
 private:
   uint8_t _sock;  // socket ID for Wiz5100
   uint16_t _port; // local port to listen on
+  
+  
+  uint16_t _remotePort;
+  char _remoteHost[30];
+  
 
 public:
   WiFiEspUDP();  // Constructor
@@ -84,7 +89,6 @@ public:
 
   // Return the port of the host who sent the current incoming packet
   virtual uint16_t remotePort();
-
 
   uint8_t getFirstSocket();
 
