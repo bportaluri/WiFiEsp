@@ -78,23 +78,23 @@ The WiFiEspClient class creates clients that can connect to servers and send and
 - stop() - YES
 
 
-###WiFiUDP class (Experimental)
+###WiFiEspUDP class
 
 The UDP class enables UDP message to be sent and received.
 
 - WiFiUDP - YES
 - begin() - YES
 - available() - YES
-- beginPacket()
-- endPacket()
-- write()
-- parsePacket()
+- beginPacket() - YES
+- endPacket() - YES
+- write() - YES
+- parsePacket() - YES
 - peek()
-- read()
+- read() - YES
 - flush()
 - stop()
-- remoteIP()
-- remotePort() 
+- remoteIP() - YES
+- remotePort() - YES
 
 
 ##Contributing
