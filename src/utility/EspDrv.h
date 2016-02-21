@@ -242,41 +242,25 @@ public:
 	// Client/Server methods
 	////////////////////////////////////////////////////////////////////////////
 
-    /*
-	* Start a TCP server on the specified port
-	*/
+
 	static bool startServer(uint16_t port);
-
     static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
-
     static void stopClient(uint8_t sock);
-
     static uint8_t getServerState(uint8_t sock);
-
     static uint8_t getClientState(uint8_t sock);
-
     static bool getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose);
-
     static bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
-
-    static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len, bool appendCrLf=false);
-
+    static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
     static bool sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t len, bool appendCrLf=false);
-
+	static bool sendDataUdp(uint8_t sock, const char* host, uint16_t port, const uint8_t *data, uint16_t len);
     static uint16_t availData(uint8_t connId);
 
 
-	////////////////////////////////////////////////////////////////////////////
-	// Non standard methods
-	////////////////////////////////////////////////////////////////////////////
-
-	/*
-	* Ping a host.
-	*/
 	static bool ping(const char *host);
-
-
     static void reset();
+
+    static void getRemoteIpAddress(IPAddress& ip);
+    static uint16_t getRemotePort();
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,6 +270,10 @@ private:
 
 	static long _bufPos;
 	static uint8_t _connId;
+	
+	static uint16_t _remotePort;
+	static uint8_t  _remoteIp[WL_IPV4_LENGTH];
+	
 
 	// firmware version string
 	static char 	fwVersion[WL_FW_VER_LENGTH];
@@ -324,6 +312,7 @@ private:
 	friend class WiFiEsp;
 	friend class WiFiEspServer;
 	friend class WiFiEspClient;
+	friend class WiFiEspUdp;
 };
 
 extern EspDrv espDrv;

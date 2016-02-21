@@ -63,6 +63,8 @@ char EspDrv::fwVersion[] = {0};
 long EspDrv::_bufPos=0;
 uint8_t EspDrv::_connId=0;
 
+uint16_t EspDrv::_remotePort  =0;
+uint8_t EspDrv::_remoteIp[] = {0};
 
 
 void EspDrv::wifiDriverInit(Stream *espSerial)
@@ -113,6 +115,13 @@ void EspDrv::reset()
 
 	// set multiple connections mode
 	sendCmd(F("AT+CIPMUX=1"));
+
+	// Show remote IP and port with "+IPD"
+	sendCmd(F("AT+CIPDINFO=1"));
+	
+	// Disable autoconnect
+	// Automatic connection can create problems during initialization phase at next boot
+	sendCmd(F("AT+CWAUTOCONN=0"));
 
 	// enable DHCP
 	sendCmd(F("AT+CWDHCP=1,1"));
@@ -524,12 +533,21 @@ bool EspDrv::startServer(uint16_t port)
 bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode)
 {
 	LOGDEBUG2(F("> startClient"), host, port);
+	
+	// TCP
+	// AT+CIPSTART=<link ID>,"TCP",<remote IP>,<remote port>
+
+	// UDP
+	// AT+CIPSTART=<link ID>,"UDP",<remote IP>,<remote port>[,<UDP local port>,<UDP mode>]
+
+	// for UDP we set a dummy remote port and UDP mode to 2
+	// this allows to specify the target host/port in CIPSEND
 
 	int ret;
 	if (protMode==TCP_MODE)
 		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%d"), 5000, sock, host, port);
 	else
-		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"%s\",%d"), 5000, sock, host, port);
+		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"0\",0,%d,2"), 5000, sock, host, port);
 
 	return ret==TAG_OK;
 }
@@ -579,11 +597,24 @@ uint16_t EspDrv::availData(uint8_t connId)
 		if (espSerial->find((char *)"+IPD,"))
 		{
 			// format is : +IPD,<id>,<len>:<data>
+			// format is : +IPD,<ID>,<len>[,<remote IP>,<remote port>]:<data>
 
-			_connId = espSerial->parseInt();
-			espSerial->read();  // read the ',' character
-			_bufPos = espSerial->parseInt();
-			espSerial->read();  // read the ':' character
+			_connId = espSerial->parseInt();    // <ID>
+			espSerial->read();                  // ,
+			_bufPos = espSerial->parseInt();    // <len>
+			espSerial->read();                  // "
+			_remoteIp[0] = espSerial->parseInt();    // <remote IP>
+			espSerial->read();                  // .
+			_remoteIp[1] = espSerial->parseInt();
+			espSerial->read();                  // .
+			_remoteIp[2] = espSerial->parseInt();
+			espSerial->read();                  // .
+			_remoteIp[3] = espSerial->parseInt();
+			espSerial->read();                  // "
+			espSerial->read();                  // ,
+			_remotePort = espSerial->parseInt();     // <remote port>
+			
+			espSerial->read();                  // :
 
 			LOGDEBUG();
 			LOGDEBUG2(F("Data packet"), _connId, _bufPos);
@@ -689,12 +720,13 @@ bool EspDrv::sendUdpData(uint8_t sock)
 }
 */
 
-bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len, bool appendCrLf)
+
+bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 {
 	LOGDEBUG2(F("> sendData:"), sock, len);
 
 	char cmdBuf[20];
-	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len);
+	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u"), sock, len);
 	espSerial->println(cmdBuf);
 
 	int idx = readUntil(1000, (char *)">", false);
@@ -722,8 +754,8 @@ bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t le
 	LOGDEBUG2(F("> sendData:"), sock, len);
 
 	char cmdBuf[20];
-	int len2 = len + 2*appendCrLf;
-	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%d"), sock, len2);
+	uint16_t len2 = len + 2*appendCrLf;
+	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u"), sock, len2);
 	espSerial->println(cmdBuf);
 
 	int idx = readUntil(1000, (char *)">", false);
@@ -754,6 +786,47 @@ bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t le
 	}
 
     return true;
+}
+
+bool EspDrv::sendDataUdp(uint8_t sock, const char* host, uint16_t port, const uint8_t *data, uint16_t len)
+{
+	LOGDEBUG2(F("> sendDataUdp:"), sock, len);
+	LOGDEBUG2(F("> sendDataUdp:"), host, port);
+
+	char cmdBuf[40];
+	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u,\"%s\",%u"), sock, len, host, port);
+	//LOGDEBUG1(F("> sendDataUdp:"), cmdBuf);
+	espSerial->println(cmdBuf);
+
+	int idx = readUntil(1000, (char *)">", false);
+	if(idx!=NUMESPTAGS)
+	{
+		LOGERROR(F("Data packet send error (1)"));
+		return false;
+	}
+
+	espSerial->write(data, len);
+
+	idx = readUntil(2000);
+	if(idx!=TAG_SENDOK)
+	{
+		LOGERROR(F("Data packet send error (2)"));
+		return false;
+	}
+
+    return true;
+}
+
+
+
+void EspDrv::getRemoteIpAddress(IPAddress& ip)
+{
+	ip = _remoteIp;
+}
+
+uint16_t EspDrv::getRemotePort()
+{
+	return _remotePort;
 }
 
 

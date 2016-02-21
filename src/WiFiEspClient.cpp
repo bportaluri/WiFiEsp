@@ -239,6 +239,12 @@ uint8_t WiFiEspClient::status()
 	return CLOSED;
 }
 
+IPAddress WiFiEspClient::remoteIP()
+{
+	IPAddress ret;
+	EspDrv::getRemoteIpAddress(ret);
+	return ret;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Private Methods

@@ -111,6 +111,12 @@ public:
   using Print::println;
 
 
+  /*
+  * Returns the remote IP address.
+  */
+  IPAddress remoteIP();
+  
+
   friend class WiFiEspServer;
 
 private:
