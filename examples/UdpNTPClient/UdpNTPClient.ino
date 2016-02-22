@@ -6,9 +6,14 @@
  For more on NTP time servers and the messages needed to communicate with them,
  see http://en.wikipedia.org/wiki/Network_Time_Protocol
 
- NOTE: If you use SoftwareSerial you should increase
- the _SS_MAX_RX_BUFF buffer size to 128 in SoftwareSerial.h under
- Arduino\hardware\arduino\avr\libraries\SoftwareSerial
+ NOTE: The serial buffer size must be larger than 36 + packet size
+ In this example we use an UDP packet of 48 bytes so the buffer must be
+ at least 36+48=84 bytes that exceeds the default buffer size (64).
+ You must modify the serial buffer size to 128
+ For HardwareSerial modify _SS_MAX_RX_BUFF in
+   Arduino\hardware\arduino\avr\cores\arduino\SoftwareSerial.h
+ For SoftwareSerial modify _SS_MAX_RX_BUFF in
+   Arduino\hardware\arduino\avr\libraries\SoftwareSerial\SoftwareSerial.h
 */
 
 #include "WiFiEsp.h"
