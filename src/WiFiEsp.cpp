@@ -55,10 +55,14 @@ int WiFiEspClass::begin(char* ssid, const char *passphrase)
 }
 
 
-int WiFiEspClass::beginAP(char* ssid, const char* pwd, char channel, uint8_t enc)
+int WiFiEspClass::beginAP(char* ssid, const char* pwd, char channel, uint8_t enc, bool apOnly)
 {
-	espMode = 2;
-    if (EspDrv::wifiStartAP(ssid, pwd, channel, enc))
+	if(apOnly)
+        espMode = 2;
+    else
+        espMode = 3;
+    
+    if (EspDrv::wifiStartAP(ssid, pwd, channel, enc, espMode))
 		return WL_CONNECTED;
 
 	return WL_CONNECT_FAILED;

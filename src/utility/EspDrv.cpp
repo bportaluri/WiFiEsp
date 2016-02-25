@@ -137,7 +137,7 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 	// Escape character syntax is needed if "SSID" or "password" contains
 	// any special characters (',', '"' and '/')
 
-	// connect to access point
+    // connect to access point, use CUR mode to avoid connection at boot
 	int ret = sendCmd(F("AT+CWJAP_CUR=\"%s\",\"%s\""), 20000, ssid, passphrase);
 
 	if (ret==TAG_OK)
@@ -156,12 +156,13 @@ bool EspDrv::wifiConnect(char* ssid, const char *passphrase)
 }
 
 
-bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t enc)
+bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t enc, uint8_t espMode)
 {
 	LOGDEBUG(F("> wifiStartAP"));
 
-	// set AP mode, use CUR mode to avoid starting the AP at reboot
-	if (sendCmd(F("AT+CWMODE_CUR=2"))!=TAG_OK)
+	// set AP mode, use CUR mode to avoid automatic start at boot
+    int ret = sendCmd(F("AT+CWMODE_CUR=%d"), 10000, espMode);
+	if (ret!=TAG_OK)
 	{
 		LOGWARN1(F("Failed to set AP mode"), ssid);
 		return false;
@@ -173,7 +174,7 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 	// any special characters (',', '"' and '/')
 
 	// start access point
-	int ret = sendCmd(F("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), 10000, ssid, pwd, channel, enc);
+	ret = sendCmd(F("AT+CWSAP_CUR=\"%s\",\"%s\",%d,%d"), 10000, ssid, pwd, channel, enc);
 
 	if (ret!=TAG_OK)
 	{

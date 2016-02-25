@@ -226,8 +226,9 @@ public:
 	* param pwd: Passphrase. Valid characters in a passphrase
 	*		  must be between ASCII 32-126 (decimal).
 	* param enc: encryption type (enum wl_enc_type)
+	* param apOnly: Set to false if you want to run AP and Station modes simultaneously
 	*/
-	int beginAP(char* ssid, const char* pwd, char channel, uint8_t enc);
+	int beginAP(char* ssid, const char* pwd, char channel, uint8_t enc, bool apOnly=true);
 
 
 
