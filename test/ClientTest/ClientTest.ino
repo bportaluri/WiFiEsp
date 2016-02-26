@@ -13,8 +13,8 @@ SoftwareSerial Serial1(6, 7); // RX, TX
 #endif
 
 
-char ssid[] = "WTwim";    // network SSID (name)
-char pwd[] = "tiv05tiv"; // network password
+char ssid[] = "Twim";     // your network SSID (name)
+char pwd[] = "12345678";  // your network password
 
 
 // Initialize the Wifi client library

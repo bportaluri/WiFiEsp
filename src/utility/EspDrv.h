@@ -48,7 +48,7 @@ along with The Arduino WiFiEsp library.  If not, see
 // Default state value for Wifi state field
 #define NA_STATE -1
 
-#define WL_FW_VER_LENGTH 16
+#define WL_FW_VER_LENGTH 6
 
 #define NO_SOCKET_AVAIL 255
 

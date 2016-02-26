@@ -81,14 +81,25 @@ bool RingBuffer::endsWith(const char* str)
 
 void RingBuffer::getStr(char * destination, unsigned int skipChars)
 {
-  int len = ringBufP-ringBuf-skipChars;
+	int len = ringBufP-ringBuf-skipChars;
 
-  // copy buffer to destination string
-  strncpy(destination, ringBuf, len);
+	// copy buffer to destination string
+	strncpy(destination, ringBuf, len);
 
-  // terminate output string
-  destination[len]=0;
+	// terminate output string
+	//destination[len]=0;
+}
 
-  //Serial.print("xxxxxxxxxxxxxxxxxxx");
-  //Serial.println(destination);
+void RingBuffer::getStrN(char * destination, unsigned int skipChars, unsigned int num)
+{
+	int len = ringBufP-ringBuf-skipChars;
+
+	if (len>num)
+		len=num;
+
+	// copy buffer to destination string
+	strncpy(destination, ringBuf, len);
+
+	// terminate output string
+	//destination[len]=0;
 }

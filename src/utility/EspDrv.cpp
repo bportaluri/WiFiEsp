@@ -872,7 +872,8 @@ bool EspDrv::sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, co
 		if(idx==NUMESPTAGS)
 		{
 			// end tag found
-			ringBuf.getStr(outStr, strlen(endTag));
+			// copy result to output buffer avoiding overflow
+			ringBuf.getStrN(outStr, strlen(endTag), outStrLen-1);
 
 			// read the remaining part of the response
 			readUntil(2000);
