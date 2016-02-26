@@ -23,7 +23,7 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "IPAddress.h"
 
 
-#include "RingBuffer.h"
+#include "WifiEspRingBuffer.h"
 
 
 
@@ -292,7 +292,7 @@ private:
 
 
 	// the ring buffer is used to search the tags in the stream
-	static RingBuffer ringBuf;
+	static WifiEspRingBuffer ringBuf;
 
 
 	//static int sendCmd(const char* cmd, int timeout=1000);
