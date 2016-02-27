@@ -58,7 +58,39 @@ size_t WiFiEspClient::println(const __FlashStringHelper *ifsh)
 // Implementation of Client virtual methods
 ////////////////////////////////////////////////////////////////////////////////
 
+int WiFiEspClient::connectSSL(const char* host, uint16_t port)
+{
+	// SSL support in SDK 1.5.2 is still broken
+	return 0;
+	//return connect(host, port, true);
+}
+
+int WiFiEspClient::connectSSL(IPAddress ip, uint16_t port)
+{
+	// SSL support in SDK 1.5.2 is still broken
+	return 0;
+	
+	//char s[16];
+	//sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+	//return connect(s, port, true);
+}
+
 int WiFiEspClient::connect(const char* host, uint16_t port)
+{
+    return connect(host, port, false);
+}
+
+int WiFiEspClient::connect(IPAddress ip, uint16_t port)
+{
+	char s[16];
+	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+	return connect(s, port, false);
+}
+
+/* Private method */
+int WiFiEspClient::connect(const char* host, uint16_t port, bool ssl)
 {
 	LOGINFO1(F("Connecting to"), host);
 
@@ -77,14 +109,6 @@ int WiFiEspClient::connect(const char* host, uint16_t port)
     	return 0;
     }
     return 1;
-}
-
-int WiFiEspClient::connect(IPAddress ip, uint16_t port)
-{
-	char s[18];
-	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-
-	return connect(s, port);
 }
 
 
