@@ -49,7 +49,8 @@ uint8_t WiFiEspUDP::begin(uint16_t port)
 
 /* return number of bytes available in the current packet,
    will return zero if parsePacket hasn't been called yet */
-int WiFiEspUDP::available() {
+int WiFiEspUDP::available()
+{
 	 if (_sock != NO_SOCKET_AVAIL)
 	 {
 		int bytes = EspDrv::availData(_sock);
@@ -136,20 +137,11 @@ int WiFiEspUDP::read()
 	return b;
 }
 
-int WiFiEspUDP::read(unsigned char* buffer, size_t len)
+int WiFiEspUDP::read(uint8_t* buf, size_t size)
 {
-	int bytes = available();
-
-	if(bytes==-1)
+	if (!available())
 		return -1;
-
-	if (bytes!=len)
-		LOGWARN1(bytes, len);
-
-	uint16_t size = 0;
-	if (!EspDrv::getDataBuf(_sock, buffer, &size))
-		return -1;
-	return size;
+	return EspDrv::getDataBuf(_sock, buf, size);
 }
 
 int WiFiEspUDP::peek()

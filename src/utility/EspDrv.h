@@ -249,7 +249,7 @@ public:
     static uint8_t getServerState(uint8_t sock);
     static uint8_t getClientState(uint8_t sock);
     static bool getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose);
-    static bool getDataBuf(uint8_t sock, uint8_t *data, uint16_t *len);
+    static int getDataBuf(uint8_t connId, uint8_t *buf, uint16_t bufSize);
     static bool sendData(uint8_t sock, const uint8_t *data, uint16_t len);
     static bool sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t len, bool appendCrLf=false);
 	static bool sendDataUdp(uint8_t sock, const char* host, uint16_t port, const uint8_t *data, uint16_t len);

@@ -21,7 +21,7 @@ char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
-unsigned int localPort = 10002;   // local port to listen on
+unsigned int localPort = 10002;  // local port to listen on
 
 char packetBuffer[255];          // buffer to hold incoming packet
 char ReplyBuffer[] = "ACK";      // a string to send back

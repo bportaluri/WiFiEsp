@@ -175,11 +175,9 @@ int WiFiEspClient::read()
 
 int WiFiEspClient::read(uint8_t* buf, size_t size)
 {
-	uint16_t _size = size;
-
-	if (!EspDrv::getDataBuf(_sock, buf, &_size))
+	if (!available())
 		return -1;
-	return 0;
+	return EspDrv::getDataBuf(_sock, buf, size);
 }
 
 int WiFiEspClient::peek()

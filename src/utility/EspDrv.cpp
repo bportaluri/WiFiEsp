@@ -691,36 +691,36 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose)
     _bufPos = 0;
 	_connId = 0;
 	*data = 0;
+	
 	return false;
 }
 
-
-bool EspDrv::getDataBuf(uint8_t sock, uint8_t *_data, uint16_t *_dataLen)
+/**
+ * Receive the data into a buffer.
+ * It reads up to bufSize bytes.
+ * @return	received data size for success else -1.
+ */
+int EspDrv::getDataBuf(uint8_t connId, uint8_t *buf, uint16_t bufSize)
 {
-	for(int i=0; i<_bufPos; i++)
+	if (connId!=_connId)
+		return false;
+
+	if(_bufPos<bufSize)
+		bufSize = _bufPos;
+	
+	for(int i=0; i<bufSize; i++)
 	{
 		int c = timedRead();
 		//LOGDEBUG(c);
-		_data[i] = (char)c;
+		if(c==-1)
+			return -1;
+		
+		buf[i] = (char)c;
+		_bufPos--;
 	}
 
-	*_dataLen = _bufPos;
-	_bufPos = 0;
-
-	return true;
+	return bufSize;
 }
-
-/*
-bool EspDrv::insertDataBuf(uint8_t sock, const uint8_t *data, uint16_t _len)
-{
-    return false;
-}
-
-bool EspDrv::sendUdpData(uint8_t sock)
-{
-    return false;
-}
-*/
 
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
