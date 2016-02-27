@@ -223,12 +223,19 @@ public:
 	* Start the ESP access point.
 	*
 	* param ssid: Pointer to the SSID string.
+	* param channel: WiFi channel (1-14)
 	* param pwd: Passphrase. Valid characters in a passphrase
 	*		  must be between ASCII 32-126 (decimal).
 	* param enc: encryption type (enum wl_enc_type)
 	* param apOnly: Set to false if you want to run AP and Station modes simultaneously
 	*/
-	int beginAP(char* ssid, const char* pwd, char channel, uint8_t enc, bool apOnly=true);
+	int beginAP(char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly=true);
+
+	/*
+	* Start the ESP access point with open security.
+	*/
+	int beginAP(char* ssid);
+	int beginAP(char* ssid, uint8_t channel);
 
 
 

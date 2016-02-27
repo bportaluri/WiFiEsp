@@ -45,7 +45,7 @@ void setup()
   Serial.println(ssid);
   
   // start access point
-  status = WiFi.beginAP(ssid, pass, 10, 3);
+  status = WiFi.beginAP(ssid, 10, pass, ENC_TYPE_WPA2_PSK);
 
   Serial.println("Access point started");
   printWifiStatus();

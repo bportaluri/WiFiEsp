@@ -55,7 +55,7 @@ int WiFiEspClass::begin(char* ssid, const char *passphrase)
 }
 
 
-int WiFiEspClass::beginAP(char* ssid, const char* pwd, char channel, uint8_t enc, bool apOnly)
+int WiFiEspClass::beginAP(char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly)
 {
 	if(apOnly)
         espMode = 2;
@@ -66,6 +66,16 @@ int WiFiEspClass::beginAP(char* ssid, const char* pwd, char channel, uint8_t enc
 		return WL_CONNECTED;
 
 	return WL_CONNECT_FAILED;
+}
+
+int WiFiEspClass::beginAP(char* ssid)
+{
+	return beginAP(ssid, 10, "", 0);
+}
+
+int WiFiEspClass::beginAP(char* ssid, uint8_t channel)
+{
+	return beginAP(ssid, channel, "", 0);
 }
 
 
