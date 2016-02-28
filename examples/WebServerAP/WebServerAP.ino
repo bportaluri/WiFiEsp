@@ -43,6 +43,10 @@ void setup()
 
   Serial.print("Attempting to start AP ");
   Serial.println(ssid);
+
+  // uncomment these two lines if you want to set the IP address of the AP
+  //IPAddress localIp(192, 168, 111, 111);
+  //WiFi.configAP(localIp);
   
   // start access point
   status = WiFi.beginAP(ssid, 10, pass, ENC_TYPE_WPA2_PSK);

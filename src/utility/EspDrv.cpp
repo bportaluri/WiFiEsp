@@ -168,7 +168,6 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 		return false;
 	}
 
-
 	// TODO
 	// Escape character syntax is needed if "SSID" or "password" contains
 	// any special characters (',', '"' and '/')
@@ -182,8 +181,10 @@ bool EspDrv::wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t e
 		return false;
 	}
 	
-	// enable DHCP for AP mode
-	sendCmd(F("AT+CWDHCP_CUR=0,1"));
+	if (espMode==2)
+		sendCmd(F("AT+CWDHCP_CUR=0,1"));    // enable DHCP for AP mode
+	if (espMode==3)
+		sendCmd(F("AT+CWDHCP_CUR=2,1"));    // enable DHCP for station and AP mode
 
 	LOGINFO1(F("Access point started"), ssid);
 	return true;
@@ -204,22 +205,50 @@ int8_t EspDrv::disconnect()
 	return WL_DISCONNECTED;
 }
 
-void EspDrv::config(uint32_t local_ip)
+void EspDrv::config(IPAddress ip)
 {
 	LOGDEBUG(F("> config"));
 
-	// TODO Not tested yet
+	// disable station DHCP
+	sendCmd(F("AT+CWDHCP_CUR=1,0"));
+	
+	// it seems we need to wait here...
+	delay(500);
+	
+	char buf[16];
+	sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 
-	// disable DHCP
-	sendCmd(F("AT+CWDHCP_DEF=0,0"));
-
-	int ret = sendCmd(F("AT+CIPSTA_CUR=\"%s\""), 5000, local_ip);
+	int ret = sendCmd(F("AT+CIPSTA_CUR=\"%s\""), 2000, buf);
+	delay(500);
 
 	if (ret==TAG_OK)
 	{
-		LOGINFO1(F("IP address"), local_ip);
+		LOGINFO1(F("IP address set"), buf);
 	}
+}
 
+void EspDrv::configAP(IPAddress ip)
+{
+	LOGDEBUG(F("> config"));
+	
+    sendCmd(F("AT+CWMODE_CUR=2"));
+	
+	// disable station DHCP
+	sendCmd(F("AT+CWDHCP_CUR=2,0"));
+	
+	// it seems we need to wait here...
+	delay(500);
+	
+	char buf[16];
+	sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+	int ret = sendCmd(F("AT+CIPAP_CUR=\"%s\""), 2000, buf);
+	delay(500);
+
+	if (ret==TAG_OK)
+	{
+		LOGINFO1(F("IP address set"), buf);
+	}
 }
 
 uint8_t EspDrv::getConnectionStatus()
@@ -315,7 +344,6 @@ void EspDrv::getIpAddress(IPAddress& ip)
 {
 	LOGDEBUG(F("> getIpAddress"));
 
-	// AT+CIFSR or AT+CIPSTA?
 	char buf[20];
 	if (sendCmdGet(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
 	{
@@ -433,7 +461,6 @@ uint8_t EspDrv::getScanNetworks()
 	while (idx == NUMESPTAGS)
 	{
 		_networkEncr[ssidListNum] = espSerial->parseInt();
-		//LOGDEBUG1("enc:", _networkEncr[ssidListNum]);
 		
 		// discard , and " characters
 		readUntil(1000, "\"");
@@ -443,13 +470,11 @@ uint8_t EspDrv::getScanNetworks()
 		{
 			ringBuf.getStr(_networkSsid[ssidListNum], 1);  // 1 = strlen ("\"")
 		}
-		//LOGDEBUG1("ssid:", _networkSsid[ssidListNum]);
 		
 		// discard , character
 		readUntil(1000, ",");
 		
 		_networkRssi[ssidListNum] = espSerial->parseInt();
-		//LOGDEBUG1("rssi:", _networkRssi[ssidListNum]);
 		
 		idx = readUntil(1000, "+CWLAP:(");
 

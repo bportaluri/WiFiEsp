@@ -79,12 +79,16 @@ int WiFiEspClass::beginAP(char* ssid, uint8_t channel)
 }
 
 
-
-void WiFiEspClass::config(IPAddress local_ip)
+void WiFiEspClass::config(IPAddress ip)
 {
-	LOGERROR(F("Not implemented"));
-	//EspDrv::config(1, (uint32_t)local_ip, 0, 0);
+	EspDrv::config(ip);
 }
+
+void WiFiEspClass::configAP(IPAddress ip)
+{
+	EspDrv::configAP(ip);
+}
+
 
 
 int WiFiEspClass::disconnect()

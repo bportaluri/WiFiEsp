@@ -27,7 +27,7 @@ void setup()
 
 void loop()
 {
-  assertEquals("Firmware version", WiFi.firmwareVersion(), "1.5.0");
+  assertEquals("Firmware version", WiFi.firmwareVersion(), "1.5.2");
   assertEquals("Status is (WL_DISCONNECTED)", WiFi.status(), WL_DISCONNECTED);
   assertEquals("Connect", WiFi.begin(ssid, pwd), WL_CONNECTED);
   assertEquals("Check status (WL_CONNECTED)", WiFi.status(), WL_CONNECTED);
@@ -60,6 +60,16 @@ void loop()
   assertEquals("IP Address", WiFi.localIP(), 0);
   assertEquals("Check SSID", WiFi.SSID(), "");
   assertEquals("Wrong pwd", WiFi.begin(ssid, pwdErr), WL_CONNECT_FAILED);
+
+  IPAddress localIp(192, 168, 168, 111);
+  WiFi.config(localIp);
+  
+  assertEquals("Connect", WiFi.begin(ssid, pwd), WL_CONNECTED);
+  assertEquals("Check status (WL_CONNECTED)", WiFi.status(), WL_CONNECTED);
+
+  ip = WiFi.localIP();
+  assertNotEquals("Check IP Address", ip[0], 0);
+
 
   Serial.println("END OF TESTS");
   delay(60000);

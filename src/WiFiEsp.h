@@ -237,6 +237,13 @@ public:
 	int beginAP(char* ssid);
 	int beginAP(char* ssid, uint8_t channel);
 
+	/**
+	* Change IP address of the AP
+	*
+	* param ip:	Static ip configuration
+	*/
+	void configAP(IPAddress ip);
+
 
 
 	/**

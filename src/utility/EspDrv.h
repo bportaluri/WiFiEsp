@@ -138,9 +138,14 @@ public:
 
 
     /*
-	 *Set ip configuration disabling dhcp client
-	*/
-    static void config(uint32_t local_ip);
+	 * Set ip configuration disabling dhcp client
+	 */
+    static void config(IPAddress local_ip);
+
+    /*
+	 * Set ip configuration disabling dhcp client
+	 */
+    static void configAP(IPAddress local_ip);
 
 
     /*
