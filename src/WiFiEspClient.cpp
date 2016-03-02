@@ -60,25 +60,19 @@ size_t WiFiEspClient::println(const __FlashStringHelper *ifsh)
 
 int WiFiEspClient::connectSSL(const char* host, uint16_t port)
 {
-	// SSL support in SDK 1.5.2 is still broken
-	return 0;
-	//return connect(host, port, true);
+	return connect(host, port, SSL_MODE);
 }
 
 int WiFiEspClient::connectSSL(IPAddress ip, uint16_t port)
 {
-	// SSL support in SDK 1.5.2 is still broken
-	return 0;
-	
-	//char s[16];
-	//sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-
-	//return connect(s, port, true);
+	char s[16];
+	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	return connect(s, port, SSL_MODE);
 }
 
 int WiFiEspClient::connect(const char* host, uint16_t port)
 {
-    return connect(host, port, false);
+    return connect(host, port, TCP_MODE);
 }
 
 int WiFiEspClient::connect(IPAddress ip, uint16_t port)
@@ -86,11 +80,11 @@ int WiFiEspClient::connect(IPAddress ip, uint16_t port)
 	char s[16];
 	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 
-	return connect(s, port, false);
+	return connect(s, port, TCP_MODE);
 }
 
 /* Private method */
-int WiFiEspClient::connect(const char* host, uint16_t port, bool ssl)
+int WiFiEspClient::connect(const char* host, uint16_t port, uint8_t protMode)
 {
 	LOGINFO1(F("Connecting to"), host);
 
@@ -98,7 +92,7 @@ int WiFiEspClient::connect(const char* host, uint16_t port, bool ssl)
 
     if (_sock != NO_SOCKET_AVAIL)
     {
-    	if (!EspDrv::startClient(host, port, _sock))
+    	if (!EspDrv::startClient(host, port, _sock, protMode))
 			return 0;
 
     	WiFiEspClass::_state[_sock] = _sock;

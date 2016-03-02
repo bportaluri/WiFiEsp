@@ -57,7 +57,7 @@ along with The Arduino WiFiEsp library.  If not, see
 #define CMD_BUFFER_SIZE 200
 
 
-typedef enum eProtMode {TCP_MODE, UDP_MODE} tProtMode;
+typedef enum eProtMode {TCP_MODE, UDP_MODE, SSL_MODE} tProtMode;
 
 
 typedef enum {
@@ -249,7 +249,7 @@ public:
 
 
 	static bool startServer(uint16_t port);
-    static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode=TCP_MODE);
+    static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode);
     static void stopClient(uint8_t sock);
     static uint8_t getServerState(uint8_t sock);
     static uint8_t getClientState(uint8_t sock);

@@ -1,3 +1,10 @@
+2.1 (2016-xx-x)
+  * SSL connection support
+  * Implementation of config and configAP methods
+  * Fixed read methods WiFiEspClient.read(buf, size) and WiFiEspUDP::read(buf, size)
+  * Fixed possible buffer overflow in EspDrv.sendCmdGet
+  * Added beginAP methods similar to WiFi101 library - parameters order for beginAP is now different!
+
 1.6 (2016-02-21)
   * Improved UDP support
   * Added WiFiEspClient.remoteIP() method

@@ -51,6 +51,7 @@ WiFiEspClient WiFiEspServer::available(byte* status)
 	int bytes = EspDrv::availData(0);
 	if (bytes>0)
 	{
+		LOGINFO1(F("New client"), EspDrv::_connId);
 		WiFiEspClient client(EspDrv::_connId);
 		return client;
 	}

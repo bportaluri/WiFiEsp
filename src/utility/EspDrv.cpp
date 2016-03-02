@@ -76,7 +76,7 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 	if (sendCmd(F("AT")) != TAG_OK)
 	{
 		LOGERROR(F("Cannot initialize ESP module"));
-		delay(8000);
+		delay(5000);
 		return;
 	}
 
@@ -112,6 +112,7 @@ void EspDrv::reset()
 
 	// set station mode
 	sendCmd(F("AT+CWMODE=1"));
+	delay(200);
 
 	// set multiple connections mode
 	sendCmd(F("AT+CIPMUX=1"));
@@ -125,6 +126,7 @@ void EspDrv::reset()
 
 	// enable DHCP
 	sendCmd(F("AT+CWDHCP=1,1"));
+	delay(200);
 }
 
 
@@ -572,7 +574,13 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	int ret;
 	if (protMode==TCP_MODE)
 		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%u"), 5000, sock, host, port);
-	else
+	else if (protMode==SSL_MODE)
+	{
+		// better to put the CIPSSLSIZE here because it is not supported before firmware 1.4
+		sendCmd(F("AT+CIPSSLSIZE=4096"));
+		ret = sendCmd(F("AT+CIPSTART=%d,\"SSL\",\"%s\",%u"), 5000, sock, host, port);
+	}
+	else if (protMode==UDP_MODE)
 		ret = sendCmd(F("AT+CIPSTART=%d,\"UDP\",\"%s\",0,%u,2"), 5000, sock, host, port);
 
 	return ret==TAG_OK;
