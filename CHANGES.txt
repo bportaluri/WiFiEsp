@@ -1,4 +1,4 @@
-2.1 (2016-xx-x)
+2.1 (2016-03-13)
   * SSL connection support
   * Implementation of config and configAP methods
   * Fixed read methods WiFiEspClient.read(buf, size) and WiFiEspUDP::read(buf, size)
