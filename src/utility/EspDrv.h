@@ -178,6 +178,21 @@ public:
 
 	static void getIpAddressAP(IPAddress& ip);
 
+    /*
+     * Get the interface IP netmask.
+     * This can be used to retrieve settings configured through DHCP.
+     *
+     * return: true if successful
+     */
+    static bool getNetmask(IPAddress& mask);
+
+    /*
+     * Get the interface IP gateway.
+     * This can be used to retrieve settings configured through DHCP.
+     *
+     * return: true if successful
+     */
+    static bool getGateway(IPAddress& mask);
 
     /*
      * Return the current SSID associated with the network
@@ -235,8 +250,8 @@ public:
      * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
      */
     static uint8_t getEncTypeNetowrks(uint8_t networkItem);
-	
-	
+
+
     /*
      * Get the firmware version
      */
@@ -275,10 +290,10 @@ private:
 
 	static long _bufPos;
 	static uint8_t _connId;
-	
+
 	static uint16_t _remotePort;
 	static uint8_t  _remoteIp[WL_IPV4_LENGTH];
-	
+
 
 	// firmware version string
 	static char 	fwVersion[WL_FW_VER_LENGTH];
@@ -287,7 +302,7 @@ private:
 	static char 	_networkSsid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
 	static int32_t 	_networkRssi[WL_NETWORKS_LIST_MAXNUM];
 	static uint8_t 	_networkEncr[WL_NETWORKS_LIST_MAXNUM];
-	
+
 
 	// settings of current selected network
 	static char 	_ssid[WL_SSID_MAX_LENGTH];

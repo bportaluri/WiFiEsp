@@ -494,6 +494,32 @@ uint8_t EspDrv::getScanNetworks()
     return ssidListNum;
 }
 
+bool EspDrv::getNetmask(IPAddress& mask) {
+  LOGDEBUG(F("> getNetmask"));
+
+	char buf[20];
+	if (sendCmdGet(F("AT+CIPSTA?"), F("+CIPSTA:netmask:\""), F("\""), buf, sizeof(buf)))
+	{
+    mask.fromString (buf);
+    return true;
+	}
+
+  return false;
+}
+
+bool EspDrv::getGateway(IPAddress& gw) {
+  LOGDEBUG(F("> getGateway"));
+
+	char buf[20];
+	if (sendCmdGet(F("AT+CIPSTA?"), F("+CIPSTA:gateway:\""), F("\""), buf, sizeof(buf)))
+	{
+    gw.fromString (buf);
+    return true;
+	}
+
+  return false;
+}
+
 char* EspDrv::getSSIDNetoworks(uint8_t networkItem)
 {
 	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
