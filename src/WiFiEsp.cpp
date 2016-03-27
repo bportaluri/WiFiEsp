@@ -114,6 +114,21 @@ IPAddress WiFiEspClass::localIP()
 	return ret;
 }
 
+IPAddress WiFiEspClass::subnetMask()
+{
+	IPAddress mask;
+	if(espMode==1)
+    EspDrv::getNetmask(mask);
+	return mask;
+}
+
+IPAddress WiFiEspClass::gatewayIP()
+{
+	IPAddress gw;
+	if(espMode==1)
+		EspDrv::getGateway(gw);
+	return gw;
+}
 
 
 char* WiFiEspClass::SSID()
