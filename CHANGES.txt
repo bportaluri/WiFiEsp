@@ -1,3 +1,6 @@
+2.1.1 (2016-05-09)
+  * Implemented gatwayIP() and subnetMask() methods
+
 2.1 (2016-03-13)
   * SSL connection support
   * Implementation of config and configAP methods
