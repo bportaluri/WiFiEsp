@@ -1,3 +1,7 @@
+2.1.2 (2016-05-08)
+  * Added retry in EspDrv::wifiDriverInit method
+  * Clean buffer in ScanNetwork (bug #43)
+
 2.1.1 (2016-05-09)
   * Implemented gatwayIP() and subnetMask() methods
 
