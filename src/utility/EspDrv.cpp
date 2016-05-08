@@ -483,6 +483,7 @@ uint8_t EspDrv::getScanNetworks()
 		if(idx==NUMESPTAGS)
 		{
 			memset(_networkSsid[ssidListNum], 0, WL_SSID_MAX_LENGTH );
+			ringBuf.getStrN(_networkSsid[ssidListNum], 1, WL_SSID_MAX_LENGTH-1);
 		}
 		
 		// discard , character
