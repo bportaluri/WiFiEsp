@@ -508,29 +508,30 @@ uint8_t EspDrv::getScanNetworks()
 }
 
 bool EspDrv::getNetmask(IPAddress& mask) {
-  LOGDEBUG(F("> getNetmask"));
+	LOGDEBUG(F("> getNetmask"));
 
 	char buf[20];
 	if (sendCmdGet(F("AT+CIPSTA?"), F("+CIPSTA:netmask:\""), F("\""), buf, sizeof(buf)))
 	{
-    mask.fromString (buf);
-    return true;
+		mask.fromString (buf);
+		return true;
 	}
 
-  return false;
+	return false;
 }
 
-bool EspDrv::getGateway(IPAddress& gw) {
-  LOGDEBUG(F("> getGateway"));
+bool EspDrv::getGateway(IPAddress& gw)
+{
+	LOGDEBUG(F("> getGateway"));
 
 	char buf[20];
 	if (sendCmdGet(F("AT+CIPSTA?"), F("+CIPSTA:gateway:\""), F("\""), buf, sizeof(buf)))
 	{
-    gw.fromString (buf);
-    return true;
+		gw.fromString (buf);
+		return true;
 	}
 
-  return false;
+	return false;
 }
 
 char* EspDrv::getSSIDNetoworks(uint8_t networkItem)
@@ -574,14 +575,12 @@ bool EspDrv::ping(const char *host)
 {
 	LOGDEBUG(F("> ping"));
 
-	int ret = sendCmd(F("AT+PING=\"%s\""), 2000, host);
-
-	if (ret==TAG_OK);
-	{
+	int ret = sendCmd(F("AT+PING=\"%s\""), 8000, host);
+	
+	if (ret==TAG_OK)
 		return true;
-	}
 
-    return false;
+	return false;
 }
 
 
