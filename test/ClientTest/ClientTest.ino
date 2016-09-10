@@ -65,7 +65,7 @@ void loop()
   
   assertEquals("Response received", (millis()-_startMillis < 2000), true);
   
-  f = client.find("<html>");
+  f = client.find((char *) "<html>");
   assertEquals("Response check", f, true);
   if (f)
   {
@@ -102,7 +102,7 @@ void loop()
   
   assertEquals("Response received", (millis()-_startMillis < 2000), true);
   
-  f = client.find("<html>");
+  f = client.find((char *) "<html>");
   assertEquals("Response check", f, true);
   if (f)
   {
