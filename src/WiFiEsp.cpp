@@ -206,5 +206,28 @@ bool WiFiEspClass::ping(const char *host)
 	return EspDrv::ping(host);
 }
 
+static uint8_t WiFiEspClass::getFreeSocket()
+{
+  // ESP Module assigns socket numbers in ascending order, so we will assign them in descending order
+    for (int i = MAX_SOCK_NUM - 1; i >= 0; i--)
+	{
+      if (_state[i] == NA_STATE)
+      {
+          return i;
+      }
+    }
+    return SOCK_NOT_AVAIL;
+}
+
+static void WiFiEspClass::allocateSocket(uint8_t sock)
+{
+  _state[sock] = sock;
+}
+
+static void WiFiEspClass::releaseSocket(uint8_t sock)
+{
+  _state[sock] = NA_STATE;
+}
+
 
 WiFiEspClass WiFi;

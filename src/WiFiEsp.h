@@ -261,6 +261,10 @@ public:
 	friend class WiFiEspServer;
 
 private:
+	static uint8_t getFreeSocket();
+	static void allocateSocket(uint8_t sock);
+	static void releaseSocket(uint8_t sock);
+
 	static uint8_t espMode;
 };
 
