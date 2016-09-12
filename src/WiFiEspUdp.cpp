@@ -32,7 +32,7 @@ WiFiEspUDP::WiFiEspUDP() : _sock(NO_SOCKET_AVAIL) {}
 
 uint8_t WiFiEspUDP::begin(uint16_t port)
 {
-    uint8_t sock = getFirstSocket();
+    uint8_t sock = WiFiEspClass::getFreeSocket();
     if (sock != NO_SOCKET_AVAIL)
     {
         EspDrv::startClient("0", port, sock, UDP_MODE);
@@ -77,13 +77,13 @@ void WiFiEspUDP::stop()
 int WiFiEspUDP::beginPacket(const char *host, uint16_t port)
 {
   if (_sock == NO_SOCKET_AVAIL)
-	  _sock = getFirstSocket();
+	  _sock = WiFiEspClass::getFreeSocket();
   if (_sock != NO_SOCKET_AVAIL)
   {
 	  //EspDrv::startClient(host, port, _sock, UDP_MODE);
 	  _remotePort = port;
 	  strcpy(_remoteHost, host);
-	  WiFiEspClass::_state[_sock] = _sock;
+	  WiFiEspClass::allocateSocket(_sock);
 	  return 1;
   }
   return 0;
@@ -177,17 +177,4 @@ uint16_t  WiFiEspUDP::remotePort()
 // Private Methods
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO remove duplication with WiFiEspClient::getFirstSocket()
-
-uint8_t WiFiEspUDP::getFirstSocket()
-{
-    for (int i = 0; i < MAX_SOCK_NUM; i++)
-	{
-      if (WiFiEspClass::_state[i] == NA_STATE)
-      {
-          return i;
-      }
-    }
-    return SOCK_NOT_AVAIL;
-}
 

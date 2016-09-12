@@ -259,6 +259,7 @@ public:
 
 	friend class WiFiEspClient;
 	friend class WiFiEspServer;
+	friend class WiFiEspUDP;
 
 private:
 	static uint8_t getFreeSocket();
