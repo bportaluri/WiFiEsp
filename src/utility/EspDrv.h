@@ -263,7 +263,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////
 
 
-	static bool startServer(uint16_t port);
+    static bool startServer(uint16_t port, uint8_t sock);
     static bool startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode);
     static void stopClient(uint8_t sock);
     static uint8_t getServerState(uint8_t sock);

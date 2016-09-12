@@ -586,11 +586,11 @@ bool EspDrv::ping(const char *host)
 
 
 // Start server TCP on port specified
-bool EspDrv::startServer(uint16_t port)
+bool EspDrv::startServer(uint16_t port, uint8_t sock)
 {
 	LOGDEBUG1(F("> startServer"), port);
 
-	int ret = sendCmd(F("AT+CIPSERVER=1,%d"), 1000, port);
+	int ret = sendCmd(F("AT+CIPSERVER=%d,%d"), 1000, sock, port);
 
 	return ret==TAG_OK;
 }
