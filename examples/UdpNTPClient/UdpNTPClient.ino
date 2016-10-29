@@ -33,6 +33,7 @@ char timeServer[] = "time.nist.gov";  // NTP server
 unsigned int localPort = 2390;        // local port to listen for UDP packets
 
 const int NTP_PACKET_SIZE = 48;  // NTP timestamp is in the first 48 bytes of the message
+const int UDP_TIMEOUT = 1000;    // timeout in miliseconds to wait for an UDP packet to arrive
 
 byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming and outgoing packets
 
@@ -72,8 +73,10 @@ void setup()
 void loop()
 {
   sendNTPpacket(timeServer); // send an NTP packet to a time server
-  // wait to see if a reply is available
-  delay(1000);
+  // wait for a reply for UDP_TIMEOUT miliseconds
+  startMs = millis();
+  while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {}
+
   Serial.println(Udp.parsePacket());
   if (Udp.parsePacket()) {
     Serial.println("packet received");
