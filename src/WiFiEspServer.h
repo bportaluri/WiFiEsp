@@ -55,6 +55,7 @@ public:
 
 private:
 	uint16_t _port;
+	uint8_t _sock;
 	bool _started;
 
 };

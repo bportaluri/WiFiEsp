@@ -90,8 +90,6 @@ public:
   // Return the port of the host who sent the current incoming packet
   virtual uint16_t remotePort();
 
-  uint8_t getFirstSocket();
-
 
   friend class WiFiEspServer;
 };

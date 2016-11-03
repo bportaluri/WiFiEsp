@@ -259,8 +259,13 @@ public:
 
 	friend class WiFiEspClient;
 	friend class WiFiEspServer;
+	friend class WiFiEspUDP;
 
 private:
+	static uint8_t getFreeSocket();
+	static void allocateSocket(uint8_t sock);
+	static void releaseSocket(uint8_t sock);
+
 	static uint8_t espMode;
 };
 
