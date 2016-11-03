@@ -33,7 +33,7 @@ char timeServer[] = "time.nist.gov";  // NTP server
 unsigned int localPort = 2390;        // local port to listen for UDP packets
 
 const int NTP_PACKET_SIZE = 48;  // NTP timestamp is in the first 48 bytes of the message
-const int UDP_TIMEOUT = 1000;    // timeout in miliseconds to wait for an UDP packet to arrive
+const int UDP_TIMEOUT = 2000;    // timeout in miliseconds to wait for an UDP packet to arrive
 
 byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming and outgoing packets
 
@@ -73,15 +73,16 @@ void setup()
 void loop()
 {
   sendNTPpacket(timeServer); // send an NTP packet to a time server
+  
   // wait for a reply for UDP_TIMEOUT miliseconds
-  startMs = millis();
+  unsigned long startMs = millis();
   while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {}
 
   Serial.println(Udp.parsePacket());
   if (Udp.parsePacket()) {
     Serial.println("packet received");
     // We've received a packet, read the data from it into the buffer
-    int aa = Udp.read(packetBuffer, NTP_PACKET_SIZE);
+    Udp.read(packetBuffer, NTP_PACKET_SIZE);
 
     // the timestamp starts at byte 40 of the received packet and is four bytes,
     // or two words, long. First, esxtract the two words:
@@ -125,7 +126,7 @@ void loop()
 }
 
 // send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(char *ntpSrv)
+void sendNTPpacket(char *ntpSrv)
 {
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
