@@ -37,6 +37,7 @@ uint8_t WiFiEspUDP::begin(uint16_t port)
     {
         EspDrv::startClient("0", port, sock, UDP_MODE);
 		
+        WiFiEspClass::allocateSocket(sock);  // allocating the socket for the listener
         WiFiEspClass::_server_port[sock] = port;
         _sock = sock;
         _port = port;
@@ -69,7 +70,13 @@ void WiFiEspUDP::stop()
 	  if (_sock == NO_SOCKET_AVAIL)
 	    return;
 
-	  //ServerDrv::stopClient(_sock);
+      // Discard data that might be in the incoming buffer
+      flush();
+      
+      // Stop the listener and return the socket to the pool
+	  EspDrv::stopClient(_sock);
+      WiFiEspClass::_state[_sock] = NA_STATE;
+      WiFiEspClass::_server_port[_sock] = 0;
 
 	  _sock = NO_SOCKET_AVAIL;
 }
@@ -132,7 +139,10 @@ int WiFiEspUDP::read()
 		return -1;
 
 	bool connClose = false;
-	EspDrv::getData(_sock, &b, false, &connClose);
+	
+    // Read the data and handle the timeout condition
+	if (! EspDrv::getData(_sock, &b, false, &connClose))
+      return -1;  // Timeout occured
 
 	return b;
 }
@@ -155,7 +165,10 @@ int WiFiEspUDP::peek()
 
 void WiFiEspUDP::flush()
 {
-  // TODO: a real check to ensure transmission has been completed
+	  // Discard all input data
+	  int count = available();
+	  while (count-- > 0)
+	    read();
 }
 
 
