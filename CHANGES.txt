@@ -1,3 +1,7 @@
+2.1.3 (2017-01-02)
+  * Fixing Issue #69 (Can't declare member function to have static linkage) 
+  * Supporting ESP8266 firmware 2.X
+
 2.1.2 (2016-05-08)
   * Added retry in EspDrv::wifiDriverInit method
   * Clean buffer in ScanNetwork (bug #43)
