@@ -97,8 +97,8 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 	// check firmware version
 	getFwVersion();
 
-	// prints a warning message if the firmware is not 1.X
-	if (fwVersion[0] != '1' or
+	// prints a warning message if the firmware is not 1.X or 2.X
+	if ((fwVersion[0] != '1' and fwVersion[0] != '2') or
 		fwVersion[1] != '.')
 	{
 		LOGWARN1(F("Warning: Unsupported firmware"), fwVersion);
