@@ -30,6 +30,7 @@ RingBuffer buf(8);
 
 void setup()
 {
+  pinMode(LED_BUILTIN, OUTPUT);	// initialize digital pin LED_BUILTIN as an output.
   Serial.begin(115200);   // initialize serial for debugging
   Serial1.begin(9600);    // initialize serial for ESP module
   WiFi.init(&Serial1);    // initialize ESP module
@@ -84,12 +85,12 @@ void loop()
         if (buf.endsWith("GET /H")) {
           Serial.println("Turn led ON");
           ledStatus = HIGH;
-          digitalWrite(13, HIGH);
+          digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
         }
         else if (buf.endsWith("GET /L")) {
           Serial.println("Turn led OFF");
           ledStatus = LOW;
-          digitalWrite(13, LOW);
+          digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
         }
       }
     }
