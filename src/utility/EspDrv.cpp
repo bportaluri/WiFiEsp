@@ -230,7 +230,7 @@ void EspDrv::config(IPAddress ip)
 	delay(500);
 	
 	char buf[16];
-	sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	sprintf_P(buf, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
 	int ret = sendCmd(F("AT+CIPSTA_CUR=\"%s\""), 2000, buf);
 	delay(500);
@@ -254,7 +254,7 @@ void EspDrv::configAP(IPAddress ip)
 	delay(500);
 	
 	char buf[16];
-	sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	sprintf_P(buf, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
 	int ret = sendCmd(F("AT+CIPAP_CUR=\"%s\""), 2000, buf);
 	delay(500);
