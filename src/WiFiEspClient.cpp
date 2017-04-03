@@ -99,7 +99,7 @@ int WiFiEspClient::connect(const char* host, uint16_t port, uint8_t protMode)
     }
 	else
 	{
-    	Serial.println(F("No socket available"));
+    	LOGERROR(F("No socket available"));
     	return 0;
     }
     return 1;
