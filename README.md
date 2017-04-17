@@ -7,20 +7,20 @@ The WiFiEsp library is very similar to the Arduino [WiFi](http://www.arduino.cc/
 Supports ESP SDK version 1.1.1 and above (AT version 0.25 and above).
 
 
-##Features
+## Features
 
 - APIs compatible with standard Arduino WiFi library.
 - Use AT commands of standard ESP firmware (no need to flash a custom firmware).
 - Support hardware and software serial ports.
 - Configurable tracing level.
 
-##Wiring
+## Wiring
 
 The WiFiEsp library has been designed to work with the [ESP WiFi shield](http://www.instructables.com/id/Cheap-Arduino-WiFi-Shield-With-ESP8266/).
 It is a cheap version of the Arduino WiFi shield that uses an ESP-01 module to provide networking capabilities to Arduino boards.
 
 
-##Examples
+## Examples
 
 - [ConnectWPA](https://github.com/bportaluri/WiFiEsp/blob/master/examples/ConnectWPA/ConnectWPA.ino) - Demonstrates how to connect to a network that is encrypted with WPA2 Personal
 - [WebClient](https://github.com/bportaluri/WiFiEsp/blob/master/examples/WebClient/WebClient.ino) - Connect to a remote webserver 
@@ -31,11 +31,11 @@ It is a cheap version of the Arduino WiFi shield that uses an ESP-01 module to p
 - [UdpNTPClient](https://github.com/bportaluri/WiFiEsp/blob/master/examples/UdpNTPClient/UdpNTPClient.ino) - Query a Network Time Protocol (NTP) server using UDP
 
 
-##Supported APIs
+## Supported APIs
 
 Most of the standard Arduino WiFi library methods are available. Refer to the [WiFi library page](http://www.arduino.cc/en/Reference/WiFi) for more details.
 
-###WiFiEsp class
+### WiFiEsp class
 
 - begin() - Not all authentication types
 - disconnect() - YES
@@ -50,7 +50,7 @@ Most of the standard Arduino WiFi library methods are available. Refer to the [W
 - macAddress() - YES
 
 
-###WiFiEspServer class
+### WiFiEspServer class
 
 The WiFiEspServer class creates servers which can send data to and receive data from connected clients (programs running on other computers or devices).
 
@@ -62,7 +62,7 @@ The WiFiEspServer class creates servers which can send data to and receive data 
 - println() - YES
 
 
-###Client class
+### Client class
 
 The WiFiEspClient class creates clients that can connect to servers and send and receive data.
 
@@ -78,7 +78,7 @@ The WiFiEspClient class creates clients that can connect to servers and send and
 - stop() - YES
 
 
-###WiFiEspUDP class
+### WiFiEspUDP class
 
 The UDP class enables UDP message to be sent and received.
 
@@ -97,6 +97,6 @@ The UDP class enables UDP message to be sent and received.
 - remotePort() - YES
 
 
-##Contributing
+## Contributing
 
 If you discover a bug or would like to propose a new feature, please open a new [issue](https://github.com/bportaluri/WiFiEsp/issues).
