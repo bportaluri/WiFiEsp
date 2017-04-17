@@ -100,7 +100,7 @@ int WiFiEspUDP::beginPacket(const char *host, uint16_t port)
 int WiFiEspUDP::beginPacket(IPAddress ip, uint16_t port)
 {
 	char s[18];
-	sprintf(s, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	sprintf_P(s, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
 	return beginPacket(s, port);
 }
