@@ -545,7 +545,7 @@ char* EspDrv::getSSIDNetoworks(uint8_t networkItem)
 uint8_t EspDrv::getEncTypeNetowrks(uint8_t networkItem)
 {
 	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
-		return NULL;
+		return 0;
 
     return _networkEncr[networkItem];
 }
@@ -553,7 +553,7 @@ uint8_t EspDrv::getEncTypeNetowrks(uint8_t networkItem)
 int32_t EspDrv::getRSSINetoworks(uint8_t networkItem)
 {
 	if (networkItem >= WL_NETWORKS_LIST_MAXNUM)
-		return NULL;
+		return 0;
 
     return _networkRssi[networkItem];
 }
