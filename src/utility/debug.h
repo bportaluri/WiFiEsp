@@ -28,7 +28,9 @@ along with The Arduino WiFiEsp library.  If not, see
 // 3: INFO: errors, warnings and informational (default)
 // 4: DEBUG: errors, warnings, informational and debug
 
+#ifndef _ESPLOGLEVEL_
 #define _ESPLOGLEVEL_ 3
+#endif
 
 
 #define LOGERROR(x)    if(_ESPLOGLEVEL_>0) { Serial.print("[WiFiEsp] "); Serial.println(x); }
