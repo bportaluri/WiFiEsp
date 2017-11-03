@@ -1,3 +1,8 @@
+2.2.2 (2017-11-03)
+  * Make SSID a const char * in begin() #116
+  * Replace NULL with 0 to avoid compilation warnings
+  * Changing _ESPLOGLEVEL_ requires editing debug.h #88
+
 2.2.1 (2017-01-02)
   * Fixing Issue #69 (Can't declare member function to have static linkage) 
   * Supporting ESP8266 firmware 2.X
