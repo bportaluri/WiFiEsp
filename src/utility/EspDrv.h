@@ -128,13 +128,13 @@ public:
      * param ssid: Pointer to the SSID string.
      * param passphrase: Passphrase. Valid characters in a passphrase must be between ASCII 32-126 (decimal).
      */
-    static bool wifiConnect(char* ssid, const char *passphrase);
+    static bool wifiConnect(const char* ssid, const char* passphrase);
 
 
     /*
 	* Start the Access Point
 	*/
-	static bool wifiStartAP(char* ssid, const char* pwd, uint8_t channel, uint8_t enc, uint8_t espMode);
+	static bool wifiStartAP(const char* ssid, const char* pwd, uint8_t channel, uint8_t enc, uint8_t espMode);
 
 
     /*

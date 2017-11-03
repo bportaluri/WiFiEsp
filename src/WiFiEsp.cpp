@@ -31,7 +31,7 @@ WiFiEspClass::WiFiEspClass()
 
 }
 
-void WiFiEspClass::init(Stream *espSerial)
+void WiFiEspClass::init(Stream* espSerial)
 {
     LOGINFO(F("Initializing ESP module"));
 	EspDrv::wifiDriverInit(espSerial);
@@ -45,7 +45,7 @@ char* WiFiEspClass::firmwareVersion()
 }
 
 
-int WiFiEspClass::begin(char* ssid, const char *passphrase)
+int WiFiEspClass::begin(const char* ssid, const char* passphrase)
 {
     espMode = 1;
 	if (EspDrv::wifiConnect(ssid, passphrase))
@@ -55,7 +55,7 @@ int WiFiEspClass::begin(char* ssid, const char *passphrase)
 }
 
 
-int WiFiEspClass::beginAP(char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly)
+int WiFiEspClass::beginAP(const char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly)
 {
 	if(apOnly)
         espMode = 2;
@@ -68,12 +68,12 @@ int WiFiEspClass::beginAP(char* ssid, uint8_t channel, const char* pwd, uint8_t 
 	return WL_CONNECT_FAILED;
 }
 
-int WiFiEspClass::beginAP(char* ssid)
+int WiFiEspClass::beginAP(const char* ssid)
 {
 	return beginAP(ssid, 10, "", 0);
 }
 
-int WiFiEspClass::beginAP(char* ssid, uint8_t channel)
+int WiFiEspClass::beginAP(const char* ssid, uint8_t channel)
 {
 	return beginAP(ssid, channel, "", 0);
 }

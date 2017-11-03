@@ -48,7 +48,7 @@ public:
 	*
 	* param espSerial: the serial interface (HW or SW) used to communicate with the ESP module
 	*/
-	static void init(Stream *espSerial);
+	static void init(Stream* espSerial);
 
 
 	/**
@@ -72,7 +72,7 @@ public:
 	* param passphrase: Passphrase. Valid characters in a passphrase
 	*		  must be between ASCII 32-126 (decimal).
 	*/
-	int begin(char* ssid, const char* passphrase);
+	int begin(const char* ssid, const char* passphrase);
 
 
 	/**
@@ -229,13 +229,13 @@ public:
 	* param enc: encryption type (enum wl_enc_type)
 	* param apOnly: Set to false if you want to run AP and Station modes simultaneously
 	*/
-	int beginAP(char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly=true);
+	int beginAP(const char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly=true);
 
 	/*
 	* Start the ESP access point with open security.
 	*/
-	int beginAP(char* ssid);
-	int beginAP(char* ssid, uint8_t channel);
+	int beginAP(const char* ssid);
+	int beginAP(const char* ssid, uint8_t channel);
 
 	/**
 	* Change IP address of the AP
