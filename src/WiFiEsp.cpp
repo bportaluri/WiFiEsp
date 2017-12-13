@@ -194,9 +194,9 @@ void ESP8266::hardReset(void)
 connected = false;
 strcpy(ip, "");
 digitalWrite(ESP8266_RST, LOW);
-delay(ESP8266_HARD_RESET_DURACTION);
+delay(ESP8266_HARD_RESET_DURATION);
 digitalWrite(ESP8266_RST, HIGH);
-delay(ESP8266_HARD_RESET_DURACTION);
+delay(ESP8266_HARD_RESET_DURATION);
 }
 */
 
