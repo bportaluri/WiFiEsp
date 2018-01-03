@@ -72,6 +72,14 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 	LOGDEBUG(F("> wifiDriverInit"));
 
 	EspDrv::espSerial = espSerial;
+	
+#ifdef WL_HARD_RESET_PIN
+	// Hard reset the ESP8266 to get it into a defined state 
+	pinMode(WL_HARD_RESET_PIN, OUTPUT);
+	digitalWrite(WL_HARD_RESET_PIN, LOW);
+	delay(500);
+	digitalWrite(WL_HARD_RESET_PIN, HIGH);
+#endif
 
 	bool initOK = false;
 	
@@ -115,8 +123,17 @@ void EspDrv::reset()
 {
 	LOGDEBUG(F("> reset"));
 
+#ifdef WL_HARD_RESET_PIN
+	// Issue a hard reset 
+	digitalWrite(WL_HARD_RESET_PIN, LOW);
+	delay(500);
+	digitalWrite(WL_HARD_RESET_PIN, HIGH);
+	delay(2500);
+#else
+	// Issue a soft reset
 	sendCmd(F("AT+RST"));
 	delay(3000);
+#endif
 	espEmptyBuf(false);  // empty dirty characters from the buffer
 
 	// disable echo of commands
