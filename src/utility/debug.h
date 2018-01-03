@@ -32,7 +32,14 @@ along with The Arduino WiFiEsp library.  If not, see
 #define _ESPLOGLEVEL_ 3
 #endif
 
-
+/* 
+ * Logging by default is over the hardware serial interface.
+ * Define _ESPCUSTOMLOGFACILITY_ if you need the hardware interface for other purposes 
+ * (e.g. for fast connections to the ESP8266 on boards with only one hardware serial).
+ * In that case you need to provide your own definitions for LOGERROR, LOGDEBUG etc. 
+ * somewhere.
+ */
+#ifndef _ESPCUSTOMLOGFACILITY_
 #define LOGERROR(x)    if(_ESPLOGLEVEL_>0) { Serial.print("[WiFiEsp] "); Serial.println(x); }
 #define LOGERROR1(x,y) if(_ESPLOGLEVEL_>2) { Serial.print("[WiFiEsp] "); Serial.print(x); Serial.print(" "); Serial.println(y); }
 #define LOGWARN(x)     if(_ESPLOGLEVEL_>1) { Serial.print("[WiFiEsp] "); Serial.println(x); }
@@ -44,6 +51,7 @@ along with The Arduino WiFiEsp library.  If not, see
 #define LOGDEBUG0(x)     if(_ESPLOGLEVEL_>3) { Serial.print(x); }
 #define LOGDEBUG1(x,y)   if(_ESPLOGLEVEL_>3) { Serial.print(x); Serial.print(" "); Serial.println(y); }
 #define LOGDEBUG2(x,y,z) if(_ESPLOGLEVEL_>3) { Serial.print(x); Serial.print(" "); Serial.print(y); Serial.print(" "); Serial.println(z); }
+#endif
 
 
 #endif
