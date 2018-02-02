@@ -70,9 +70,11 @@ void loop()
 {
   // if there are incoming bytes available
   // from the server, read them and print them
-  while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
+  if (client.available()) {
+    while(client.available()) {
+      char c = client.read();
+      Serial.write(c);
+    }
   }
 
   // if the server's disconnected, stop the client
@@ -84,8 +86,9 @@ void loop()
     // do nothing forevermore
     while (true);
   }
-}
 
+  delay(1);
+}
 
 void printWifiStatus()
 {
