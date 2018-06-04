@@ -24,7 +24,7 @@ along with The Arduino WiFiEsp library.  If not, see
 
 
 #include "RingBuffer.h"
-
+#define ESPdefaultTimeout 2000
 
 
 // Maximum size of a SSID
