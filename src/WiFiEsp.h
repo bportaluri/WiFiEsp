@@ -111,7 +111,20 @@ public:
 	* return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
 	*/
 	uint8_t* macAddress(uint8_t* mac);
+	
+        /*
+        * Set the station MAC address configration saved in flash.
+        *
+        * param mac: Pointer to the mac string.
+        */
+        static bool setSTAmacAddressPER(const char* mac);
 
+        /*
+        * Set  the station MAC address configration not saved in flash.
+        *
+        * param mac: Pointer to the mac string.
+        */
+        static bool SetSTAmacAddressTMP(const char* mac);
 	/**
 	* Get the interface IP address.
 	*
