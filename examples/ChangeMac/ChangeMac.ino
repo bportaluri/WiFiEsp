@@ -1,4 +1,5 @@
-#include "WiFiEsp.h"
+#include "src/WiFiEsp.h"
+#include "SoftwareSerial.h"
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void setup() {
@@ -9,7 +10,19 @@ void setup() {
   // initialize ESP module
   WiFi.init(&Serial1);
   delay(1000);
-  WiFi.SetSTAmacAddressTMP("18:fe:35:98:d3:7a"); 
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7a",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7b",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7c",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7d",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7e",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:7f",true); 
+  printWifiData();
+  WiFi.setSTAmacAddress("18:fe:35:98:d3:70",true); 
   printWifiData();
   }
 

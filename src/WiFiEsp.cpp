@@ -55,14 +55,13 @@ int WiFiEspClass::begin(const char* ssid, const char* passphrase)
 }
 
 
-
 int WiFiEspClass::beginAP(const char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly)
 {
 	if(apOnly)
         espMode = 2;
     else
         espMode = 3;
-
+    
     if (EspDrv::wifiStartAP(ssid, pwd, channel, enc, espMode))
 		return WL_CONNECTED;
 
@@ -105,23 +104,17 @@ uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
     return mac;
 }
 
-static bool WiFiEspClass::setSTAmacAddressPER(const char* mac){
-  espMode=1;
-  if(EspDrv::setMacAddressSTA_PER(mac))
-    return true;
-  else
-    return false;
+static bool WiFiEspClass::setSTAmacAddress(const char* mac,bool temp){
+	espMode=1;
+	if(temp)
+	if(EspDrv::setMacAddressSTA_TMP(mac))
+		return true;
+	else
+		return false;
+	if(EspDrv::setMacAddressSTA_PER(mac))
+		return true;
+	return false;
 }
-
-
-static bool WiFiEspClass::SetSTAmacAddressTMP(const char* mac){
-  espMode=1;
-  if(EspDrv::SetMacAddressSTA_TMP(mac))
-    return true;
-  else
-    return false;
-}
-
 
 IPAddress WiFiEspClass::localIP()
 {

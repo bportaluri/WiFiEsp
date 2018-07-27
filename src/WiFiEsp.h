@@ -112,20 +112,15 @@ public:
 	*/
 	uint8_t* macAddress(uint8_t* mac);
 	
-        /*
+        /**
         * Set the station MAC address configration saved in flash.
         *
         * param mac: Pointer to the mac string.
+	* param temp: Boolean value indicates if the change should be permanent or not
         */
-        static bool setSTAmacAddressPER(const char* mac);
+        static bool setSTAmacAddress(const char* mac, bool temp);
 
-        /*
-        * Set  the station MAC address configration not saved in flash.
-        *
-        * param mac: Pointer to the mac string.
-        */
-        static bool SetSTAmacAddressTMP(const char* mac);
-	/**
+        /**
 	* Get the interface IP address.
 	*
 	* return: Ip address value
@@ -145,7 +140,7 @@ public:
 	*
 	* return: gateway ip address value
 	*/
-   IPAddress gatewayIP();
+   	IPAddress gatewayIP();
 
 	/**
 	* Return the current SSID associated with the network

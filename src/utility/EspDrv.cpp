@@ -19,8 +19,8 @@ along with The Arduino WiFiEsp library.  If not, see
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#include "EspDrv.h"
-#include "debug.h"
+#include "utility/EspDrv.h"
+#include "utility/debug.h"
 
 
 #define NUMESPTAGS 5
@@ -375,7 +375,7 @@ static bool EspDrv::setMacAddressSTA_PER(const char* mac)
 	return false;
 }
 
-static bool EspDrv::SetMacAddressSTA_TMP(const char* mac)
+static bool EspDrv::setMacAddressSTA_TMP(const char* mac)
 {
 	  LOGDEBUG(F("> SetMacAddressSTA_TMP"));
 

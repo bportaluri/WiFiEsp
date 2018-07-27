@@ -181,7 +181,7 @@ public:
      *
      * param mac: Pointer to the mac string.
      */
-    static bool SetMacAddressSTA_TMP(const char* mac);
+    static bool setMacAddressSTA_TMP(const char* mac);
 
     /*
      * Get the interface IP address.
