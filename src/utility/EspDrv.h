@@ -170,6 +170,20 @@ public:
     static uint8_t* getMacAddress();
 
     /*
+     * Set the station MAC address configration saved in flash.
+     *
+     * param mac: Pointer to the mac string.
+     */
+    static bool setMacAddressSTA_PER(const char* mac);
+
+    /*
+     * Set  the station MAC address configration not saved in flash.
+     *
+     * param mac: Pointer to the mac string.
+     */
+    static bool setMacAddressSTA_TMP(const char* mac);
+
+    /*
      * Get the interface IP address.
      *
      * return: copy the ip address value in IPAddress object

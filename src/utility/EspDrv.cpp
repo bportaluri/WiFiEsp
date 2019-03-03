@@ -74,7 +74,7 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 	EspDrv::espSerial = espSerial;
 
 	bool initOK = false;
-	
+
 	for(int i=0; i<5; i++)
 	{
 		if (sendCmd(F("AT")) == TAG_OK)
@@ -131,7 +131,7 @@ void EspDrv::reset()
 
 	// Show remote IP and port with "+IPD"
 	sendCmd(F("AT+CIPDINFO=1"));
-	
+
 	// Disable autoconnect
 	// Automatic connection can create problems during initialization phase at next boot
 	sendCmd(F("AT+CWAUTOCONN=0"));
@@ -194,7 +194,7 @@ bool EspDrv::wifiStartAP(const char* ssid, const char* pwd, uint8_t channel, uin
 		LOGWARN1(F("Failed to start AP"), ssid);
 		return false;
 	}
-	
+
 	if (espMode==2)
 		sendCmd(F("AT+CWDHCP_CUR=0,1"));    // enable DHCP for AP mode
 	if (espMode==3)
@@ -225,10 +225,10 @@ void EspDrv::config(IPAddress ip)
 
 	// disable station DHCP
 	sendCmd(F("AT+CWDHCP_CUR=1,0"));
-	
+
 	// it seems we need to wait here...
 	delay(500);
-	
+
 	char buf[16];
 	sprintf_P(buf, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
@@ -244,15 +244,15 @@ void EspDrv::config(IPAddress ip)
 void EspDrv::configAP(IPAddress ip)
 {
 	LOGDEBUG(F("> config"));
-	
+
     sendCmd(F("AT+CWMODE_CUR=2"));
-	
+
 	// disable station DHCP
 	sendCmd(F("AT+CWDHCP_CUR=2,0"));
-	
+
 	// it seems we need to wait here...
 	delay(500);
-	
+
 	char buf[16];
 	sprintf_P(buf, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
@@ -353,6 +353,48 @@ uint8_t* EspDrv::getMacAddress()
 	return _mac;
 }
 
+static bool EspDrv::setMacAddressSTA_PER(const char* mac)
+{
+
+	LOGDEBUG(F("> setMacAddressSTA_PER"));
+
+	int ret = sendCmd(F("AT+CIPSTAMAC_DEF=\"%s\""), 20000, mac);
+
+	if (ret==TAG_OK)
+	{
+	  LOGINFO1(F("Changed mac to "), mac);
+	  return true;
+	}
+
+	LOGWARN1(F("Failed changing mac to"), mac);
+
+	// clean additional messages logged after the FAIL tag
+	delay(1000);
+	espEmptyBuf(false);
+
+	return false;
+}
+
+static bool EspDrv::setMacAddressSTA_TMP(const char* mac)
+{
+	  LOGDEBUG(F("> SetMacAddressSTA_TMP"));
+
+	  int ret = sendCmd(F("AT+CIPSTAMAC_CUR=\"%s\""), 20000, mac);
+
+	  if (ret==TAG_OK)
+	  {
+	    LOGINFO1(F("Changed mac to "), mac);
+	    return true;
+	  }
+
+	  LOGWARN1(F("Failed changing mac to"), mac);
+
+	  // clean additional messages logged after the FAIL tag
+	  delay(1000);
+	  espEmptyBuf(false);
+
+	  return false;
+}
 
 void EspDrv::getIpAddress(IPAddress& ip)
 {
@@ -461,23 +503,23 @@ uint8_t EspDrv::getScanNetworks()
     uint8_t ssidListNum = 0;
     int idx;
 	bool ret = false;
-	
+
 
 	espEmptyBuf();
 
 	LOGDEBUG(F("----------------------------------------------"));
 	LOGDEBUG(F(">> AT+CWLAP"));
-	
+
 	espSerial->println(F("AT+CWLAP"));
 
 	char buf[100];
-	
+
 	idx = readUntil(10000, "+CWLAP:(");
-	
+
 	while (idx == NUMESPTAGS)
 	{
 		_networkEncr[ssidListNum] = espSerial->parseInt();
-		
+
 		// discard , and " characters
 		readUntil(1000, "\"");
 
@@ -487,12 +529,12 @@ uint8_t EspDrv::getScanNetworks()
 			memset(_networkSsid[ssidListNum], 0, WL_SSID_MAX_LENGTH );
 			ringBuf.getStrN(_networkSsid[ssidListNum], 1, WL_SSID_MAX_LENGTH-1);
 		}
-		
+
 		// discard , character
 		readUntil(1000, ",");
-		
+
 		_networkRssi[ssidListNum] = espSerial->parseInt();
-		
+
 		idx = readUntil(1000, "+CWLAP:(");
 
 		if(ssidListNum==WL_NETWORKS_LIST_MAXNUM-1)
@@ -500,7 +542,7 @@ uint8_t EspDrv::getScanNetworks()
 
 		ssidListNum++;
 	}
-	
+
 	if (idx==-1)
 		return -1;
 
@@ -578,7 +620,7 @@ bool EspDrv::ping(const char *host)
 	LOGDEBUG(F("> ping"));
 
 	int ret = sendCmd(F("AT+PING=\"%s\""), 8000, host);
-	
+
 	if (ret==TAG_OK)
 		return true;
 
@@ -601,7 +643,7 @@ bool EspDrv::startServer(uint16_t port, uint8_t sock)
 bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t protMode)
 {
 	LOGDEBUG2(F("> startClient"), host, port);
-	
+
 	// TCP
 	// AT+CIPSTART=<link ID>,"TCP",<remote IP>,<remote port>
 
@@ -687,7 +729,7 @@ uint16_t EspDrv::availData(uint8_t connId)
 			espSerial->read();                  // "
 			espSerial->read();                  // ,
 			_remotePort = espSerial->parseInt();     // <remote port>
-			
+
 			espSerial->read();                  // :
 
 			LOGDEBUG();
@@ -764,7 +806,7 @@ bool EspDrv::getData(uint8_t connId, uint8_t *data, bool peek, bool* connClose)
     _bufPos = 0;
 	_connId = 0;
 	*data = 0;
-	
+
 	return false;
 }
 
@@ -780,14 +822,14 @@ int EspDrv::getDataBuf(uint8_t connId, uint8_t *buf, uint16_t bufSize)
 
 	if(_bufPos<bufSize)
 		bufSize = _bufPos;
-	
+
 	for(int i=0; i<bufSize; i++)
 	{
 		int c = timedRead();
 		//LOGDEBUG(c);
 		if(c==-1)
 			return -1;
-		
+
 		buf[i] = (char)c;
 		_bufPos--;
 	}

@@ -104,6 +104,18 @@ uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
     return mac;
 }
 
+static bool WiFiEspClass::setSTAmacAddress(const char* mac,bool temp){
+	espMode=1;
+	if(temp)
+	if(EspDrv::setMacAddressSTA_TMP(mac))
+		return true;
+	else
+		return false;
+	if(EspDrv::setMacAddressSTA_PER(mac))
+		return true;
+	return false;
+}
+
 IPAddress WiFiEspClass::localIP()
 {
 	IPAddress ret;
