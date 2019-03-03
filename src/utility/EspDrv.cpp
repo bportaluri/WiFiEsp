@@ -359,6 +359,7 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddress"));
 
 	char buf[20];
+	memset(buf, '\0', sizeof(buf));
 	if (sendCmdGet(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
@@ -381,6 +382,7 @@ void EspDrv::getIpAddressAP(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddressAP"));
 
 	char buf[20];
+	memset(buf, '\0', sizeof(buf));
 	if (sendCmdGet(F("AT+CIPAP?"), F("+CIPAP:ip:\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
