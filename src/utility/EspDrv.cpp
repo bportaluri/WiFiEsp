@@ -475,9 +475,9 @@ uint8_t EspDrv::getScanNetworks()
 		_networkEncr[ssidListNum] = espSerial->parseInt();
 		
 		// discard , and " characters
-		readUntil(1000, "\"");
+		readUntil(ESPdefaultTimeout, "\"");
 
-		idx = readUntil(1000, "\"", false);
+		idx = readUntil(ESPdefaultTimeout, "\"", false);
 		if(idx==NUMESPTAGS)
 		{
 			memset(_networkSsid[ssidListNum], 0, WL_SSID_MAX_LENGTH );
@@ -485,11 +485,11 @@ uint8_t EspDrv::getScanNetworks()
 		}
 		
 		// discard , character
-		readUntil(1000, ",");
+		readUntil(ESPdefaultTimeout, ",");
 		
 		_networkRssi[ssidListNum] = espSerial->parseInt();
 		
-		idx = readUntil(1000, "+CWLAP:(");
+		idx = readUntil(ESPdefaultTimeout, "+CWLAP:(");
 
 		if(ssidListNum==WL_NETWORKS_LIST_MAXNUM-1)
 			break;
@@ -801,7 +801,7 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len)
 	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u"), sock, len);
 	espSerial->println(cmdBuf);
 
-	int idx = readUntil(1000, (char *)">", false);
+	int idx = readUntil(ESPdefaultTimeout, (char *)">", false);
 	if(idx!=NUMESPTAGS)
 	{
 		LOGERROR(F("Data packet send error (1)"));
@@ -830,7 +830,7 @@ bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t le
 	sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u"), sock, len2);
 	espSerial->println(cmdBuf);
 
-	int idx = readUntil(1000, (char *)">", false);
+	int idx = readUntil(ESPdefaultTimeout, (char *)">", false);
 	if(idx!=NUMESPTAGS)
 	{
 		LOGERROR(F("Data packet send error (1)"));
@@ -870,7 +870,7 @@ bool EspDrv::sendDataUdp(uint8_t sock, const char* host, uint16_t port, const ui
 	//LOGDEBUG1(F("> sendDataUdp:"), cmdBuf);
 	espSerial->println(cmdBuf);
 
-	int idx = readUntil(1000, (char *)">", false);
+	int idx = readUntil(ESPdefaultTimeout, (char *)">", false);
 	if(idx!=NUMESPTAGS)
 	{
 		LOGERROR(F("Data packet send error (1)"));
@@ -929,7 +929,7 @@ bool EspDrv::sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, co
 	espSerial->println(cmd);
 
 	// read result until the startTag is found
-	idx = readUntil(1000, startTag);
+	idx = readUntil(ESPdefaultTimeout, startTag);
 
 	if(idx==NUMESPTAGS)
 	{
