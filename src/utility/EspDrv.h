@@ -25,7 +25,14 @@ along with The Arduino WiFiEsp library.  If not, see
 
 #include "RingBuffer.h"
 
-
+/* 
+ * Pin for ESP8266 hard reset 
+ * Connect this to the ESP8266's CH_PD line (taking care of the voltage
+ * differential, either through a converter or through a resistor bridge,
+ * just like you did for the ESP8266's RX line)
+ * If undefined, we will be relying entirely on soft reset (AT+RST) 
+ */
+//#define WL_HARD_RESET_PIN 10
 
 // Maximum size of a SSID
 #define WL_SSID_MAX_LENGTH 32
