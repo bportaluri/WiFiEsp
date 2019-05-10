@@ -92,7 +92,7 @@ void RingBuffer::getStr(char * destination, unsigned int skipChars)
 
 void RingBuffer::getStrN(char * destination, unsigned int skipChars, unsigned int num)
 {
-	int len = ringBufP-ringBuf-skipChars;
+	unsigned int len = ringBufP-ringBuf-skipChars;
 
 	if (len>num)
 		len=num;
