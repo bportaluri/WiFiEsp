@@ -22,6 +22,13 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/EspDrv.h"
 #include "utility/debug.h"
 
+#if defined(ARDUINO_ARCH_STM32)
+//For va_start
+#include <stdarg.h>
+
+//vsnprintf_P is not defined in avr/pgmspace.h for ststm32-maple
+#define vsnprintf_P vsnprintf
+#endif
 
 #define NUMESPTAGS 5
 
