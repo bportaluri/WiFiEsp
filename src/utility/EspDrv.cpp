@@ -106,7 +106,7 @@ void EspDrv::wifiDriverInit(Stream *espSerial)
 	}
 	else
 	{
-		LOGINFO1(F("Initilization successful -"), fwVersion);
+		LOGINFO1(F("Initialization successful -"), fwVersion);
 	}
 }
 
