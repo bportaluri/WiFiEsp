@@ -23,6 +23,10 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/debug.h"
 
 
+#if defined(__SAMD21G18A__)||defined(__SAMD51__)
+#define vsnprintf_P  vsnprintf
+#endif
+
 #define NUMESPTAGS 5
 
 const char* ESPTAGS[] =
