@@ -22,6 +22,7 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/EspDrv.h"
 #include "utility/debug.h"
 
+#include <stdarg.h>
 
 #if defined(__SAMD21G18A__)||defined(__SAMD51__)
 #define vsnprintf_P  vsnprintf
