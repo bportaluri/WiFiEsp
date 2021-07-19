@@ -46,7 +46,7 @@ typedef enum
 
 Stream *EspDrv::espSerial;
 
-RingBuffer EspDrv::ringBuf(32);
+RingBufferWifiEsp EspDrv::ringBuf(32);
 
 // Array of data to cache the information related to the networks discovered
 char 	EspDrv::_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};
