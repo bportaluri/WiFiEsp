@@ -1,3 +1,47 @@
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * -----------------------------------------
+ *  
+ * ABOUT: https://www.mikroe.com/wifi-esp-click
+ *  This sketch uses the WiFi ESP click to connect to a WiFi network and do a get
+ *  HTTP request.
+ *  
+ * SPECIFICATIONS:
+ * 
+ *      Type:                     WiFi
+ *  
+ *      Applications:             Create smart appliances, home automation systems, 
+ *                                wireless data loggers, etc
+ *                            
+ *      On-board modules:         ESP-WROOM-02 carries ESP8266EX highly integrated 
+ *                                Wi-Fi SoC
+ *                            
+ *      Key Features  Protocols:  IPv4, TCP/UDP/HTTP/FTP, 802.11 b/g/n standard, 
+ *                                UART interface, 3.3V power supply
+ *                            
+ *      Interface:                UART,GPIO
+ *  
+ *      Compatibility:            mikroBUS
+ *  
+ *      Click board size:         M (42.9 x 25.4 mm)
+ *  
+ *      Input Voltage:            3.3V
+ *  
+ *  
+ * DATASHEET: https://download.mikroe.com/documents/datasheets/0c-esp-wroom-02-datasheet-en.pdf
+ *  
+ *  ----------------------------------------
+ *  
+ * Please report if you find any issue when using this code so we can
+ * keep improving it
+ */
+ 
 /*
  WiFiEsp example: WebClientRepeating
 
@@ -8,13 +52,20 @@
  For more details see: http://yaab-arduino.blogspot.com/p/wifiesp.html
 */
 
+#include <ESP8266_Lib.h>
+#undef max
+#undef min
+#include "FTTech_SAMD51Clicks.h"
 #include "WiFiEsp.h"
 
-// Emulate Serial1 on pins 6/7 if not present
-#ifndef HAVE_HWSERIAL1
-#include "SoftwareSerial.h"
-SoftwareSerial Serial1(6, 7); // RX, TX
-#endif
+// Your ESP8266 baud rate:
+#define ESP8266_BAUD 115200
+
+// Hardware Serial on Mega, Leonardo, Micro...
+#define EspSerial Serial2
+#define serverport 80
+
+ESP8266 wifi(&EspSerial);
 
 char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
@@ -28,14 +79,44 @@ const unsigned long postingInterval = 10000L; // delay between updates, in milli
 // Initialize the Ethernet client object
 WiFiEspClient client;
 
+/******************************************************************************
+* Function Prototypes
+*******************************************************************************/
+void myTimerEvent(void);
+void WiFiESPClick_Init(void);
+void printWifiStatus(void);
+void httpRequest(void);
+/******************************************************************************
+* Function Definitions
+*******************************************************************************/
+
+// Define EN and RST pins
+#define EN 44
+#define RST A4
+
 void setup()
 {
-  // initialize serial for debugging
-  Serial.begin(115200);
-  // initialize serial for ESP module
-  Serial1.begin(9600);
+  // This will initiate the board
+  FTClicks.begin(); 
+  // Enable 5V
+  FTClicks.turnON_5V();
+  // Enable the power output of Click 2
+  FTClicks.turnON(2);
+  // Define Enable and Reset Pins of Click 2 as outputs
+  pinMode(EN, OUTPUT);
+  pinMode(RST, OUTPUT);  
+  // Initialize serial for debugging and waits for console
+  Serial.begin(9600);
+  while(!Serial);
+  // Puts a space in debug window and hard resets WiFi module
+  Serial.print("\n\n\n\n\n\n\n\n\nInitiating...\n");
+  WiFiESPClick_Init();
+  // initialize serial for ESP module and waits
+  EspSerial.begin(ESP8266_BAUD);
+  while(!EspSerial);
+  
   // initialize ESP module
-  WiFi.init(&Serial1);
+  WiFi.init(&EspSerial);
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -83,10 +164,10 @@ void httpRequest()
   client.stop();
 
   // if there's a successful connection
-  if (client.connect(server, 80)) {
+  if (client.connect(server, serverport)) {
     Serial.println("Connecting...");
     
-    // send the HTTP PUT request
+    // send the HTTP GET request
     client.println(F("GET /asciilogo.txt HTTP/1.1"));
     client.println(F("Host: arduino.cc"));
     client.println("Connection: close");
@@ -118,4 +199,18 @@ void printWifiStatus()
   Serial.print("Signal strength (RSSI):");
   Serial.print(rssi);
   Serial.println(" dBm");
+}
+
+void WiFiESPClick_Init(){
+  Serial.print("Reseting module");
+  digitalWrite(EN, HIGH);
+  Serial.print(".");
+  delay(500);
+  digitalWrite(RST, LOW);
+  Serial.print(".");
+  delay(500);
+  digitalWrite(RST, HIGH);
+  Serial.print(".");
+  delay(2000);
+  Serial.println(" Reseted!\n");
 }
