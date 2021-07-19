@@ -22,6 +22,11 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/EspDrv.h"
 #include "utility/debug.h"
 
+#include <stdarg.h>
+
+#if defined(__SAMD21G18A__)||defined(__SAMD51__)
+#define vsnprintf_P  vsnprintf
+#endif
 
 #define NUMESPTAGS 5
 
@@ -46,7 +51,7 @@ typedef enum
 
 Stream *EspDrv::espSerial;
 
-RingBuffer EspDrv::ringBuf(32);
+RingBufferWifiEsp EspDrv::ringBuf(32);
 
 // Array of data to cache the information related to the networks discovered
 char 	EspDrv::_networkSsid[][WL_SSID_MAX_LENGTH] = {{"1"},{"2"},{"3"},{"4"},{"5"}};

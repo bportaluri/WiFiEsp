@@ -27,7 +27,7 @@ int reqCount = 0;                // number of requests received
 WiFiEspServer server(80);
 
 // use a ring buffer to increase speed and reduce memory allocation
-RingBuffer buf(8);
+RingBufferWifiEsp buf(8);
 
 void setup()
 {
