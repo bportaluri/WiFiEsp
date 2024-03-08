@@ -322,7 +322,7 @@ private:
 	static bool sendCmdGet(const __FlashStringHelper* cmd, const char* startTag, const char* endTag, char* outStr, int outStrLen);
 	static bool sendCmdGet(const __FlashStringHelper* cmd, const __FlashStringHelper* startTag, const __FlashStringHelper* endTag, char* outStr, int outStrLen);
 
-	static int readUntil(unsigned int timeout, const char* tag=NULL, bool findTags=true);
+	static int readUntil(int timeout, const char* tag=NULL, bool findTags=true);
 
 	static void espEmptyBuf(bool warn=true);
 

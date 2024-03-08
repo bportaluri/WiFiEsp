@@ -26,13 +26,9 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/debug.h"
 
 
-WiFiEspClient::WiFiEspClient() : _sock(255)
-{
-}
+WiFiEspClient::WiFiEspClient() : _sock(255){STMillis=0;}
 
-WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
-{
-}
+WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock){STMillis=0;}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,15 +133,13 @@ size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
 
 int WiFiEspClient::available()
 {
-	if (_sock != 255)
-	{
+	STMillis=millis();
+	while(millis()-STMillis < getTimeout()){
+     if (_sock != 255){ 
 		int bytes = EspDrv::availData(_sock);
-		if (bytes>0)
-		{
-			return bytes;
-		}
-	}
-
+		if(bytes>0){return bytes;}
+	  }
+    }
 	return 0;
 }
 

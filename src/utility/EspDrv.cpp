@@ -359,7 +359,6 @@ void EspDrv::getIpAddress(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddress"));
 
 	char buf[20];
-	memset(buf, '\0', sizeof(buf));
 	if (sendCmdGet(F("AT+CIFSR"), F(":STAIP,\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
@@ -382,7 +381,6 @@ void EspDrv::getIpAddressAP(IPAddress& ip)
 	LOGDEBUG(F("> getIpAddressAP"));
 
 	char buf[20];
-	memset(buf, '\0', sizeof(buf));
 	if (sendCmdGet(F("AT+CIPAP?"), F("+CIPAP:ip:\""), F("\""), buf, sizeof(buf)))
 	{
 		char* token;
@@ -459,7 +457,9 @@ int32_t EspDrv::getCurrentRSSI()
 uint8_t EspDrv::getScanNetworks()
 {
     uint8_t ssidListNum = 0;
-    int idx;	
+    int idx;
+	bool ret = false;
+	
 
 	espEmptyBuf();
 
@@ -467,6 +467,8 @@ uint8_t EspDrv::getScanNetworks()
 	LOGDEBUG(F(">> AT+CWLAP"));
 	
 	espSerial->println(F("AT+CWLAP"));
+
+	char buf[100];
 	
 	idx = readUntil(10000, "+CWLAP:(");
 	
@@ -607,8 +609,7 @@ bool EspDrv::startClient(const char* host, uint16_t port, uint8_t sock, uint8_t 
 	// for UDP we set a dummy remote port and UDP mode to 2
 	// this allows to specify the target host/port in CIPSEND
 
-	
-	int ret = -1;
+	int ret;
 	if (protMode==TCP_MODE)
 		ret = sendCmd(F("AT+CIPSTART=%d,\"TCP\",\"%s\",%u"), 5000, sock, host, port);
 	else if (protMode==SSL_MODE)
@@ -629,7 +630,7 @@ void EspDrv::stopClient(uint8_t sock)
 {
 	LOGDEBUG1(F("> stopClient"), sock);
 
-	sendCmd(F("AT+CIPCLOSE=%d"), 4000, sock);
+	int ret = sendCmd(F("AT+CIPCLOSE=%d"), 4000, sock);
 }
 
 
@@ -778,7 +779,7 @@ int EspDrv::getDataBuf(uint8_t connId, uint8_t *buf, uint16_t bufSize)
 	if(_bufPos<bufSize)
 		bufSize = _bufPos;
 	
-	for(uint16_t i=0; i<bufSize; i++)
+	for(int i=0; i<bufSize; i++)
 	{
 		int c = timedRead();
 		//LOGDEBUG(c);
@@ -839,7 +840,7 @@ bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t le
 
 	//espSerial->write(data, len);
 	PGM_P p = reinterpret_cast<PGM_P>(data);
-	for (uint16_t i=0; i<len; i++)
+	for (int i=0; i<len; i++)
 	{
 		unsigned char c = pgm_read_byte(p++);
 		espSerial->write(c);
@@ -1040,7 +1041,7 @@ int EspDrv::sendCmd(const __FlashStringHelper* cmd, int timeout, ...)
 // Returns:
 //   the index of the tag found in the ESPTAGS array
 //   -1 if no tag was found (timeout)
-int EspDrv::readUntil(unsigned int timeout, const char* tag, bool findTags)
+int EspDrv::readUntil(int timeout, const char* tag, bool findTags)
 {
 	ringBuf.reset();
 
@@ -1109,7 +1110,7 @@ void EspDrv::espEmptyBuf(bool warn)
 // copied from Serial::timedRead
 int EspDrv::timedRead()
 {
-  unsigned int _timeout = 1000;
+  int _timeout = 1000;
   int c;
   long _startMillis = millis();
   do

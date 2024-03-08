@@ -29,6 +29,7 @@ along with The Arduino WiFiEsp library.  If not, see
 
 class WiFiEspClient : public Client
 {
+protected: unsigned long STMillis; //variable used to do the subtraction and see how much time has passed, for the timeout
 public:
   WiFiEspClient();
   WiFiEspClient(uint8_t sock);
