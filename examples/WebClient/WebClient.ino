@@ -19,7 +19,7 @@ char ssid[] = "Twim";            // your network SSID (name)
 char pass[] = "12345678";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
-char server[] = "arduino.cc";
+char server[] = "arduino.tips";
 
 // Initialize the Ethernet client object
 WiFiEspClient client;
@@ -60,7 +60,7 @@ void setup()
     Serial.println("Connected to server");
     // Make a HTTP request
     client.println("GET /asciilogo.txt HTTP/1.1");
-    client.println("Host: arduino.cc");
+    client.println("Host: "+String(server));
     client.println("Connection: close");
     client.println();
   }
