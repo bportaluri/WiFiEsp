@@ -29,7 +29,7 @@ along with The Arduino WiFiEsp library.  If not, see
 // 4: DEBUG: errors, warnings, informational and debug
 
 #ifndef _ESPLOGLEVEL_
-#define _ESPLOGLEVEL_ 3
+#define _ESPLOGLEVEL_ 4
 #endif
 
 
